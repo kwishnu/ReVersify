@@ -1,0 +1,1 @@
+require('react-native').AppRegistry.registerComponent('reVersify', () => require('./app/nav/nav.js'));
