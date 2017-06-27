@@ -17,6 +17,7 @@ class DropdownMenu extends Component {
         }
     }
     handlePress2(e) {
+        if (this.props.item2Color == '#555555')return;
         if (this.props.onPress) {
             this.props.onPress(2);
         }
@@ -39,26 +40,25 @@ class DropdownMenu extends Component {
                         <TouchableOpacity
                             onPress={ this.handlePress1.bind(this) }
                             style={ styles.menuItem } >
-                            <Text style={ styles.text }>{ this.props.item1 }</Text>
+                            <Text style={[styles.text, {color: '#ffffff'}]}>{ this.props.item1 }</Text>
                         </TouchableOpacity>
-                        <View style={styles.divider}>
-                        </View>
+                        <View style={styles.divider}/>
                         <TouchableOpacity
                             onPress={ this.handlePress2.bind(this) }
                             style={ styles.menuItem } >
-                            <Text style={ styles.text }>{ this.props.item2 }</Text>
+                            <Text style={[styles.text, {color: this.props.item2Color}]}>{ this.props.item2 }</Text>
                         </TouchableOpacity>
-                        <View style={styles.divider}>
-                        </View>
+                        <View style={styles.divider}/>
                         <TouchableOpacity
                             onPress={ this.handlePress3.bind(this) }
                             style={ styles.menuItem } >
-                            <Text style={ styles.text }>{ this.props.item3 }</Text>
+                            <Text style={[styles.text, {color: '#ffffff'}]}>{ this.props.item3 }</Text>
                         </TouchableOpacity>
+                        <View style={styles.divider}/>
                         <TouchableOpacity
                             onPress={ this.handlePress4.bind(this) }
                             style={ styles.menuItem } >
-                            <Text style={ styles.text }>{ this.props.item4 }</Text>
+                            <Text style={[styles.text, {color: '#ffffff'}]}>{ this.props.item4 }</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -70,7 +70,7 @@ class DropdownMenu extends Component {
                         <TouchableOpacity
                             onPress={ this.handlePress4.bind(this) }
                             style={ styles.menuItem } >
-                            <Text style={ styles.text }>{ this.props.item4 }</Text>
+                            <Text style={[styles.text, {color: '#ffffff'}]}>{ this.props.item4 }</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -94,32 +94,32 @@ const styles = StyleSheet.create({
     outerContainer: {
         width: width,
         height: height,
-        backgroundColor: 'transparent',
+        backgroundColor: 'transparent'
     },
     container: {
-        width: height/3,
         flexDirection: 'column',
+        width: height/3,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#333333',
         borderWidth: 1,
-        borderColor: '#060606'
+        borderColor: '#060606',
     },
     menuItem: {
         flex: 1,
         flexDirection: 'row',
+        width: height/3,
         alignItems: 'center',
-        justifyContent: 'flex-start',
-        backgroundColor: 'transparent',
+        justifyContent: 'center',
+        backgroundColor: 'transparent'
     },
     divider: {
         height: StyleSheet.hairlineWidth,
-        width: height/3.5,
-        backgroundColor: '#111',
+        width: height/3,
+        backgroundColor: '#111'
     },
     text: {
         fontSize: normalizeFont(configs.LETTER_SIZE * 0.08),
-        color: '#ffffff',
-    },
+    }
 });
 export default DropdownMenu;
