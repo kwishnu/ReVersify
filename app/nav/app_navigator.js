@@ -10,8 +10,9 @@ const Mission = require('../routes/mission');
 const About = require('../routes/about');
 const Social = require('../routes/social');
 const Game = require('../routes/game');
-const Daily = require('../routes/daily');
+const Book = require('../routes/book');
 const Collection = require('../routes/collection');
+const Daily = require('../routes/daily');
 const Favorites = require('../routes/favorites');
 const Bounce = require('../routes/bounce');
 const HintStore = require('../routes/hintstore');
@@ -39,10 +40,12 @@ class AppNavigator extends React.Component {
                 return Social;
             case 'game':
                 return Game;
-            case 'daily':
-                return Daily;
+            case 'book':
+                return Book;
             case 'collection':
                 return Collection;
+            case 'daily':
+                return Daily;
             case 'favorites':
                 return Favorites;
             case 'bounce':
