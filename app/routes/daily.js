@@ -91,13 +91,15 @@ class Daily extends Component{
                     }
                 }
                 var levels = [5, 5, 6, 7];
+                var taken = -1;
                 for(var i=0; i<4; i++){
                     var titleIndex = -1;
                     var rnd = Array.from(new Array(homeData[levels[i]].data.length), (x,i) => i);
                     rnd = shuffleArray(rnd);
                     for (var r=0; r<rnd.length; r++){
-                        if (myPackArray.indexOf(homeData[levels[i]].data[rnd[r]].name) < 0){
+                        if (myPackArray.indexOf(homeData[levels[i]].data[rnd[r]].name) < 0 && rnd[r] != taken){
                             titleIndex = rnd[r];
+                            taken = rnd[r];
                             myPackArray.push(homeData[r].title);
                             break;
                         }
