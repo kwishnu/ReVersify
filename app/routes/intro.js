@@ -17,8 +17,10 @@ const KEY_InfinteHints = 'infHintKey';
 const KEY_PlayFirst = 'playFirstKey';
 const KEY_ShowVerse = 'showVerseKey';
 const KEY_ratedTheApp = 'ratedApp';
+const KEY_ThankRated = 'thankRatedApp';
 const KEY_expandInfo = 'expandInfoKey';
 const KEY_Solved = 'numSolvedKey';
+const KEY_Favorites = 'numFavoritesKey';
 const KEY_show_score = 'showScoreKey';
 const {width, height} = require('Dimensions').get('window');
 
@@ -44,8 +46,10 @@ class Intro extends Component {
                 [KEY_PlayFirst, 'false'],
                 [KEY_ShowVerse, 'false'],
                 [KEY_ratedTheApp, 'false'],
+                [KEY_ThankRated, 'false'],
                 [KEY_expandInfo, '1.1.1'],
                 [KEY_Solved, '0'],
+                [KEY_Favorites, '0'],
                 [KEY_show_score, '1']
             ];
             try {
