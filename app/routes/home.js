@@ -97,7 +97,6 @@ const CELL_WIDTH = Math.floor(width); // one tile's fraction of the screen width
 const CELL_PADDING = Math.floor(CELL_WIDTH * .08); // 5% of the cell width...+
 const TILE_WIDTH = (CELL_WIDTH - CELL_PADDING * 2);
 const BORDER_RADIUS = CELL_PADDING * .2;
-const KEY_solvedTV = 'solvedTV';
 const KEY_daily_solved_array = 'solved_array';
 const KEY_show_score = 'showScoreKey';
 const KEY_Score = 'scoreKey';
@@ -109,6 +108,8 @@ const KEY_Verses = 'versesKey';
 const KEY_Time = 'timeKey';
 const KEY_solvedTP = 'solvedTP';
 const KEY_ratedTheApp = 'ratedApp';
+const KEY_ThankRated = 'thankRatedApp';
+const KEY_Solved = 'numSolvedKey';
 let homeData = [];
 let dsArray = [];
 let solvedTodayOrNot = false;
@@ -139,9 +140,11 @@ class Home extends Component{
             indexSelected: 0,
             todayFull: null,
             isPremium: this.props.isPremium,
+            hasRated: false,
+            thankedRating: false,
             menuImage: require('../images/menu.png'),
-            total_score: 0,
-            total_opacity: 1,
+            solved: 0,
+            solved_opacity: 1,
             nextBonus: 0,
             homeData: this.props.homeData,
             dataSource: ds.cloneWithRowsAndSections(dataBlob, sectionIds, rowIds)
@@ -155,13 +158,23 @@ class Home extends Component{
         let todayfull = moment().format('MMMM D, YYYY');
         let nowISO = moment().valueOf();
         let tonightMidnight = moment().endOf('day').valueOf();
-        try {
-            AsyncStorage.setItem(KEY_Verses, JSON.stringify(this.props.homeData));
-            AsyncStorage.setItem(KEY_Time, JSON.stringify(nowISO));
-        } catch (error) {
-            window.alert('AsyncStorage error: 164' + error.message);
-        }
-        AsyncStorage.getItem(KEY_solvedTP).then((solvedTodays) => {
+
+        AsyncStorage.setItem(KEY_Verses, JSON.stringify(this.props.homeData)).then(() => {
+            return AsyncStorage.setItem(KEY_Time, JSON.stringify(nowISO));
+        }).then(() => {
+            return AsyncStorage.getItem(KEY_ThankRated);
+        }).then((thanked) => {
+            let thankedForRating = (thanked == 'true')?true:false;
+            this.setState({thankedRating: thankedForRating});
+            return AsyncStorage.getItem(KEY_ratedTheApp);
+        }).then((rated) => {
+            let ratedOrNot = (rated == 'true')?true:false;
+            this.setState({hasRated: ratedOrNot});
+            return AsyncStorage.getItem(KEY_Solved);
+        }).then((numSolved) => {
+            this.setState({solved: numSolved})
+            return AsyncStorage.getItem(KEY_solvedTP);
+        }).then((solvedTodays) => {
             if (solvedTodays !== null) {
                 solvedTodayOrNot = (solvedTodays == 'true')?true:false;
             }else{
@@ -175,7 +188,7 @@ class Home extends Component{
             return AsyncStorage.getItem(KEY_show_score);
         }).then((showScore) => {
             if (showScore !== null) {
-                this.setState({total_opacity: parseInt(showScore, 10)});
+                this.setState({solved_opacity: parseInt(showScore, 10)});
             }else{
                 try {
                     AsyncStorage.setItem(KEY_show_score, '1');
@@ -197,7 +210,7 @@ class Home extends Component{
                 }
             }
             return AsyncStorage.getItem(KEY_midnight);
-        }).then( (value) => {
+        }).then((value) => {
             if (value !== null) {
                 var storedMidnight = parseInt(JSON.parse(value), 10);
                 var milliSecsOver = nowISO - storedMidnight;
@@ -228,6 +241,17 @@ class Home extends Component{
             }
         }).then((ready)=>{
             this.setState({todayFull: todayfull, isLoading: false});
+            if (this.state.hasRated){
+                if (!this.state.thankedRating){
+                    try {
+                        AsyncStorage.setItem(KEY_ThankRated, 'true');
+                    } catch (error) {
+                        window.alert('AsyncStorage error: 249' + error.message);
+                    }
+                    Alert.alert('Thank You!', `You now have a new feature: the first tile will already be played in each Verse. You can change this in 'Settings' if you wish`);
+            this.props.navigator.pop({});
+                }
+            }
         }).catch(function(error) {
             window.alert('home.js: ' + error.message);
         });
@@ -290,7 +314,7 @@ class Home extends Component{
             BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
         } else {
             AsyncStorage.getItem(KEY_show_score).then((showScore) => {
-                this.setState({total_opacity: parseInt(showScore, 10)});
+                this.setState({solved_opacity: parseInt(showScore, 10)});
             });
             this.setState({menuImage: require('../images/menu.png')});
             BackHandler.removeEventListener('hardwareBackPress', this.handleHardwareBackButton);
@@ -400,7 +424,7 @@ class Home extends Component{
     }
     getTextColor(bg, index){
         var strToReturn = invertColor(bg, true);
-        if(index == '16' && solvedTodayOrNot){
+        if(index == '13' && solvedTodayOrNot){
             strToReturn = '#999';
             return {
                 color: strToReturn,
@@ -498,7 +522,8 @@ class Home extends Component{
             });
             return;
         }
-        let theDestination = 'collection';
+        let pIDarr = productID.split('.');
+        let theDestination = 'book';//pIDarr[2];
         let gripeText = '';
         let useColors = '';
         let bgColorToSend = '';
@@ -521,7 +546,7 @@ class Home extends Component{
                 });
                 return;
             case 'Last Three Days':
-                gripeText = 'Purchase any Verse Collection and always have access here to the previous 30 Daily Verses!';
+                gripeText = 'Purchase any item in the app and always have access here to the previous 30 Daily Verses!';
             case 'Last Thirty Days':  //fallthrough
                 theDestination = 'daily';
                 theTitle = 'Daily Verses';
@@ -552,9 +577,6 @@ class Home extends Component{
                 }
             }
             bgColorToSend = (useColors == 'true')?bg:'#cfe7c2';
-
-            console.log(JSON.stringify(this.state.homeData[index]));
-
             this.props.navigator.replace({
                 id: theDestination,
                 passProps: {
@@ -570,7 +592,12 @@ class Home extends Component{
         });
     }
     showDialog(index, type){
-        if(index < 16)return;// || index == 17
+        if(index < 16)return;
+        if(index == 17){
+            this.setState({item2Color: '#555555'})
+        }else{
+            this.setState({item2Color: '#ffffff'})
+        }
         Vibration.vibrate(25);
         BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
         if(type == 'mypack' || type == 'solved'){
@@ -606,21 +633,23 @@ class Home extends Component{
         switch(which){
             case 0://touch outside of dropdown, just close
                 return;
-            case 1:
+            case 1://move to or from Completed
                 let whatToCallIt = (this.state.moveToCompleted == 'true')?'solved':'mypack';
                 this.state.homeData[this.state.indexSelected].type = whatToCallIt;
                 break;
-            case 2:
+            case 2://open all or first only
+            console.log(this.state.openClose);
                 if(this.state.openClose){
                     this.state.homeData[this.state.indexSelected].num_solved = this.state.homeData[this.state.indexSelected].num_verses;
                 }else{
                     this.state.homeData[this.state.indexSelected].num_solved = '0';
                 }
+                   console.log(JSON.stringify(this.state.homeData[this.state.indexSelected].num_solved));
                 break;
-            case 3:
+            case 3://hide or show
                 this.state.homeData[this.state.indexSelected].show = 'false';
                 break;
-            case 4:
+            case 4://show hidden, if any
                 for (let showVerses=16; showVerses<this.state.homeData.length; showVerses++){
                     this.state.homeData[showVerses].show = 'true';
                 }
@@ -656,9 +685,9 @@ class Home extends Component{
                             <Button style={container_styles.button}>
                                 <Image source={ require('../images/noimage.png') } style={ { width: normalize(height/15), height: normalize(height/15) } } />
                             </Button>
-                            <View style={ container_styles.total_score }>
-                                <Text style={[container_styles.total_text, {opacity: this.state.total_opacity}]}>Solved:</Text>
-                                <Text style={[container_styles.total_text, {opacity: this.state.total_opacity}]}>{this.state.total_score.toLocaleString()}</Text>
+                            <View style={ container_styles.solved }>
+                                <Text style={[container_styles.total_text, {opacity: this.state.solved_opacity}]}>Solved:</Text>
+                                <Text style={[container_styles.total_text, {opacity: this.state.solved_opacity}]}>{this.state.solved.toLocaleString()}</Text>
                             </View>
                         </View>
                         <View style={ container_styles.verses_container }>
@@ -679,7 +708,7 @@ class Home extends Component{
                              />
                         </View>
                         {this.state.shouldShowDialog &&
-                                <Dialog showFull={this.state.showFullDialog} onPress={(num)=>{ this.onDialogSelect(num); }} item1={this.state.strWhereToSend} item2={this.state.strOpenVerses} item3={'Hide from Contents'} item4={'Show hidden collections'} />
+                                <Dialog item2Color={this.state.item2Color} showFull={this.state.showFullDialog} onPress={(num)=>{ this.onDialogSelect(num); }} item1={this.state.strWhereToSend} item2={this.state.strOpenVerses} item3={'Hide from Contents'} item4={'Show hidden collections'} />
                         }
                      </View>
                 </SideMenu>
@@ -704,7 +733,7 @@ const container_styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#000000'
+        backgroundColor: '#222222'
     },
     listview: {
         flexDirection: 'row',
@@ -727,7 +756,7 @@ const container_styles = StyleSheet.create({
         width: normalize(height*0.077),
         height: normalize(height*0.077)
     },
-    total_score: {
+    solved: {
         position: 'absolute',
         justifyContent: 'center',
         alignItems: 'flex-end',
