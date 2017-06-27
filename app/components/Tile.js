@@ -26,7 +26,7 @@ class Tile extends Component {
       scale: new Animated.Value(1),
       text: this.props.text,
       zIndex: 0,
-      opacity: 1,
+      opacity: this.props.opac,
       useSounds: this.props.sounds
     };
   }
@@ -105,6 +105,11 @@ class Tile extends Component {
             ).start()
         });
         }
+    }
+    disappear(sent) {
+        if (this.state.text == sent || reverse(this.state.text) == sent){
+            this.setState({opacity: 0});
+        };
     }
     inDropZone(gesture) {
         var isDropZone = false;
