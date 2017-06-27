@@ -59,6 +59,7 @@ const KEY_daily_solved_array = 'solved_array';
 const KEY_Time = 'timeKey';
 const KEY_Verses = 'versesKey';
 const KEY_expandInfo = 'expandInfoKey';
+const KEY_Favorites = 'numFavoritesKey';
 
 
 class Favorites extends Component{
@@ -170,13 +171,15 @@ class Favorites extends Component{
                 }
             }
             var levels = [5, 5, 6, 7];
+            var taken = -1;
             for(var i=0; i<4; i++){
                 var titleIndex = -1;
                 var rnd = Array.from(new Array(homeData[levels[i]].data.length), (x,i) => i);
                 rnd = shuffleArray(rnd);
                 for (var r=0; r<rnd.length; r++){
-                    if (myPackArray.indexOf(homeData[levels[i]].data[rnd[r]].name) < 0){
+                    if (myPackArray.indexOf(homeData[levels[i]].data[rnd[r]].name) < 0 && rnd[r] != taken){
                         titleIndex = rnd[r];
+                        taken = rnd[r];
                         myPackArray.push(homeData[r].title);
                         break;
                     }
@@ -417,7 +420,7 @@ class Favorites extends Component{
     }
     goToDaily(index){
         let sArray = [];
-        let gripeText = (this.props.isPremium == 'true')?'':'Purchase any Verse Collection and always have access here to the previous 30 Daily Verses!';
+        let gripeText = (this.props.isPremium == 'true')?'':'Purchase any item in the app and always have access here to the previous 30 Daily Verses!';
 
         AsyncStorage.getItem(KEY_daily_solved_array).then((theArray) => {
             if (theArray !== null) {
@@ -439,11 +442,12 @@ class Favorites extends Component{
         });
     }
     onSelect(verseStr) {
+
         let arr = verseStr.split('**');
         let index = parseInt(arr[0], 10);
         let bgC = this.props.bgColor;
         let newColor = (bgC == '#000000')? '#cfe7c2':this.props.bgColor;
-        if(index>parseInt(this.props.homeData[this.props.dataElement].num_solved, 10))return;
+
         this.props.navigator.replace({
             id: 'game',
             passProps: {
@@ -468,7 +472,7 @@ class Favorites extends Component{
         this.setState({ shouldShowDialog: false });
         if(which == 0)return;
         let arr = this.state.selected.split('**');
-        Alert.alert( 'Remove Verse', 'Remove ' + arr[1] + ' from My Favorites?',
+        Alert.alert( 'Remove Verse', 'Remove ' + arr[2] + ' from My Favorites?',
             [
                 {text: 'Remove', onPress: () => this.removeItem(arr[0])},
                 {text: 'Cancel', style: 'cancel'},
@@ -482,34 +486,29 @@ class Favorites extends Component{
         dataArray[17].show = bool;
         dataArray[17].verses.length = 0;
         dataArray[17].num_verses = (parseInt(dataArray[17].num_verses) - 1) + '';
-//        dataArray[17].num_solved = (parseInt(dataArray[17].num_solved) - 1) + '';
-//        dataArray[17].solved.pop();
         let newArray = [];
         for (let a=0; a<this.state.dataSource.length; a++){
             if (this.state.dataSource[a].substr(0, 1) != item){
                 dataArray[17].verses.push(this.state.dataSource[a].substring(this.state.dataSource[a].indexOf('*') + 2));
                 newArray.push(this.state.dataSource[a]);
-//                console.log(JSON.stringify(dataArray[17]));
             }
         }
         try {
             AsyncStorage.setItem(KEY_Verses, JSON.stringify(dataArray));
+            AsyncStorage.setItem(KEY_Favorites, String(dataArray[17].verses.length));
         } catch (error) {
             window.alert('AsyncStorage error: ' + error.message);
         }
         if (bool == 'true'){
             this.setState({homeData: dataArray, dataSource: newArray});
         }else{
-
             this.props.navigator.replace({
                 id: 'home',
                 passProps: {
-                    homeData: this.state.homeData,
+                    homeData: dataArray,
                 }
             });
-
         }
-
     }
     toggleInfoBox(bool){
         if (this.props.isPremium == 'true')return;
@@ -531,20 +530,18 @@ class Favorites extends Component{
         const menu = <Menu onItemSelected={ this.onMenuItemSelected } data = {this.props.homeData} />;
         if(this.state.isLoading == true){
             return(
-                <View style={[collection_styles.loading, {backgroundColor: this.props.bgColor}]}>
+                <View style={[collection_styles.loading, {backgroundColor: '#222222'}]}>
                     <ActivityIndicator animating={true} size={'large'}/>
                 </View>
             )
         }else{
            const rows = this.dataSource.cloneWithRows(this.state.dataSource);
-           console.log(this.state.expand);
         if(this.state.expand){
             return (
                 <SideMenu
                     menu={ menu }
                     isOpen={ this.state.isOpen }
                     onChange={ (isOpen) => this.updateMenuState(isOpen) }>
-
                     <View style={ [collection_styles.container, {backgroundColor: this.state.bgColor}, this.darkBorder(this.state.bgColor)] }>
                         <View style={ [collection_styles.header, {backgroundColor: this.state.headerColor}]}>
                             <Button style={collection_styles.button} onPress={ () => this.handleHardwareBackButton() }>
