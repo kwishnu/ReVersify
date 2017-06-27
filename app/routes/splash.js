@@ -118,7 +118,7 @@ class SplashScreen extends Component {
                     }
                 }
                 if (solvNum >= bonusScore){
-                    const bID = 'bonus.' + strNextBonus;
+                    const bID = 'bonus.' + strNextBonus + '.collection';
                     for (let getNext=0; getNext<bonuses.length; getNext++){
                         if (bonuses[getNext][0] == strNextBonus){
                             const nextToSet = bonuses[getNext + 1][0];//ignoring index-out-of-bounds possibility as top bonus is set at 100,000,000,000...
@@ -129,23 +129,24 @@ class SplashScreen extends Component {
                             }
                         }
                     }
-                    return this.getPuzzlePack(bonusScore, bID, this.state.pData);
+                    return true;// this.getPuzzlePack(bonusScore, bID, this.state.pData);*************************************bonuses****************************************************************
                 }else{
                     return false;
                 }
             }).then((pArray) => {
                 if (pArray)this.setState({pData: pArray});
-                return AsyncStorage.getItem(KEY_Notifs);            }).then((notifHour) => {//notification hour, zero if no notifications (from Settings)
-                    if (notifHour !== null) {
-                        this.setNotifications(notifHour);
-                    }else{
-                        this.setState({notif_time: '7'});
-                        try {
-                            AsyncStorage.setItem(KEY_Notifs, '7');
-                        } catch (error) {
-                            window.alert('AsyncStorage error: ' + error.message);
-                        }
+                return AsyncStorage.getItem(KEY_Notifs);
+            }).then((notifHour) => {//notification hour, zero if no notifications (from Settings)
+                if (notifHour !== null) {
+                    this.setNotifications(notifHour);
+                }else{
+                    this.setState({notif_time: '7'});
+                    try {
+                        AsyncStorage.setItem(KEY_Notifs, '7');
+                    } catch (error) {
+                        window.alert('AsyncStorage error: ' + error.message);
                     }
+                }
                 return AsyncStorage.getItem(KEY_SeenStart);
             }).then((seenIntro) => {
                 if (seenIntro !== null) {//has already seen app intro
@@ -288,6 +289,7 @@ class SplashScreen extends Component {
                             }
                             if((parseInt(row.vnum, 10) >= sNum) && (parseInt(row.vnum, 10) < (sNum + 31))){//daily verses here
                                 verseStringArray.unshift(row.vs);
+                                console.log('vs: ' + row.vs);
                             }
                         });
                         vData.length = 22;//truncate extra elements, which shouldn't be necessary but is...
@@ -467,14 +469,16 @@ class SplashScreen extends Component {
             }
         }
         var levels = [5, 5, 6, 7];
+        var taken = -1;
         for(var i=0; i<4; i++){
             var titleIndex = -1;
             var rnd = Array.from(new Array(homeData[levels[i]].data.length), (x,i) => i);
             rnd = shuffleArray(rnd);
             for (var r=0; r<rnd.length; r++){
-                if (myPackArray.indexOf(homeData[levels[i]].data[rnd[r]].name) < 0){
+                if (myPackArray.indexOf(homeData[levels[i]].data[rnd[r]].name) < 0 && rnd[r] != taken){
                     titleIndex = rnd[r];
-                    myPackArray.push(homeData[levels[i]].data[rnd[r]].name);
+                    taken = rnd[r];
+                    myPackArray.push(homeData[r].title);
                     break;
                 }
             }
