@@ -13,17 +13,17 @@ const KEY_Sound = 'soundKey';
 const KEY_Verses = 'versesKey';
 const KEY_solvedTP = 'solvedTP';
 const KEY_Solved = 'numSolvedKey';
+const KEY_Favorites = 'numFavoritesKey';
 const KEY_daily_solved_array = 'solved_array';
 const KEY_Time = 'timeKey';
 const KEY_MyHints = 'myHintsKey';
-//const KEY_Premium = 'premiumOrNot';
+const KEY_Premium = 'premiumOrNot';
 const KEY_InfinteHints = 'infHintKey';
 const KEY_PlayFirst = 'playFirstKey';
 const KEY_ShowVerse = 'showVerseKey';
 let dsArray = [];
 let homeData = {};
 let Sound = require('react-native-sound');
-
 const click = new Sound('click.mp3', Sound.MAIN_BUNDLE, (error) => {
   if (error) {
     window.alert('Sound file not found');
@@ -54,7 +54,9 @@ const fanfare = new Sound('aah.mp3', Sound.MAIN_BUNDLE, (error) => {
     window.alert('Sound file not found');
   }
 });
-
+reverse = (s) => {
+    return s.split("").reverse().join("");
+}
 cleanup = (sentence) => {
    return sentence.toLowerCase().replace(/[^a-zA-Z]+/g, "");
 
@@ -159,15 +161,18 @@ class Game extends Component {
             showFB: true,
             showTwitter: true,
             showFavorites: true,
+            showBible: false,
+            numFavorites: 0,
             letterImage: require('../images/letters/i.png'),
             arrowImage: require('../images/arrowforward.png'),
             scaleXY: new Animated.Value(0),
             soundString: 'Mute Sounds',
             useSounds: true,
             doneWithVerse: false,
-            playFirstFragment: false,
-//            hasPremium: false,
+            playedFirst: false,
+            isPremium: false,
             numHints: 0,
+            numSolved: 0,
             myHintsInitialNum: -1,
             hintNumOpacity: 1,
             hasInfiniteHints: false,
@@ -177,6 +182,7 @@ class Game extends Component {
     }
     componentDidMount() {
         if (this.props.dataElement == 17)this.setState({showFavorites: false});
+        if (this.props.fromWhere == 'book')this.setState({showBible: true});
         this.setPanelColors();
         BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
         AppState.addEventListener('change', this.handleAppStateChange);
@@ -231,10 +237,6 @@ class Game extends Component {
                     window.alert('AsyncStorage error: ' + error.message);
                 }
             }
-//            return AsyncStorage.getItem(KEY_Premium);//has purchased any item
-//        }).then((prem) => {
-//            let premiumBool = (prem == 'true')?true:false;
-//            if (premiumBool)this.setState({hasPremium: play });
             return AsyncStorage.getItem(KEY_ShowVerse);
         }).then((show) => {
             if (show == 'true' || this.props.fromWhere == 'favorites'){
@@ -254,11 +256,24 @@ class Game extends Component {
             if (num > -1){
                 this.setState({ numHints: num, myHintsInitialNum: num });
             }
+            return AsyncStorage.getItem(KEY_Premium);
+        }).then((premium) => {
+            let hasPremium = (premium == 'true')?true:false;
+            if (hasPremium)this.setState({isPremium: hasPremium});
+            return AsyncStorage.getItem(KEY_Solved);
+        }).then((solved) => {
+            let ns = parseInt(solved);
+            this.setState({numSolved: ns});
+            return AsyncStorage.getItem(KEY_Favorites);
+        }).then((favs) => {
+            let numFavs = parseInt(favs);
+            this.setState({numFavorites: numFavs});
             return AsyncStorage.getItem(KEY_PlayFirst);
         }).then((playFirst) => {
-            let play = (playFirst == 'true')?true:false;
-            if (play)this.setState({playFirstFragment: play });
-        }).then(() => {setTimeout(() => {this.setState({ isLoading: false })}, 500)})
+            if (playFirst == 'true'){
+                this.playFirst();
+            }
+        }).then(() => {setTimeout(() => { this.setState({ isLoading: false }); }, 500); })
     }
     componentWillUnmount () {
         BackHandler.removeEventListener('hardwareBackPress', this.handleHardwareBackButton);
@@ -439,7 +454,17 @@ class Game extends Component {
                             fragAssemble = '';
                         }
                         if (fragments.length % 3 == 0 && fragments.length < 25){
-                            haveFinished = true;
+                            const count = fragments =>
+                                fragments.reduce((a, b) =>
+                                    Object.assign(a, {[b]: (a[b] || 0) + 1}), {});//checking for duplicate fragments
+                            const duplicates = dict =>
+                                Object.keys(dict).filter((a) => dict[a] > 1);
+                            let dup = false;
+                            let nameObj = count(fragments);
+                            for (var prop in nameObj) {
+                                if (nameObj[prop] > 1)dup = true;
+                            }
+                            if(!dup)haveFinished = true;
                         }else{
                             fragments.length = 0;
                             remainingStr = verseKeyString;
@@ -527,13 +552,15 @@ class Game extends Component {
             }
         }
         var levels = [5, 5, 6, 7];
+        var taken = -1;
         for(var i=0; i<4; i++){
             var titleIndex = -1;
             var rnd = Array.from(new Array(homeData[levels[i]].data.length), (x,i) => i);
             rnd = shuffleArray(rnd);
             for (var r=0; r<rnd.length; r++){
-                if (myPackArray.indexOf(homeData[levels[i]].data[rnd[r]].name) < 0){
+                if (myPackArray.indexOf(homeData[levels[i]].data[rnd[r]].name) < 0 && rnd[r] != taken){
                     titleIndex = rnd[r];
+                    taken = rnd[r];
                     myPackArray.push(homeData[r].title);
                     break;
                 }
@@ -644,8 +671,12 @@ class Game extends Component {
                         wordArrayPosition: [onLine, onWord, onLetter], line0Text: line0String,
                         line1Text: line1String, line2Text: line2String, line3Text: line3String,
                         line4Text: line4String, line5Text: line5String, line6Text: line6String, line7Text: line7String
-                      })
-        setTimeout(() => {this.playDropSound()}, 50);
+        })
+        if (this.state.playedFirst == true){
+            setTimeout(() => {this.playDropSound()}, 50);
+        }else{
+            this.setState({playedFirst: true});
+        }
     }
     endOfGame(){
         if(this.state.useSounds == true){fanfare.play();}
@@ -677,7 +708,7 @@ class Game extends Component {
         }
         try {
             AsyncStorage.setItem(KEY_daily_solved_array, JSON.stringify(dsArray));
-//            AsyncStorage.setItem(KEY_daily_solved_array, JSON.stringify(dsArray));
+            AsyncStorage.setItem(KEY_Solved, String(this.state.numSolved + 1));
         } catch (error) {
             window.alert('AsyncStorage error: ' + error.message);
         }
@@ -710,6 +741,133 @@ class Game extends Component {
         let darkerColor = (bgC == '#cfe7c2')? '#2B0B30':shadeColor(color, -40);
 //        let darkerColor = shadeColor(color, -40);
         return {backgroundColor: darkerColor};
+    }
+    playFirst(){
+        let verseArray = this.props.homeData[this.props.dataElement].verses[this.props.index].split('**');
+        let vStr = cleanup(verseArray[2]);
+        let str = '';
+        switch (true){
+            case ((this.state.frag0 == this.state.nextFrag) || (reverse(this.state.frag0) == this.state.nextFrag)):
+                str = (this.state.frag0 == this.state.nextFrag)?(this.state.frag0):reverse(this.state.frag0);
+                this.setState({frag0Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag1 == this.state.nextFrag) || (reverse(this.state.frag1) == this.state.nextFrag)):
+                str = (this.state.frag1 == this.state.nextFrag)?(this.state.frag1):reverse(this.state.frag1);
+                this.setState({frag1Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag2 == this.state.nextFrag) || (reverse(this.state.frag2) == this.state.nextFrag)):
+                str = (this.state.frag2 == this.state.nextFrag)?(this.state.frag2):reverse(this.state.frag2);
+                this.setState({frag2Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag3 == this.state.nextFrag) || (reverse(this.state.frag3) == this.state.nextFrag)):
+                str = (this.state.frag3 == this.state.nextFrag)?(this.state.frag3):reverse(this.state.frag3);
+                this.setState({frag3Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag4 == this.state.nextFrag) || (reverse(this.state.frag4) == this.state.nextFrag)):
+                str = (this.state.frag4 == this.state.nextFrag)?(this.state.frag4):reverse(this.state.frag4);
+                this.setState({frag4Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag5 == this.state.nextFrag) || (reverse(this.state.frag5) == this.state.nextFrag)):
+                str = (this.state.frag5 == this.state.nextFrag)?(this.state.frag5):reverse(this.state.frag5);
+                this.setState({frag5Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag6 == this.state.nextFrag) || (reverse(this.state.frag6) == this.state.nextFrag)):
+                str = (this.state.frag6 == this.state.nextFrag)?(this.state.frag6):reverse(this.state.frag6);
+                this.setState({frag6Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag7 == this.state.nextFrag) || (reverse(this.state.frag7) == this.state.nextFrag)):
+                str = (this.state.frag7 == this.state.nextFrag)?(this.state.frag7):reverse(this.state.frag7);
+                this.setState({frag7Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag8 == this.state.nextFrag) || (reverse(this.state.frag8) == this.state.nextFrag)):
+                str = (this.state.frag8 == this.state.nextFrag)?(this.state.frag8):reverse(this.state.frag8);
+                this.setState({frag8Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag9 == this.state.nextFrag) || (reverse(this.state.frag9) == this.state.nextFrag)):
+                str = (this.state.frag9 == this.state.nextFrag)?(this.state.frag9):reverse(this.state.frag9);
+                this.setState({frag9Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag10 == this.state.nextFrag) || (reverse(this.state.frag10) == this.state.nextFrag)):
+                str = (this.state.frag10 == this.state.nextFrag)?(this.state.frag10):reverse(this.state.frag10);
+                this.setState({frag10Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag11 == this.state.nextFrag) || (reverse(this.state.frag11) == this.state.nextFrag)):
+                str = (this.state.frag11 == this.state.nextFrag)?(this.state.frag11):reverse(this.state.frag11);
+                this.setState({frag11Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag12 == this.state.nextFrag) || (reverse(this.state.frag12) == this.state.nextFrag)):
+                str = (this.state.frag12 == this.state.nextFrag)?(this.state.frag12):reverse(this.state.frag12);
+                this.setState({frag12Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag13 == this.state.nextFrag) || (reverse(this.state.frag13) == this.state.nextFrag)):
+                str = (this.state.frag13 == this.state.nextFrag)?(this.state.frag13):reverse(this.state.frag13);
+                this.setState({frag13Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag14 == this.state.nextFrag) || (reverse(this.state.frag14) == this.state.nextFrag)):
+                str = (this.state.frag14 == this.state.nextFrag)?(this.state.frag14):reverse(this.state.frag14);
+                this.setState({frag14Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag15 == this.state.nextFrag) || (reverse(this.state.frag15) == this.state.nextFrag)):
+                str = (this.state.frag15 == this.state.nextFrag)?(this.state.frag15):reverse(this.state.frag15);
+                this.setState({frag15Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag16 == this.state.nextFrag) || (reverse(this.state.frag16) == this.state.nextFrag)):
+                str = (this.state.frag16 == this.state.nextFrag)?(this.state.frag16):reverse(this.state.frag16);
+                this.setState({frag16Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag17 == this.state.nextFrag) || (reverse(this.state.frag17) == this.state.nextFrag)):
+                str = (this.state.frag17 == this.state.nextFrag)?(this.state.frag17):reverse(this.state.frag17);
+                this.setState({frag17Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag18 == this.state.nextFrag) || (reverse(this.state.frag18) == this.state.nextFrag)):
+                str = (this.state.frag18 == this.state.nextFrag)?(this.state.frag18):reverse(this.state.frag18);
+                this.setState({frag18Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag19 == this.state.nextFrag) || (reverse(this.state.frag19) == this.state.nextFrag)):
+                str = (this.state.frag19 == this.state.nextFrag)?(this.state.frag19):reverse(this.state.frag19);
+                this.setState({frag19Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag20 == this.state.nextFrag) || (reverse(this.state.frag20) == this.state.nextFrag)):
+                str = (this.state.frag20 == this.state.nextFrag)?(this.state.frag20):reverse(this.state.frag20);
+                this.setState({frag20Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag21 == this.state.nextFrag) || (reverse(this.state.frag21) == this.state.nextFrag)):
+                str = (this.state.frag21 == this.state.nextFrag)?(this.state.frag21):reverse(this.state.frag21);
+                this.setState({frag21Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag22 == this.state.nextFrag) || (reverse(this.state.frag22) == this.state.nextFrag)):
+                str = (this.state.frag22 == this.state.nextFrag)?(this.state.frag22):reverse(this.state.frag22);
+                this.setState({frag22Opacity: 0});
+                this.onDrop(str);
+                break;
+            case ((this.state.frag23 == this.state.nextFrag) || (reverse(this.state.frag23) == this.state.nextFrag)):
+                str = (this.state.frag23 == this.state.nextFrag)?(this.state.frag23):reverse(this.state.frag23);
+                this.setState({frag23Opacity: 0});
+                this.onDrop(str);
+                break;
+        }
     }
     giveHint(frag){
         let hints = this.state.numHints;
@@ -886,17 +1044,22 @@ class Game extends Component {
         }
     }
     addToFavorites(){
-        let num = (parseInt(homeData[17].num_verses, 10) + 1) + '';
-        homeData[17].num_verses = num;
-//        homeData[17].num_solved = num;
-        homeData[17].verses.push(this.props.homeData[this.props.dataElement].verses[this.props.index]);
-//        homeData[17].solved.push(1);
-        homeData[17].show = 'true';
-        try {
-            AsyncStorage.setItem(KEY_Verses, JSON.stringify(homeData));
-            Alert.alert('Verse Added', this.state.chapterVerse + ' added to Favorites' );
-        } catch (error) {
-            window.alert('AsyncStorage error: ' + error.message);
+        if (this.state.isPremium || this.state.numFavorites < 3){
+            let newNumFavorites = this.state.numFavorites + 1;
+            this.setState({numFavorites: newNumFavorites});
+            let num = (parseInt(homeData[17].num_verses, 10) + 1) + '';
+            homeData[17].num_verses = num;
+            homeData[17].verses.push(this.props.homeData[this.props.dataElement].verses[this.props.index]);
+            homeData[17].show = 'true';
+            try {
+                AsyncStorage.setItem(KEY_Verses, JSON.stringify(homeData));
+                AsyncStorage.setItem(KEY_Favorites, newNumFavorites + '');
+                Alert.alert('Verse Added', this.state.chapterVerse + ' added to Favorites' );
+            } catch (error) {
+                window.alert('AsyncStorage error: ' + error.message);
+            }
+        }else{
+            Alert.alert('Favorites full', 'Sorry, Favorites storage is limited to 3 unless you have purchased something within the app');
         }
     }
 
@@ -917,7 +1080,7 @@ class Game extends Component {
                                   }), transform: [{scale}]};
         if(this.state.isLoading == true){
             return(
-                <View style={[game_styles.loading, {backgroundColor: this.state.bgColor}]}>
+                <View style={[game_styles.loading, {backgroundColor: '#222222'}]}>
                     <ActivityIndicator animating={true} size={'large'}/>
                 </View>
             );
@@ -972,57 +1135,57 @@ class Game extends Component {
                         </View>
                         <View style={game_styles.game}>
                                 <View style={game_styles.tile_row} >
-                                    <Tile ref={(a) => { this.a = a; }} text={ this.state.frag0 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                    <Tile ref={(b) => { this.b = b; }} text={ this.state.frag1 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                    <Tile ref={(c) => { this.c = c; }} text={ this.state.frag2 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    <Tile ref={(a) => { this.a = a; }} opac={ this.state.frag0Opacity } text={ this.state.frag0 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    <Tile ref={(b) => { this.b = b; }} opac={ this.state.frag1Opacity } text={ this.state.frag1 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    <Tile ref={(c) => { this.c = c; }} opac={ this.state.frag2Opacity } text={ this.state.frag2 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
                                 </View>
                             { this.state.rows2 &&
                                 <View style={game_styles.tile_row} >
-                                    <Tile ref={(d) => { this.d = d; }} text={ this.state.frag3 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                    <Tile ref={(e) => { this.e = e; }} text={ this.state.frag4 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                    <Tile ref={(f) => { this.f = f; }} text={ this.state.frag5 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    <Tile ref={(d) => { this.d = d; }} opac={ this.state.frag3Opacity } text={ this.state.frag3 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    <Tile ref={(e) => { this.e = e; }} opac={ this.state.frag4Opacity } text={ this.state.frag4 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    <Tile ref={(f) => { this.f = f; }} opac={ this.state.frag5Opacity } text={ this.state.frag5 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
                                 </View>
                             }
                             { this.state.rows3 &&
                                 <View style={game_styles.tile_row} >
-                                    <Tile ref={(g) => { this.g = g; }} text={ this.state.frag6 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                    <Tile ref={(h) => { this.h = h; }} text={ this.state.frag7 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                    <Tile ref={(i) => { this.i = i; }} text={ this.state.frag8 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    <Tile ref={(g) => { this.g = g; }} opac={ this.state.frag6Opacity } text={ this.state.frag6 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    <Tile ref={(h) => { this.h = h; }} opac={ this.state.frag7Opacity } text={ this.state.frag7 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    <Tile ref={(i) => { this.i = i; }} opac={ this.state.frag8Opacity } text={ this.state.frag8 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
                                 </View>
                             }
                             { this.state.rows4 &&
                                     <View style={game_styles.tile_row} >
-                                        <Tile ref={(j) => { this.j = j; }} text={ this.state.frag9 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                        <Tile ref={(k) => { this.k = k; }} text={ this.state.frag10 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                        <Tile ref={(l) => { this.l = l; }} text={ this.state.frag11 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(j) => { this.j = j; }} opac={ this.state.frag9Opacity } text={ this.state.frag9 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(k) => { this.k = k; }} opac={ this.state.frag10Opacity } text={ this.state.frag10 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(l) => { this.l = l; }} opac={ this.state.frag11Opacity } text={ this.state.frag11 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
                                     </View>
                             }
                             { this.state.rows5 &&
                                     <View style={game_styles.tile_row} >
-                                        <Tile ref={(m) => { this.m = m; }} text={ this.state.frag12 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                        <Tile ref={(n) => { this.n = n; }} text={ this.state.frag13 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                        <Tile ref={(o) => { this.o = o; }} text={ this.state.frag14 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(m) => { this.m = m; }} opac={ this.state.frag12Opacity } text={ this.state.frag12 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(n) => { this.n = n; }} opac={ this.state.frag13Opacity } text={ this.state.frag13 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(o) => { this.o = o; }} opac={ this.state.frag14Opacity } text={ this.state.frag14 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
                                     </View>
                             }
                             { this.state.rows6 &&
                                     <View style={game_styles.tile_row} >
-                                        <Tile ref={(p) => { this.p = p; }} text={ this.state.frag15 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                        <Tile ref={(q) => { this.q = q; }} text={ this.state.frag16 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                        <Tile ref={(r) => { this.r = r; }} text={ this.state.frag17 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(p) => { this.p = p; }} opac={ this.state.frag15Opacity } text={ this.state.frag15 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(q) => { this.q = q; }} opac={ this.state.frag16Opacity } text={ this.state.frag16 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(r) => { this.r = r; }} opac={ this.state.frag17Opacity } text={ this.state.frag17 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
                                     </View>
                             }
                             { this.state.rows7 &&
                                     <View style={game_styles.tile_row} >
-                                        <Tile ref={(s) => { this.s = s; }} text={ this.state.frag18 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                        <Tile ref={(t) => { this.t = t; }} text={ this.state.frag19 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                        <Tile ref={(u) => { this.u = u; }} text={ this.state.frag20 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(s) => { this.s = s; }} opac={ this.state.frag18Opacity } text={ this.state.frag18 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(t) => { this.t = t; }} opac={ this.state.frag19Opacity } text={ this.state.frag19 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(u) => { this.u = u; }} opac={ this.state.frag20Opacity } text={ this.state.frag20 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
                                     </View>
                             }
                             { this.state.rows8 &&
                                     <View style={game_styles.tile_row} >
-                                        <Tile ref={(v) => { this.v = v; }} text={ this.state.frag21 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                        <Tile ref={(w) => { this.w = w; }} text={ this.state.frag22 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                        <Tile ref={(x) => { this.x = x; }} text={ this.state.frag23 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(v) => { this.v = v; }} opac={ this.state.frag21Opacity } text={ this.state.frag21 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(w) => { this.w = w; }} opac={ this.state.frag22Opacity } text={ this.state.frag22 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(x) => { this.x = x; }} opac={ this.state.frag23Opacity } text={ this.state.frag23 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
                                     </View>
                             }
                         </View>
@@ -1052,6 +1215,9 @@ class Game extends Component {
                             }
                             { this.state.showFavorites &&
                             <Animated.Image style={[ {width: 65, height: 65, margin: 1}, buttonsStyle ]} source={require('../images/favorites.png')} onStartShouldSetResponder={() => { this.addToFavorites() }} />
+                            }
+                            { this.state.showBible &&
+                            <Animated.Image style={[ {width: 65, height: 65, margin: 1}, buttonsStyle ]} source={require('../images/bible.png')} onStartShouldSetResponder={() => { this.addToFavorites() }} />
                             }
                         </View>
                         }
