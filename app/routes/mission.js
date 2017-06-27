@@ -7,6 +7,7 @@ import moment from 'moment';
 const styles = require('../styles/styles');
 const {width, height} = require('Dimensions').get('window');
 const KEY_ratedTheApp = 'ratedApp';
+const KEY_PlayFirst = 'playFirstKey';
 let year = moment().year();
 
 module.exports = class Mission extends Component {
@@ -27,9 +28,8 @@ module.exports = class Mission extends Component {
         AppState.removeEventListener('change', this.handleAppStateChange);
     }
     handleAppStateChange=(appState)=>{//for coming back from rating app
-        AppState.removeEventListener('change', this.handleAppStateChange);
         if(appState == 'active'){
-            this.props.navigator.pop({
+            this.props.navigator.replace({
                 id: 'splash',
                 passProps: {
                     motive: 'initialize'
@@ -57,12 +57,12 @@ module.exports = class Mission extends Component {
                     'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=' + configs.appStoreID + '&pageNumber=0&sortOrdering=2&type=Purple+Software&mt=8' :
                     'market://details?id=' + configs.appStoreID;
                 try {
-                    AsyncStorage.setItem(KEY_ratedTheApp, 'true');
-//                    .then(()=>{
-//                        this.setState({ratedApp: true});
-//                        this.props.navigator.pop({});
-//                    });
+                    AsyncStorage.setItem(KEY_ratedTheApp, 'true')
+                    .then(()=>{
+                        return AsyncStorage.setItem(KEY_PlayFirst, 'true');
+                    }).then(()=>{
                         Linking.openURL(storeUrl);
+                    })
                 } catch (error) {
                     window.alert('AsyncStorage error: ' + error.message);
                 }
