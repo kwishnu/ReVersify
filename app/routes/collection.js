@@ -139,27 +139,29 @@ class Collection extends Component{
                     myPackArray.push(homeData[key].title);
                 }
             }
-        var levels = [5, 5, 6, 7];
-        for(var i=0; i<4; i++){
-            var titleIndex = -1;
-            var rnd = Array.from(new Array(homeData[levels[i]].data.length), (x,i) => i);
-            rnd = shuffleArray(rnd);
-            for (var r=0; r<rnd.length; r++){
-                if (myPackArray.indexOf(homeData[levels[i]].data[rnd[r]].name) < 0){
-                    titleIndex = rnd[r];
-                    myPackArray.push(homeData[r].title);
-                    break;
+            var levels = [5, 5, 6, 7];
+            var taken = -1;
+            for(var i=0; i<4; i++){
+                var titleIndex = -1;
+                var rnd = Array.from(new Array(homeData[levels[i]].data.length), (x,i) => i);
+                rnd = shuffleArray(rnd);
+                for (var r=0; r<rnd.length; r++){
+                    if (myPackArray.indexOf(homeData[levels[i]].data[rnd[r]].name) < 0 && rnd[r] != taken){
+                        titleIndex = rnd[r];
+                        taken = rnd[r];
+                        myPackArray.push(homeData[r].title);
+                        break;
+                    }
+                }
+                if (titleIndex > -1){
+                    homeData[18 + i].title = '*' + homeData[levels[i]].data[titleIndex].name;
+                    homeData[18 + i].product_id = homeData[levels[i]].data[titleIndex].product_id;
+                    homeData[18 + i].num_verses = homeData[levels[i]].data[titleIndex].num_verses;
+                    homeData[18 + i].bg_color = homeData[levels[i]].data[titleIndex].color;
+                }else{
+                    homeData[18 + i].show = 'false';
                 }
             }
-            if (titleIndex > -1){
-                homeData[18 + i].title = '*' + homeData[levels[i]].data[titleIndex].name;
-                homeData[18 + i].product_id = homeData[levels[i]].data[titleIndex].product_id;
-                homeData[18 + i].num_verses = homeData[levels[i]].data[titleIndex].num_verses;
-                homeData[18 + i].bg_color = homeData[levels[i]].data[titleIndex].color;
-            }else{
-                homeData[18 + i].show = 'false';
-            }
-        }
             try {
                 this.props.navigator.replace({
                     id: 'home',
@@ -327,14 +329,15 @@ class Collection extends Component{
     }
     bg(num){
          let strToReturn='';
-         let onThis = parseInt(this.props.homeData[this.props.dataElement].num_solved, 10);
+         let numberSolved = parseInt(this.props.homeData[this.props.dataElement].num_solved, 10);
          let numPuzzles = parseInt(this.props.homeData[this.props.dataElement].num_verses, 10);
-         if (onThis == numPuzzles){
-            strToReturn = (this.props.homeData[this.props.dataElement].solved[num] == 0)?'#00FF00':'#079707';
+         if (numberSolved == numPuzzles){
+//            strToReturn = (this.props.homeData[this.props.dataElement].solved[num] == 0)?'#00FF00':'#079707';
             return {
-                backgroundColor: strToReturn
+                backgroundColor: '#00FF00'
             };
          }
+         let onThis = parseInt(this.props.homeData[this.props.dataElement].num_solved, 10);
          if(num==onThis){
              strToReturn='#00FF00';
              }else if(num<onThis){
@@ -383,7 +386,7 @@ class Collection extends Component{
     }
     goToDaily(index){
         let sArray = [];
-        let gripeText = (this.props.isPremium == 'true')?'':'Purchase any Verse Collection and always have access here to the previous 30 Daily Verses!';
+        let gripeText = (this.props.isPremium == 'true')?'':'Purchase any item in the app and always have access here to the previous 30 Daily Verses!';
 
         AsyncStorage.getItem(KEY_daily_solved_array).then((theArray) => {
             if (theArray !== null) {
@@ -408,7 +411,6 @@ class Collection extends Component{
         let bgC = this.props.bgColor;
         let newColor = (bgC == '#000000')? '#cfe7c2':this.props.bgColor;
         if(index>parseInt(this.props.homeData[this.props.dataElement].num_solved, 10))return;
-        console.log(this.props.homeData[this.props.dataElement].verses[index]);
         this.props.navigator.replace({
             id: 'game',
             passProps: {
@@ -428,7 +430,7 @@ class Collection extends Component{
         const menu = <Menu onItemSelected={ this.onMenuItemSelected } data = {this.props.homeData} />;
         if(this.state.isLoading == true){
             return(
-                <View style={[collection_styles.loading, {backgroundColor: this.props.bgColor}]}>
+                <View style={[collection_styles.loading, {backgroundColor: '#222222'}]}>
                     <ActivityIndicator animating={true} size={'large'}/>
                 </View>
             )
