@@ -155,15 +155,18 @@ class Home extends Component{
         Orientation.lockToPortrait();
         BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
         AppState.addEventListener('change', this.handleAppStateChange);
-        let todayfull = moment().format('MMMM D, YYYY');
         let nowISO = moment().valueOf();
         let tonightMidnight = moment().endOf('day').valueOf();
-
-        AsyncStorage.setItem(KEY_Verses, JSON.stringify(this.props.homeData)).then(() => {
-            return AsyncStorage.setItem(KEY_Time, JSON.stringify(nowISO));
-        }).then(() => {
-            return AsyncStorage.getItem(KEY_ThankRated);
-        }).then((thanked) => {
+        try {
+            AsyncStorage.setItem(KEY_Verses, JSON.stringify(this.props.homeData));
+            AsyncStorage.setItem(KEY_Time, JSON.stringify(nowISO));
+        } catch (error) {
+            window.alert('AsyncStorage error: ' + error.message);
+        }
+        homeData = this.state.homeData;
+        var todayfull = moment().format('MMMM D, YYYY');
+        this.setState({todayFull: todayfull});
+        AsyncStorage.getItem(KEY_ThankRated).then((thanked) => {
             let thankedForRating = (thanked == 'true')?true:false;
             this.setState({thankedRating: thankedForRating});
             return AsyncStorage.getItem(KEY_ratedTheApp);
@@ -182,7 +185,7 @@ class Home extends Component{
                 try {
                     AsyncStorage.setItem(KEY_solvedTP, 'false');
                 } catch (error) {
-                    window.alert('AsyncStorage error: 174' + error.message);
+                    window.alert('AsyncStorage error: 188' + error.message);
                 }
             }
             return AsyncStorage.getItem(KEY_show_score);
@@ -193,7 +196,7 @@ class Home extends Component{
                 try {
                     AsyncStorage.setItem(KEY_show_score, '1');
                 } catch (error) {
-                    window.alert('AsyncStorage error: 196' + error.message);
+                    window.alert('AsyncStorage error: 199' + error.message);
                 }
             }
             return AsyncStorage.getItem(KEY_daily_solved_array);
@@ -206,7 +209,7 @@ class Home extends Component{
                 try {
                    AsyncStorage.setItem(KEY_daily_solved_array, JSON.stringify(solvedArray));
                 } catch (error) {
-                   window.alert('AsyncStorage error 209: ' + error.message);
+                   window.alert('AsyncStorage error 212: ' + error.message);
                 }
             }
             return AsyncStorage.getItem(KEY_midnight);
@@ -227,7 +230,7 @@ class Home extends Component{
                         AsyncStorage.setItem(KEY_midnight, JSON.stringify(tonightMidnight));
                         AsyncStorage.setItem(KEY_solvedTP, 'false');
                     } catch (error) {
-                        window.alert('AsyncStorage error: 230' + error.message);
+                        window.alert('AsyncStorage error: 233' + error.message);
                     }
                 }
                 return true;
@@ -235,18 +238,18 @@ class Home extends Component{
                 try {
                     AsyncStorage.setItem(KEY_midnight, JSON.stringify(tonightMidnight));
                 } catch (error) {
-                    window.alert('AsyncStorage error: 238' + error.message);
+                    window.alert('AsyncStorage error: 241' + error.message);
                 }
                 return true;
             }
         }).then((ready)=>{
-            this.setState({todayFull: todayfull, isLoading: false});
+            this.setState({isLoading: false});
             if (this.state.hasRated){
                 if (!this.state.thankedRating){
                     try {
                         AsyncStorage.setItem(KEY_ThankRated, 'true');
                     } catch (error) {
-                        window.alert('AsyncStorage error: 249' + error.message);
+                        window.alert('AsyncStorage error: 252' + error.message);
                     }
                     Alert.alert('Thank You!', `You now have a new feature: the first tile will already be played in each Verse. You can change this in 'Settings' if you wish`);
             this.props.navigator.pop({});
@@ -523,7 +526,7 @@ class Home extends Component{
             return;
         }
         let pIDarr = productID.split('.');
-        let theDestination = 'book';//pIDarr[2];
+        let theDestination = pIDarr[2];
         let gripeText = '';
         let useColors = '';
         let bgColorToSend = '';
@@ -565,7 +568,7 @@ class Home extends Component{
                 });
                 return;
         }
-        AsyncStorage.getItem(KEY_Color).then((colors) => {//a verse collection launcher:
+        AsyncStorage.getItem(KEY_Color).then((colors) => {//a verse collection or book launcher:
             if (colors !== null) {
                 useColors = colors;
             }else{
