@@ -197,14 +197,83 @@ class Game extends Component {
         verseStr = verseStr.substring(1);
         switch(initial){
 //            case 'A':
-//                imageString = '../images/letters/a.png';
+//                this.setState({ letterImage: require('../images/letters/a.png') });
 //                break;
-            case 'I':
-              this.setState({ letterImage: require('../images/letters/i.png') });
-                break;
+//            case 'B':
+//                this.setState({ letterImage: require('../images/letters/b.png') });
+//                break;
+//            case 'C':
+//                this.setState({ letterImage: require('../images/letters/c.png') });
+//                break;
+//            case 'D':
+//                this.setState({ letterImage: require('../images/letters/d.png') });
+//                break;
+//            case 'E':
+//                this.setState({ letterImage: require('../images/letters/e.png') });
+//                break;
             case 'F':
                 this.setState({ letterImage: require('../images/letters/f.png') });
                 break;
+//            case 'G':
+//                this.setState({ letterImage: require('../images/letters/i.png') });
+//                break;
+//            case 'H':
+//                this.setState({ letterImage: require('../images/letters/i.png') });
+//                break;
+            case 'I':
+                this.setState({ letterImage: require('../images/letters/i.png') });
+                break;
+//            case 'J':
+//                this.setState({ letterImage: require('../images/letters/j.png') });
+//                break;
+//            case 'K':
+//                this.setState({ letterImage: require('../images/letters/k.png') });
+//                break;
+//            case 'L':
+//                this.setState({ letterImage: require('../images/letters/l.png') });
+//                break;
+//            case 'M':
+//                this.setState({ letterImage: require('../images/letters/m.png') });
+//                break;
+//            case 'N':
+//                this.setState({ letterImage: require('../images/letters/n.png') });
+//                break;
+//            case 'O':
+//                this.setState({ letterImage: require('../images/letters/o.png') });
+//                break;
+//            case 'P':
+//                this.setState({ letterImage: require('../images/letters/p.png') });
+//                break;
+//            case 'Q':
+//                this.setState({ letterImage: require('../images/letters/q.png') });
+//                break;
+//            case 'R':
+//                this.setState({ letterImage: require('../images/letters/r.png') });
+//                break;
+//            case 'S':
+//                this.setState({ letterImage: require('../images/letters/s.png') });
+//                break;
+//            case 'T':
+//                this.setState({ letterImage: require('../images/letters/t.png') });
+//                break;
+//            case 'U':
+//                this.setState({ letterImage: require('../images/letters/u.png') });
+//                break;
+//            case 'V':
+//                this.setState({ letterImage: require('../images/letters/v.png') });
+//                break;
+//            case 'W':
+//                this.setState({ letterImage: require('../images/letters/w.png') });
+//                break;
+//            case 'X':
+//                this.setState({ letterImage: require('../images/letters/x.png') });
+//                break;
+//            case 'Y':
+//                this.setState({ letterImage: require('../images/letters/y.png') });
+//                break;
+//            case 'Z':
+//                this.setState({ letterImage: require('../images/letters/z.png') });
+//                break;
             default:
                 this.setState({ letterImage: require('../images/letters/i.png') });
         }
@@ -221,7 +290,7 @@ class Game extends Component {
         }).then((bools) => {
             if(bools){
                 this.setState({
-                    rows2: bools[0][0], rows3: bools[0][1], rows4: bools[0][2], rows5: bools[0][3], rows6: bools[0][4], rows7: bools[0][5], rows8: bools[0][5], numberOfRows: bools[1]
+                    rows2: bools[0][0], rows3: bools[0][1], rows4: bools[0][2], rows5: bools[0][3], rows6: bools[0][4], rows7: bools[0][5], rows8: bools[0][6], numberOfRows: bools[1]
                 })
             }
             return AsyncStorage.getItem(KEY_Sound);
@@ -272,6 +341,8 @@ class Game extends Component {
         }).then((playFirst) => {
             if (playFirst == 'true'){
                 this.playFirst();
+            }else{
+                this.setState({playedFirst: true});
             }
         }).then(() => {setTimeout(() => { this.setState({ isLoading: false }); }, 500); })
     }
@@ -511,6 +582,7 @@ class Game extends Component {
         this.props.navigator.replace({
             id: 'bounce',
             passProps: {
+                sender: 'game',
                 homeData: this.props.homeData,
                 daily_solvedArray: this.state.daily_solvedArray,
                 dataElement: this.props.dataElement,
