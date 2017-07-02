@@ -72,13 +72,12 @@ module.exports = class Store extends Component {
             if(strExpand){
                 let expandArr = strExpand.split('.');
                 let tf = false;
-                console.log(this.props.dataIndex);
                 switch(this.props.dataIndex){
-                    case 5:
+                    case 5://Verse Collections
                         tf = (expandArr[0] == '1')?true:false;
                         this.setState({expand: tf});
                         break;
-                    case 6: case 7:
+                    case 6: case 7://Old and New Testaments
                         tf = (expandArr[1] == '1')?true:false;
                         this.setState({expand: tf});
                         break;
@@ -214,14 +213,14 @@ startPurchase = (item_name, itemID, nav) => {
 //            .then(() => InAppBilling.purchase(itemID))
 //            .then((details) => {
                 nav.pop({});
-//                nav.replace({
-//                    id: 'splash',
-//                    passProps: {
-//                        motive: 'purchase',
-//                        packName: item_name,
-//                        productID: itemID
-//                    }
-//                });
+                nav.replace({
+                    id: 'splash',
+                    passProps: {
+                        motive: 'purchase',
+                        packName: item_name,
+                        productID: itemID
+                    }
+                });
 //                console.log("You purchased: ", details)
 //                return InAppBilling.close()
 //            }).catch((err) => {
