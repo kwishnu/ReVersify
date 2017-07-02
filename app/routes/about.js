@@ -59,7 +59,6 @@ module.exports = class About extends Component {
 //                            window.alert('AsyncStorage error: ' + error.message);
 //                        }
 //return;
-
         NetInfo.isConnected.fetch().then(isConnected => {
             if (isConnected){
                 let storeUrl = Platform.OS === 'ios' ?
