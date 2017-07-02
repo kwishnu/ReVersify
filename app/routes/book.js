@@ -80,6 +80,7 @@ class Book extends Component{
     }
     componentDidMount() {
         homeData = this.state.homeData;
+
         this.setColors();
         AppState.addEventListener('change', this.handleAppStateChange);
         BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
@@ -416,8 +417,14 @@ class Book extends Component{
         });
     }
     launchReader(){
-        window.alert('Launch Reader...');
-
+        this.props.navigator.push({
+            id: 'reader',
+            passProps: {
+                homeData: this.props.homeData,
+                dataElement: this.props.dataElement,
+                chapterIndex: 0
+            }
+        });
     }
     onSelect(verseStr, index) {
         let bgC = this.props.bgColor;
@@ -430,6 +437,7 @@ class Book extends Component{
                 index: index,
                 fromWhere: 'book',
                 daily_solvedArray: this.props.daily_solvedArray,
+                isPremium: this.props.isPremium,
                 dataElement: this.props.dataElement,
                 bgColor: newColor,
                 myTitle: this.props.title
@@ -520,17 +528,17 @@ const collection_styles = StyleSheet.create({
         paddingRight: 6,
     },
     launcher: {
-        width: height*.25,
-        height: height*.05,
-        borderRadius: 2,
+        width: height*.126,
+        height: height*.126,
+        borderRadius: height*.063,
         borderWidth: 1,
-        margin: height*.005,
+        margin: height*.002,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#ffffff'
     },
     launcher_text: {
-        fontSize: normalizeFont(configs.LETTER_SIZE*.075),
+        fontSize: normalizeFont(configs.LETTER_SIZE*.09),
         fontWeight: 'bold'
     }
 });
