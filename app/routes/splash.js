@@ -72,11 +72,12 @@ class SplashScreen extends Component {
                         window.alert('AsyncStorage error: ' + error.message);
                     }
                 }
+                console.log(homeData.length);
                 if (homeData.length > 22){//screen for bonus packs vs. purchased packs
                     for (let chk=22; chk<homeData.length; chk++){
                         if (homeData[chk].product_id.indexOf('bonus') < 0){
-                            homeData[17].show = 'false';//purchased something, gets access to last 30 daily verses rather than last 3 days
-                            homeData[18].show = 'true';
+                            homeData[14].show = 'false';//purchased something, gets access to last 30 daily verses rather than last 3 days
+                            homeData[15].show = 'true';
                             premiumBool = 'true';
                             getPurchasedBool = false;//a purchased pack is here, we don't need to retrieve them which would erase progress stats
                             continue;
@@ -107,7 +108,7 @@ class SplashScreen extends Component {
             }).then((ns) => {//number solved
                 var solvNum = 0;
                 var strNextBonus = this.state.nextBonus;
-                var bonusScore = parseInt(strNextBonus);//send number so getPuzzlePack() knows this is a bonus pack
+                var bonusScore = parseInt(strNextBonus);//send number so getCollection() knows this is a bonus pack
                 if (ns !== null){
                     solvNum =  parseInt(ns, 10);
                 }else{
@@ -129,7 +130,7 @@ class SplashScreen extends Component {
                             }
                         }
                     }
-                    return true;// this.getPuzzlePack(bonusScore, bID, this.state.pData);*************************************bonuses****************************************************************
+                    return false;// this.getCollection(bonusScore, bID, this.state.pData);*************************************bonuses****************************************************************
                 }else{
                     return false;
                 }
@@ -167,8 +168,8 @@ class SplashScreen extends Component {
                     AsyncStorage.getItem(KEY_Premium).then((prem) => {
                         premiumBool = 'false';
                         if(prem == 'true'){
-                            homeData[17].show = 'false';
-                            homeData[18].show = 'true';
+                            homeData[14].show = 'false';
+                            homeData[15].show = 'true';
                             premiumBool = 'true';
                         }
                         this.setState({ connectionBool: false,
@@ -252,7 +253,7 @@ class SplashScreen extends Component {
                 var whereToGo = (this.state.seenStart == 'true')?'home':'intro';
                 setTimeout(() => {this.gotoScene(whereToGo, this.state.pData)}, 500);//Hate to do this, but avoids warning of setting state on mounted component
             }).catch(function(error) {
-                window.alert('splash 200: ' + error.message);
+                window.alert('splash 256: ' + error.message);
             });
         }else{//purchased verse pack...
             this.setState({hasPremium: 'true'});
@@ -263,15 +264,15 @@ class SplashScreen extends Component {
             }
             AsyncStorage.getItem(KEY_Verses).then((verses) => {
                 homeData = JSON.parse(verses);
-                homeData[17].show = 'false';
-                homeData[18].show = 'true';
+                homeData[14].show = 'false';
+                homeData[15].show = 'true';
                 return homeData;
             }).then((theData) => {
                 return this.getCollection(this.props.packName, this.props.productID, theData);
             }).then((data) => {
                 this.gotoScene('home', data);
             }).catch(function(error) {
-                window.alert('282: ' + error.message);
+                window.alert('275: ' + error.message);
             });
         }
 	}
@@ -289,7 +290,6 @@ class SplashScreen extends Component {
                             }
                             if((parseInt(row.vnum, 10) >= sNum) && (parseInt(row.vnum, 10) < (sNum + 31))){//daily verses here
                                 verseStringArray.unshift(row.vs);
-                                console.log('vs: ' + row.vs);
                             }
                         });
                         vData.length = 22;//truncate extra elements, which shouldn't be necessary but is...
@@ -299,7 +299,7 @@ class SplashScreen extends Component {
                             vData[15].verses[jj] = verseStringArray[jj];//load last 30 days
                             if(jj < 3){vData[14].verses[jj] = verseStringArray[jj];}//load last 3 days
                         }
-                        for (let addExtra=25; addExtra<dataArray.length; addExtra++){//add any extra packs onto data array
+                        for (let addExtra=22; addExtra<dataArray.length; addExtra++){//add any extra packs onto data array
                             vData.push(dataArray[addExtra]);
                         }
 //                        vData[17].solved = dataArray[17].solved;
@@ -353,13 +353,13 @@ class SplashScreen extends Component {
 
                     const subs = Meteor.subscribe('AllData', {
                         onReady: function () {
-                                const d_verses = Meteor.collection('dataC').find({pack: combinedName});
+                                const d_verses = Meteor.collection('dataB').find({pack: combinedName});
                                 var verseCount = 0;
                                 var whichOfThe3 = 0;
                                 for (var key in d_verses) {
                                     var obj = d_verses[key];
                                     for (var prop in obj) {
-                                        if(prop=='puzz'){
+                                        if(prop=='vs'){
                                             verses[whichOfThe3].push(obj[prop]);
                                             verseCount++;
                                         }
@@ -398,6 +398,7 @@ class SplashScreen extends Component {
                     var solved = [];
                     var bg_color = '';
                     var verses = [];
+                    var chapters = [];
                     if(typeof name == 'string'){//regular pack
                         strName = name;
                         for (var k = 0; k < theData.length; k++){
@@ -429,12 +430,15 @@ class SplashScreen extends Component {
                     var arr = new Array(parseInt(num_verses)).fill(0);
                     const subs = Meteor.subscribe('AllData', {
                         onReady: function () {
-                            const d_verses = Meteor.collection('dataP').find({pack: strName});
+                            const d_verses = Meteor.collection('dataV').find({pack: strName});
                             for (var key in d_verses) {
                                 var obj = d_verses[key];
                                 for (var prop in obj) {
-                                    if(prop=='puzz'){
+                                    if(prop=='vs'){
                                         verses.push(obj[prop]);
+                                    }
+                                    if(prop=='chapter'){
+                                        chapters.push(obj[prop]);
                                     }
                                 }
                             }
@@ -448,7 +452,8 @@ class SplashScreen extends Component {
                                 solved: arr,
                                 product_id: ID,
                                 bg_color: bg_color,
-                                verses: verses
+                                verses: verses,
+                                chapters: chapters
                             });
                             resolve(theData);
                         },
@@ -491,6 +496,7 @@ class SplashScreen extends Component {
                 homeData[18 + i].show = 'false';
             }
         }
+        let connected = this.state.connectionBool;
         this.props.navigator.replace({
             id: whichScene,
             passProps: {
@@ -498,7 +504,7 @@ class SplashScreen extends Component {
                 isPremium: this.state.hasPremium,
                 seenIntro: this.state.seenStart,
                 introIndex: 0,
-                connectionBool: true,//connected,
+                connectionBool: connected,
                 destination: 'home'
                 },
        });
