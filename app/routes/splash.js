@@ -72,7 +72,6 @@ class SplashScreen extends Component {
                         window.alert('AsyncStorage error: ' + error.message);
                     }
                 }
-                console.log(homeData.length);
                 if (homeData.length > 22){//screen for bonus packs vs. purchased packs
                     for (let chk=22; chk<homeData.length; chk++){
                         if (homeData[chk].product_id.indexOf('bonus') < 0){
@@ -88,9 +87,6 @@ class SplashScreen extends Component {
                                 getPurchased: getPurchasedBool,
                                 pData: homeData
                 });
-
-
-
                 return AsyncStorage.getItem(KEY_NextBonus);
             }).then((nb) => {//get next bonus level, compare to current number solved, download bonus pack accordingly...
                 if (nb !== null){
@@ -188,7 +184,7 @@ class SplashScreen extends Component {
                 }else{
                     return false;
                 }
-            }).then((isConnected) => {//retrieve purchased packs here
+            }).then((isConnected) => {//retrieve purchased packs here, if not already on device
                 var promises = [];
                 if(isConnected && this.state.getPurchased && Meteor.status().status == 'connected'){
                     var packNames = [];
@@ -302,11 +298,11 @@ class SplashScreen extends Component {
                         for (let addExtra=22; addExtra<dataArray.length; addExtra++){//add any extra packs onto data array
                             vData.push(dataArray[addExtra]);
                         }
-//                        vData[17].solved = dataArray[17].solved;
-                        vData[17].num_verses = dataArray[17].num_verses;
-//                        vData[17].num_solved = dataArray[17].num_solved;
+                        vData[17].num_verses = dataArray[17].num_verses;//update Favorites and premium status...
                         vData[17].show = dataArray[17].show;
                         vData[17].verses = dataArray[17].verses;
+                        vData[14].show = dataArray[14].show;
+                        vData[15].show = dataArray[15].show;
                         resolve(vData);
                     },
                     onStop: function () {
@@ -465,42 +461,42 @@ class SplashScreen extends Component {
                 }
         });
     }
-    gotoScene(whichScene, homeData){
+    gotoScene(whichScene, appData){
         var myPackArray = [];
         var str = '';
-        for (var key in homeData){
-            if (homeData[key].type == 'mypack'){
-                myPackArray.push(homeData[key].title);
+        for (var key in appData){
+            if (appData[key].type == 'mypack'){
+                myPackArray.push(appData[key].title);
             }
         }
         var levels = [5, 5, 6, 7];
         var taken = -1;
         for(var i=0; i<4; i++){
             var titleIndex = -1;
-            var rnd = Array.from(new Array(homeData[levels[i]].data.length), (x,i) => i);
+            var rnd = Array.from(new Array(appData[levels[i]].data.length), (x,i) => i);
             rnd = shuffleArray(rnd);
             for (var r=0; r<rnd.length; r++){
-                if (myPackArray.indexOf(homeData[levels[i]].data[rnd[r]].name) < 0 && rnd[r] != taken){
+                if (myPackArray.indexOf(appData[levels[i]].data[rnd[r]].name) < 0 && rnd[r] != taken){
                     titleIndex = rnd[r];
                     taken = rnd[r];
-                    myPackArray.push(homeData[r].title);
+                    myPackArray.push(appData[r].title);
                     break;
                 }
             }
             if (titleIndex > -1){
-                homeData[18 + i].title = '*' + homeData[levels[i]].data[titleIndex].name;
-                homeData[18 + i].product_id = homeData[levels[i]].data[titleIndex].product_id;
-//                homeData[18 + i].num_verses = homeData[levels[i]].data[titleIndex].num_verses;
-                homeData[18 + i].bg_color = homeData[levels[i]].data[titleIndex].color;
+                appData[18 + i].title = '*' + appData[levels[i]].data[titleIndex].name;
+                appData[18 + i].product_id = appData[levels[i]].data[titleIndex].product_id;
+//                appData[18 + i].num_verses = appData[levels[i]].data[titleIndex].num_verses;
+                appData[18 + i].bg_color = appData[levels[i]].data[titleIndex].color;
             }else{
-                homeData[18 + i].show = 'false';
+                appData[18 + i].show = 'false';
             }
         }
         let connected = this.state.connectionBool;
         this.props.navigator.replace({
             id: whichScene,
             passProps: {
-                homeData: homeData,
+                homeData: appData,
                 isPremium: this.state.hasPremium,
                 seenIntro: this.state.seenStart,
                 introIndex: 0,
