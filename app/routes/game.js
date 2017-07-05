@@ -113,7 +113,7 @@ class Game extends Component {
         this.opac = new Animated.Value(0);
         this.state = {
             id: 'game',
-//            title: this.props.title,
+            title: this.props.title,
             index: this.props.index,
             homeData: this.props.homeData,
             daily_solvedArray: this.props.daily_solvedArray,
@@ -184,6 +184,8 @@ class Game extends Component {
         if (this.props.dataElement == 17)this.setState({showFavorites: false});
         if (this.props.fromWhere == 'book')this.setState({showBible: true});
         this.setPanelColors();
+        let titleText=(this.props.fromWhere == 'book')?'':this.props.title;
+        this.setState({title: titleText});
         BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
         AppState.addEventListener('change', this.handleAppStateChange);
         homeData = this.props.homeData;
@@ -344,7 +346,9 @@ class Game extends Component {
             }else{
                 this.setState({playedFirst: true});
             }
-        }).then(() => {setTimeout(() => { this.setState({ isLoading: false }); }, 500); })
+        }).then(() => {setTimeout(()=>{ this.setState({ isLoading: false });
+                                        if (this.props.fromWhere == 'book')this.flipPanel(true);
+                      }, 250); })
     }
     componentWillUnmount () {
         BackHandler.removeEventListener('hardwareBackPress', this.handleHardwareBackButton);
@@ -565,8 +569,31 @@ class Game extends Component {
                 }
         });
     }
+    getText(verse){
+        let verseArray = verse.split('**');
+        let bookName = this.props.title.substring(0, this.props.title.indexOf(' ', -1));
+        return bookName + ' ' + verseArray[1];
+
+    }
+    seeVerseInReader(){
+        let chV = this.state.panelText;
+        chV = chV.substring(chV.indexOf(' ', -1) + 1);
+        let chvArray = chV.split(':');
+        let chapterNum = parseInt(chvArray[0]) - 1;
+
+        this.props.navigator.push({
+            id: 'reader',
+            passProps: {
+                homeData: this.props.homeData,
+                dataElement: this.props.dataElement,
+                chapterIndex: chapterNum,
+                fromWhere: 'game',
+                entireVerse: this.state.entireVerse
+            }
+        });
+    }
     nextVerse(){
-        let newIndex = this.state.index + 1;
+        let newIndex = String(parseInt(this.state.index, 10) + 1);
         let onLastVerse = (this.props.fromWhere == 'home' || newIndex == parseInt(this.props.homeData[this.props.dataElement].num_verses, 10))?true:false;
         if(this.props.fromWhere == 'home' || onLastVerse){
             this.closeGame('home');
@@ -576,6 +603,8 @@ class Game extends Component {
         if(this.props.fromWhere == 'daily'){
             let today = moment(this.props.title, 'MMMM D, YYYY');
             nextTitle = today.subtract(1, 'days').format('MMMM D, YYYY');
+        }else if(this.props.fromWhere == 'book'){
+            nextTitle = this.getText(this.props.homeData[this.props.dataElement].verses[newIndex]);
         }else{
             nextTitle = (parseInt(this.props.title, 10) + 1).toString();
         }
@@ -758,7 +787,7 @@ class Game extends Component {
         }else{
             this.setState({ arrowImage: require('../images/arrowforward.png') });
         }
-        this.flipPanel();
+        if (this.props.fromWhere != 'book')this.flipPanel(false);
         this.setState({doneWithVerse: true, showHintButton: false, showNextArrow: true});
         this.showButtonPanel();
         if(this.props.fromWhere == 'collection'){
@@ -1039,17 +1068,18 @@ class Game extends Component {
             ).start()
         });
     }
-    flipPanel(){
+    flipPanel(fromBook){
         this.flip.setValue(0);
         let chapterVerseStr = '';
         let pBgC ='';
         let pBC = '';
         let bool = false;
+        let pText = (fromBook == true)?this.props.title:this.state.chapterVerse;
         if(!this.state.showingVerse){
             pBgC = '#555555';
             pBC = '#000000';
             bool = true;
-            this.setState({panelText: this.state.chapterVerse,
+            this.setState({panelText:  pText,
                                        panelBgColor: pBgC,
                                        panelBorderColor: pBC,
                                        showingVerse: bool
@@ -1164,7 +1194,7 @@ class Game extends Component {
                             <Button style={game_styles.button} onPress={() => this.closeGame(this.props.fromWhere)}>
                                 <Image source={ require('../images/close.png') } style={{ width: normalize(height*0.07), height: normalize(height*0.07) }} />
                             </Button>
-                            <Text style={styles.header_text} >{ this.props.title }</Text>
+                            <Text style={styles.header_text} >{ this.state.title }</Text>
                             <Button style={game_styles.button} onPress={ () => this.showDropdown()}>
                                 <Image source={ require('../images/dropdown.png') } style={{ width: normalize(height*0.07), height: normalize(height*0.07) }} />
                             </Button>
@@ -1200,7 +1230,7 @@ class Game extends Component {
                                     <View style={game_styles.line}></View>
                                 </View>
                         </View>
-                        <View style={game_styles.verse_panel_container} onStartShouldSetResponder={ ()=> {this.flipPanel()}}>
+                        <View style={game_styles.verse_panel_container} onStartShouldSetResponder={ ()=> {let bool=(this.props.fromWhere == 'book')?true:false; this.flipPanel(bool);}}>
                             <Animated.View style={[imageStyle, game_styles.verse_panel, {backgroundColor: this.state.panelBgColor, borderColor: this.state.panelBorderColor}]}>
                                         <Text style={game_styles.panel_text} >{this.state.panelText}</Text>
                             </Animated.View>
@@ -1289,7 +1319,7 @@ class Game extends Component {
                             <Animated.Image style={[ {width: 65, height: 65, margin: 1}, buttonsStyle ]} source={require('../images/favorites.png')} onStartShouldSetResponder={() => { this.addToFavorites() }} />
                             }
                             { this.state.showBible &&
-                            <Animated.Image style={[ {width: 65, height: 65, margin: 1}, buttonsStyle ]} source={require('../images/bible.png')} onStartShouldSetResponder={() => { this.addToFavorites() }} />
+                            <Animated.Image style={[ {width: 65, height: 65, margin: 1}, buttonsStyle ]} source={require('../images/bible.png')} onStartShouldSetResponder={() => { this.seeVerseInReader() }} />
                             }
                         </View>
                         }
