@@ -12,8 +12,9 @@ const KEY_Sound = 'soundKey';
 const KEY_Color = 'colorKey';
 const KEY_Notifs = 'notifsKey';
 const KEY_NotifTime = 'notifTimeKey';
-const KEY_UseNumLetters = 'numLetters';
+const KEY_PlayFirst = 'playFirstKey';
 const KEY_show_score = 'showScoreKey';
+const KEY_Premium = 'premiumOrNot';
 var nowISO = moment().valueOf();
 var tonightMidnight = moment().endOf('day').valueOf();
 
@@ -30,17 +31,21 @@ module.exports = class Settings extends Component {
             notifs_state: true,
             notif_time: '7',
             notif_text: 'Yes, at',
-            nl_state: true,
-            nl_text: 'Show Answer letter-count',
+            play_first_state: true,
+            play_first_text: 'Play first Verse tile',
+            showPlayFirst: false,
             score_state: true,
-            score_text: 'Show Score on Contents',
+            score_text: 'Show # solved on Contents',
             pickerColor: '#ffffff'
         };
        this.handleHardwareBackButton = this.handleHardwareBackButton.bind(this);
     }
     componentDidMount(){
         BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
-        AsyncStorage.getItem(KEY_Sound).then((sounds) => {
+        AsyncStorage.getItem(KEY_Premium).then((prem) => {
+            if (prem == 'true')this.setState({showPlayFirst: true});
+            return AsyncStorage.getItem(KEY_Sound);
+        }).then((sounds) => {
             if (sounds !== null) {
                 var textToUse = (sounds == 'true')?'Game sounds on':'Game sounds off';
                 var stateToUse = (sounds == 'true')?true:false;
@@ -88,18 +93,18 @@ module.exports = class Settings extends Component {
                     pickerColor: '#666666'
                 });
             }
-            return AsyncStorage.getItem(KEY_UseNumLetters);
-        }).then((letters) => {
-            if (letters !== null) {
-                var stateToUse = (letters == 'true')?true:false;
-                var strToUse = (letters == 'true')?'Show Answer letter-count':'Hiding Answer letter-count';
+            return AsyncStorage.getItem(KEY_PlayFirst);
+        }).then((playOrNot) => {
+            if (playOrNot !== null) {
+                var stateToUse = (playOrNot == 'true')?true:false;
+                var strToUse = (playOrNot == 'true')?'Play first Verse tile':'Not playing first tile';
                 this.setState({
-                    nl_state: stateToUse,
-                    nl_text: strToUse
+                    play_first_state: stateToUse,
+                    play_first_text: strToUse
                 });
             }else{
                 try {
-                    AsyncStorage.setItem(KEY_UseNumLetters, 'true');//
+                    AsyncStorage.setItem(KEY_PlayFirst, 'true');//
                 } catch (error) {
                     window.alert('AsyncStorage error: ' + error.message);
                 }
@@ -108,7 +113,7 @@ module.exports = class Settings extends Component {
         }).then((showScore) => {
             if (showScore !== null) {
                 var stateToUse = (showScore == '1')?true:false;
-                var strToUse = (showScore == '1')?'Show Score on Contents':'Hiding Score on Contents';
+                var strToUse = (showScore == '1')?'Show # solved on Contents':'Hiding # solved on Contents';
                 this.setState({
                     score_state: stateToUse,
                     score_text: strToUse
@@ -168,17 +173,17 @@ module.exports = class Settings extends Component {
             window.alert('AsyncStorage error: ' + error.message);
         }
     }
-    toggleLetters(state){
-        var strToUse = (state)?'Show Answer letter-count':'Hiding Answer letter-count';
-        this.setState({nl_text: strToUse});
+    togglePlayFirst(state){
+        var strToUse = (state)?'Play first Verse tile':'Not playing first tile';
+        this.setState({play_first_text: strToUse});
         try {
-            AsyncStorage.setItem(KEY_UseNumLetters, state.toString());
+            AsyncStorage.setItem(KEY_PlayFirst, state.toString());
         } catch (error) {
             window.alert('AsyncStorage error: ' + error.message);
         }
     }
     toggleScore(state){
-        var strToUse = (state)?'Show Score on Contents':'Hiding score on Contents';
+        var strToUse = (state)?'Show # solved on Contents':'Hiding # solved on Contents';
         var opacityValue = (state)?'1':'0';
         this.setState({score_text: strToUse});
         try {
@@ -221,15 +226,15 @@ module.exports = class Settings extends Component {
     }
     startNotifications(time) {
         var tomorrowAM = new Date(Date.now() + (moment(tonightMidnight).add(parseInt(time, 10), 'hours').valueOf()) - nowISO);
-//        PushNotification.localNotificationSchedule({
-//            message: "A new Daily Verse is in!",
-//            vibrate: true,
-//            soundName: 'plink.mp3',
-//            //repeatType: 'day',//can be 'time', if so use following:
-//            repeatTime: 86400000,//daily
-//            date: tomorrowAM,
-//            id: '777',
-//        });
+        PushNotification.localNotificationSchedule({
+            message: "A new Daily Verse is in!",
+            vibrate: true,
+            soundName: 'plink.mp3',
+            //repeatType: 'day',//can be 'time', if so use following:
+            repeatTime: 86400000,//daily
+            date: tomorrowAM,
+            id: '777',
+        });
     }
 
     render() {
@@ -313,18 +318,22 @@ module.exports = class Settings extends Component {
                                 <View style={settings_styles.divider}>
                                 </View>
                             </View>
-                            <View style={[settings_styles.parameter_container, {marginTop: height*0.04}]}>
-                                <View style={[settings_styles.text_container, {alignItems: 'flex-end'}]}>
-                                    <Text style={settings_styles.text}>{this.state.nl_text}</Text>
+                            {(this.state.showPlayFirst == true) &&
+                            <View>
+                                <View style={[settings_styles.parameter_container, {marginTop: height*0.04}]}>
+                                    <View style={[settings_styles.text_container, {alignItems: 'flex-end'}]}>
+                                        <Text style={settings_styles.text}>{this.state.play_first_text}</Text>
+                                    </View>
+                                    <View style={settings_styles.switch_container}>
+                                        <Switch value={this.state.play_first_state} onValueChange={(state)=>{this.togglePlayFirst(state)}}/>
+                                    </View>
                                 </View>
-                                <View style={settings_styles.switch_container}>
-                                    <Switch value={this.state.nl_state} onValueChange={(state)=>{this.toggleLetters(state)}}/>
+                                <View style={settings_styles.parameter_container}>
+                                    <View style={settings_styles.divider}>
+                                    </View>
                                 </View>
                             </View>
-                            <View style={settings_styles.parameter_container}>
-                                <View style={settings_styles.divider}>
-                                </View>
-                            </View>
+                            }
                             <View style={[settings_styles.parameter_container, {marginTop: height*0.04}]}>
                                 <View style={[settings_styles.text_container, {alignItems: 'flex-end'}]}>
                                     <Text style={settings_styles.text}>{this.state.score_text}</Text>
