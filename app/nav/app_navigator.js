@@ -18,6 +18,7 @@ const Bounce = require('../routes/bounce');
 const HintStore = require('../routes/hintstore');
 const Store = require('../routes/store');
 const Reader = require('../routes/reader');
+const Intro1 = require('../intro/intro1');
 
 class AppNavigator extends React.Component {
     constructor(props) {
@@ -57,6 +58,8 @@ class AppNavigator extends React.Component {
                 return Store;
             case 'reader':
                 return Reader;
+            case 'intro1':
+                return Intro1;
 
             // Add more ids here
         }
