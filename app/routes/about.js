@@ -107,7 +107,7 @@ module.exports = class About extends Component {
                         <View style={about_styles.divider}>
                         </View>
                     </View>
-                    <Text style={about_styles.mediumPrint}>{'If you enjoy our app, please take a moment to rate us in the store via the button below!'}</Text>
+                    <Text style={about_styles.mediumPrint}>{'If you enjoy our app, please take a moment to rate us in the store via the button below, and we\'ll thank you with a special Game setting!'}</Text>
                     <Button style={about_styles.rate_button} onPress={() => this.rateApp()}>
                         <Text style={about_styles.sure}>Sure!</Text>
                     </Button>
