@@ -56,16 +56,16 @@ module.exports = class Store extends Component {
         this.state = {
             id: 'store',
             dataSource: this.props.availableList,
-            expand: this.props.expand,
-            infoString: `All Bible Books are priced $0.99USD and may be accessed by Chapter and Verse. A portion of the proceeds raised by the app will be donated to the WEB project of World Outreach Ministries.`,
-            infoText: `All Bible Books are priced $0.99USD and may be accessed by Chapter and Verse. A portion of the proceeds raised by the app will be donated to the WEB project of World Outreach Ministries.`
+            expand: true,
+            infoString: `All Bible Books are priced $0.99USD and may be read in their entirety. A portion of the proceeds raised by the app will be donated to the WEB project of World Outreach Ministries.`,
+            infoText: `All Bible Books are priced $0.99USD and may be read in their entirety. A portion of the proceeds raised by the app will be donated to the WEB project of World Outreach Ministries.`
         };
         this.handleHardwareBackButton = this.handleHardwareBackButton.bind(this);
     }
     componentDidMount(){
         if (this.props.dataIndex == 5){
-            this.setState({ infoText: `All Verse Collections contain 100 Verse Puzzles and are priced $0.99USD. A portion of the proceeds raised by the app will be donated to the WEB project of World Outreach Ministries.`,
-                            infoString: `All Verse Collections contain 100 Verse Puzzles and are priced $0.99USD. A portion of the proceeds raised by the app will be donated to the WEB project of World Outreach Ministries.`
+            this.setState({ infoText: `All Verse Collections contain 50 Verse Puzzles and are priced $0.99USD. A portion of the proceeds raised by the app will be donated to the WEB project of World Outreach Ministries.`,
+                            infoString: `All Verse Collections contain 50 Verse Puzzles and are priced $0.99USD. A portion of the proceeds raised by the app will be donated to the WEB project of World Outreach Ministries.`
             });
         }
         AsyncStorage.getItem(KEY_expandInfo).then((strExpand) => {
@@ -197,6 +197,7 @@ const Row = ({props, navigator}) => (
     <View style={ store_styles.purchase_row }>
         <View style={[store_styles.purchase_text_container, {backgroundColor: props.color}]}>
             <Text style={[store_styles.launcher_text, {color: this.invertColor(props.color, true)}]}>{props.name}</Text>
+            <Text style={[store_styles.launcher_text_small, {color: this.invertColor(props.color, true)}]}>{props.num_verses + ' Verse Puzzles'}</Text>
         </View>
         <View style={ store_styles.purchase_button_container } onStartShouldSetResponder={ ()=> {this.startPurchase(props.name, props.product_id, navigator)}}>
             <View style={store_styles.buy_button} >
@@ -319,7 +320,10 @@ const store_styles = StyleSheet.create({
         marginRight: height * .02
     },
     launcher_text: {
-        fontSize: normalizeFont(configs.LETTER_SIZE * .1),
+        fontSize: normalizeFont(configs.LETTER_SIZE * .11),
+    },
+    launcher_text_small: {
+        fontSize: normalizeFont(configs.LETTER_SIZE * .08),
     },
     info_text: {
         fontSize: normalizeFont(configs.LETTER_SIZE * .085),
