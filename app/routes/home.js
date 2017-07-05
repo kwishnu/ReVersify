@@ -115,6 +115,8 @@ let dsArray = [];
 let solvedTodayOrNot = false;
 
 
+//  {/* A JSX comment */}
+
 class Home extends Component{
     constructor(props) {
         super(props);
@@ -333,7 +335,7 @@ class Home extends Component{
                     break;
                 case 'intro':
                     this.props.navigator.push({
-                        id: 'intro',
+                        id: 'intro1',
                         passProps: {
                             destination: 'menu',
                             homeData: this.state.homeData,
@@ -563,7 +565,7 @@ class Home extends Component{
                         gripeText: gripeText,
                         dataElement: index,
                         isPremium: this.state.isPremium,
-                        bgColor: bg//'#795959'
+                        bgColor: '#cfe7c2'//'#795959'
                     },
                 });
                 return;
