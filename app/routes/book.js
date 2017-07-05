@@ -391,7 +391,7 @@ class Book extends Component{
     }
     getText(verse){
         let verseArray = verse.split('**');
-        return verseArray[1];
+        return verseArray[1].substring(verseArray[1].indexOf(' ', -1) + 1);
 
     }
     goToDaily(index){
@@ -422,18 +422,20 @@ class Book extends Component{
             passProps: {
                 homeData: this.props.homeData,
                 dataElement: this.props.dataElement,
-                chapterIndex: 0
+                chapterIndex: 0,
+                fromWhere: 'book'
             }
         });
     }
     onSelect(verseStr, index) {
         let bgC = this.props.bgColor;
         let newColor = (bgC == '#000000')? '#cfe7c2':this.props.bgColor;
+        let fullVerse = this.props.title + ' ' + this.getText(verseStr);
         this.props.navigator.replace({
             id: 'game',
             passProps: {
                 homeData: this.props.homeData,
-                title: this.getText(verseStr),
+                title: fullVerse,
                 index: index,
                 fromWhere: 'book',
                 daily_solvedArray: this.props.daily_solvedArray,
@@ -450,7 +452,7 @@ class Book extends Component{
         const ds = this.dataSource.cloneWithRows(this.props.homeData[this.props.dataElement].verses);
         if(this.state.isLoading == true){
             return(
-                <View style={[collection_styles.loading, {backgroundColor: '#222222'}]}>
+                <View style={[book_styles.loading, {backgroundColor: '#222222'}]}>
                     <ActivityIndicator animating={true} size={'large'}/>
                 </View>
             )
@@ -461,26 +463,26 @@ class Book extends Component{
                     isOpen={ this.state.isOpen }
                     onChange={ (isOpen) => this.updateMenuState(isOpen) }>
 
-                    <View style={ [collection_styles.container, {backgroundColor: this.state.bgColor}, this.darkBorder(this.state.bgColor)] }>
-                        <View style={ [collection_styles.header, {backgroundColor: this.state.headerColor}]}>
-                            <Button style={collection_styles.button} onPress={ () => this.handleHardwareBackButton() }>
+                    <View style={ [book_styles.container, {backgroundColor: this.state.bgColor}, this.darkBorder(this.state.bgColor)] }>
+                        <View style={ [book_styles.header, {backgroundColor: this.state.headerColor}]}>
+                            <Button style={book_styles.button} onPress={ () => this.handleHardwareBackButton() }>
                                 <Image source={ require('../images/arrowback.png') } style={ { width: normalize(height*0.07), height: normalize(height*0.07) } } />
                             </Button>
                             <Text style={{fontSize: configs.LETTER_SIZE * 0.7, color: this.state.titleColor}} >{this.props.title}</Text>
-                            <Button style={collection_styles.button} onPress={ () => this.launchReader()}>
-                                <Image source={ require('../images/bible.png') } style={ { width: normalize(height*0.1), height: normalize(height*0.1) } } />
+                            <Button style={[book_styles.button, {marginRight: 10}]} onPress={ () => this.launchReader()}>
+                                <Image source={ require('../images/bible.png') } style={ { width: normalize(height*0.14), height: normalize(height*0.14) } } />
                             </Button>
                         </View>
-                        <View style={ [collection_styles.tiles_container, {backgroundColor: this.state.bgColor}, this.darkBorder(this.state.bgColor)] }>
+                        <View style={ [book_styles.tiles_container, {backgroundColor: this.state.bgColor}, this.darkBorder(this.state.bgColor)] }>
                              <ListView  showsVerticalScrollIndicator ={false}
                                         initialListSize ={100}
-                                        contentContainerStyle={ collection_styles.listview }
+                                        contentContainerStyle={ book_styles.listview }
                                         dataSource={ds}
                                         renderRow={(rowData, sectionID, rowID) =>
                                          <View>
                                              <TouchableHighlight onPress={() => this.onSelect(rowData, rowID)}
-                                                                 style={collection_styles.launcher} >
-                                                 <Text style={ collection_styles.launcher_text }>{this.getText(rowData)}</Text>
+                                                                 style={book_styles.launcher} >
+                                                 <Text style={ book_styles.launcher_text }>{this.getText(rowData)}</Text>
                                              </TouchableHighlight>
                                          </View>}
                              />
@@ -493,7 +495,7 @@ class Book extends Component{
 }
 
 
-const collection_styles = StyleSheet.create({
+const book_styles = StyleSheet.create({
     container: {
         flex: 1,
     },
