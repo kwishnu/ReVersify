@@ -59,7 +59,12 @@ module.exports = class Menu extends Component {
                                         <TouchableHighlight onPress={() => this.props.onItemSelected(rowData)}
                                                             underlayColor={'#222222'}
                                                             style={[menu_styles.launcher]}>
+                                            <View style={{flexDirection: 'row'}}>
                                             <Text style={ menu_styles.launcher_text }>{rowData.title}</Text>
+                                            {(rowData.title == 'Settings') &&
+                                                <Image source={ require('../images/settings.png') } style={ { width: normalize(height*.028), height: normalize(height*.028), marginLeft: normalize(height*.02) } } />
+                                            }
+                                            </View>
                                         </TouchableHighlight>
                                     </View>
                                 }
