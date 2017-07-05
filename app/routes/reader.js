@@ -15,6 +15,7 @@ module.exports = class Reader extends Component {
             id: 'reader',
             isLoading: true,
             title: '',
+            chapterNumber: '',
             section1: '',
             section2: '',
             section3: '',
@@ -26,22 +27,50 @@ module.exports = class Reader extends Component {
         this.goBack = this.goBack.bind(this);
     }
     componentDidMount(){
-        console.log(JSON.stringify(this.props.homeData[this.props.dataElement]));
+        let chapterText = this.props.homeData[this.props.dataElement].chapters[this.props.chapterIndex];
+        let s1 = '';
+        let s2 = '';
+        let s3 = '';
+        if (this.props.fromWhere == 'game'){
+            let v = this.props.entireVerse;
+            let v1 = v.substr(0, 20);
+            let v2 = v.substr(v.length - 20);
+            let startIndex = 0;
+            let endIndex = 0;
+            startIndex = chapterText.indexOf(v1);
+            endIndex = chapterText.indexOf(v2, startIndex + 1);
+            console.log(startIndex + ', ' + endIndex);
+            if (startIndex > -1 && endIndex > -1){
+                s1 = chapterText.substring(0, startIndex - 1);
+                s2 = chapterText.substring(startIndex, endIndex + 20);
+                s3 = chapterText.substring(endIndex + 20);
+            }else{
+                s1 = chapterText
+            }
+        }else{
+             s1 = chapterText
+        }
+
+
+
+
 
         let title = this.props.homeData[this.props.dataElement].title;
         let bg = this.props.homeData[this.props.dataElement].bg_color;
-        let chapterText = this.props.homeData[this.props.dataElement].chapters[this.props.chapterIndex];
-        let initialLetter = chapterText.substr(0, 1);
-        chapterText = chapterText.substring(1);
+        let chapNum = s1.substr(0, s1.indexOf(' '));
+        s1 = s1.substring(s1.indexOf(' ', -1) + 2);
+        let initialLetter = s1.substr(0, 1);
+        s1 = s1.substring(1);
         let backOpac = (this.props.chapterIndex > 0)?1:0;
         let forwardOpac = (this.props.chapterIndex < this.props.homeData[this.props.dataElement].chapters.length - 1)?1:0;
 
 //setTimeout(() => { this.setState({ isLoading: false }); }, 500);
         this.setState({ title: title,
+                        chapterNumber: chapNum,
                         initial: initialLetter,
-                        section1: chapterText,
-                        section2: '',
-                        section3: '',
+                        section1: s1,
+                        section2: s2,
+                        section3: s3,
                         backOpacity: backOpac,
                         forwardOpacity: forwardOpac,
                         bgColor: bg,
@@ -119,13 +148,13 @@ module.exports = class Reader extends Component {
                         </Button>
                     </View>
                     <View style={[reader_styles.reader_container, {backgroundColor: this.state.bgColor}]}>
-                        <ScrollView contentContainerStyle={reader_styles.text_container}>
+                        <ScrollView contentContainerStyle={reader_styles.scrollview}>
+                            <Text style={reader_styles.text}>{this.state.chapterNumber + '\r\n'}
                             <Text style={reader_styles.initial_text}>{this.state.initial}
                             <Text style={reader_styles.text}>{this.state.section1}
                                 <Text style={reader_styles.bold_text}> {this.state.section2} </Text>
                                 {this.state.section3}
-                            </Text>
-                            </Text>
+                            </Text></Text></Text>
                         </ScrollView>
                     </View>
                 </View>
@@ -166,20 +195,19 @@ const reader_styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    text_container: {
+    scrollview: {
         width: width*.93,
         borderWidth: 2,
         borderColor: '#333333',
         backgroundColor: '#fffff0',
         alignItems: 'center',
         justifyContent: 'flex-start',
-        paddingVertical: height*.05,
-        paddingHorizontal: height*.03,
     },
     text: {
         fontSize: normalizeFont(configs.LETTER_SIZE*0.09),
         color: '#000000',
         fontFamily: 'Book Antiqua',
+        margin: 30
     },
     bold_text: {
         fontSize: normalizeFont(configs.LETTER_SIZE*0.09),
