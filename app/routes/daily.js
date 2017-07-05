@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Image, TouchableHighlight, ListView, BackHandler, Animated, AsyncStorage, AppState } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableHighlight, ListView, BackHandler, Animated, AsyncStorage, AppState, ActivityIndicator } from 'react-native';
 import moment from 'moment';
 import Button from '../components/Button';
 import configs from '../config/configs';
@@ -21,7 +21,7 @@ const {width, height} = require('Dimensions').get('window');
 const NUM_WIDE = 3;
 const CELL_WIDTH = Math.floor(width/NUM_WIDE); // one tile's fraction of the screen width
 const CELL_PADDING = Math.floor(CELL_WIDTH * .05); // 5% of the cell width...+
-const TILE_WIDTH = (CELL_WIDTH - CELL_PADDING * 2) - 7;
+const TILE_WIDTH = (CELL_WIDTH - CELL_PADDING * 2);
 const BORDER_RADIUS = CELL_PADDING * .2 + 3;
 const KEY_Time = 'timeKey';
 
@@ -36,6 +36,7 @@ class Daily extends Component{
             dataElement: this.props.dataElement,
             title: this.props.title,
             isOpen: false,
+            isLoading: true,
             dataSource: ds.cloneWithRows(Array.from(new Array(parseInt(this.props.homeData[this.props.dataElement].num_verses, 10)), (x,i) => i))//[0,1,2...]
         };
         this.handleHardwareBackButton = this.handleHardwareBackButton.bind(this);
@@ -44,6 +45,7 @@ class Daily extends Component{
         homeData = this.props.homeData;
         AppState.addEventListener('change', this.handleAppStateChange);
         BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
+        setTimeout(()=>{this.setState({isLoading: false});}, 50);
     }
     componentWillUnmount () {
         BackHandler.removeEventListener('hardwareBackPress', this.handleHardwareBackButton);
@@ -272,7 +274,7 @@ class Daily extends Component{
     bg(num){
          var strToReturn='';
          if (this.props.daily_solvedArray[num + 1]==0){
-             strToReturn='#079707';//green
+             strToReturn='#54165e';//green
              }else{
              strToReturn='#999ba0';//grey
              }
@@ -294,7 +296,7 @@ class Daily extends Component{
     getUnderlay(num){
          var strToReturn='';
          if (this.props.daily_solvedArray[num + 1]==0){
-             strToReturn='#079707';//green
+             strToReturn='#54165e';//green
              }else{
              strToReturn='#999ba0';//grey
              }
@@ -330,49 +332,62 @@ class Daily extends Component{
 
     render() {
         const menu = <Menu onItemSelected={ this.onMenuItemSelected } data = {this.props.homeData} />;
-        return (
-            <SideMenu   menu={ menu }
-                        isOpen={ this.state.isOpen }
-                        onChange={ (isOpen) => this.updateMenuState(isOpen) }>
-                <View style={ [container_styles.container, this.border('#070f4e')] }>
-                    <View style={ container_styles.header }>
-                        <Button style={container_styles.button} onPress={ () => this.handleHardwareBackButton() }>
-                            <Image source={ require('../images/arrowback.png') } style={ { width: normalize(height*0.07), height: normalize(height*0.07) } } />
-                        </Button>
-                        <Text style={styles.header_text} >{this.props.title}</Text>
-                        <Button style={container_styles.button}>
-                            <Image source={ require('../images/noimage.png') } style={ { width: normalize(height*0.07), height: normalize(height*0.07) } } />
-                        </Button>
-                    </View>
-                    <View style={ [container_styles.tiles_container, this.border('#070f4e')] }>
-                         <ListView  showsVerticalScrollIndicator ={false}
-                                    initialListSize ={50}
-                                    contentContainerStyle={ container_styles.listview }
-                                    dataSource={this.state.dataSource}
-                                    renderRow={(rowData) =>
-                             <View>
-                                 <TouchableHighlight onPress={() => this.onSelect(rowData, moment().subtract(rowData + 1, 'days').format('MMMM D, YYYY'))}
-                                                     underlayColor={this.getUnderlay(rowData)}
-                                                     style={[container_styles.launcher, this.getBorder(rowData), this.bg(rowData)]} >
-                                     <Text  style={[ styles.daily_launcher_text, this.getTextColor(rowData) ] }>{moment().subtract(rowData + 1, 'days').format('M/D/YYYY')}</Text>
-                                 </TouchableHighlight>
-                             </View>}
-                         />
-                    </View>
-                    <View style={container_styles.center_text_view}>
-                        <Text numberOfLines={5} style={container_styles.gripe_text}>{this.props.gripeText}</Text>
-                    </View>
+        if(this.state.isLoading == true){
+            return(
+                <View style={[daily_styles.loading, {backgroundColor: '#222222'}]}>
+                    <ActivityIndicator animating={true} size={'large'}/>
                 </View>
-            </SideMenu>
-        );
+            )
+        }else{
+            return (
+                <SideMenu   menu={ menu }
+                            isOpen={ this.state.isOpen }
+                            onChange={ (isOpen) => this.updateMenuState(isOpen) }>
+                    <View style={ [daily_styles.container, this.border('#070f4e')] }>
+                        <View style={ daily_styles.header }>
+                            <Button style={daily_styles.button} onPress={ () => this.handleHardwareBackButton() }>
+                                <Image source={ require('../images/arrowback.png') } style={ { width: normalize(height*0.07), height: normalize(height*0.07) } } />
+                            </Button>
+                            <Text style={styles.header_text} >{this.props.title}</Text>
+                            <Button style={daily_styles.button}>
+                                <Image source={ require('../images/noimage.png') } style={ { width: normalize(height*0.07), height: normalize(height*0.07) } } />
+                            </Button>
+                        </View>
+                        <View style={ [daily_styles.tiles_container, this.border('#070f4e')] }>
+                             <ListView  showsVerticalScrollIndicator ={false}
+                                        initialListSize ={50}
+                                        contentContainerStyle={ daily_styles.listview }
+                                        dataSource={this.state.dataSource}
+                                        renderRow={(rowData) =>
+                                 <View>
+                                     <TouchableHighlight onPress={() => this.onSelect(rowData, moment().subtract(rowData + 1, 'days').format('MMMM D, YYYY'))}
+                                                         underlayColor={this.getUnderlay(rowData)}
+                                                         style={[daily_styles.launcher, this.getBorder(rowData), this.bg(rowData)]} >
+                                         <Text  style={[ daily_styles.launcher_text, this.getTextColor(rowData) ] }>{moment().subtract(rowData + 1, 'days').format('M/D/YYYY')}</Text>
+                                     </TouchableHighlight>
+                                 </View>}
+                             />
+                        </View>
+                        <View style={daily_styles.center_text_view}>
+                            <Text numberOfLines={5} style={daily_styles.gripe_text}>{this.props.gripeText}</Text>
+                        </View>
+                    </View>
+                </SideMenu>
+            );
+        }
     }
 }
 
 
-const container_styles = StyleSheet.create({
+const daily_styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#cfe7c2',
+    },
+    loading: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     header: {
         flex: 1,
@@ -412,9 +427,8 @@ const container_styles = StyleSheet.create({
     },
     tiles_container: {
         flex: 11,
-        backgroundColor: '#795959',
-        paddingLeft: 6,
-        paddingRight: 6,
+        backgroundColor: '#cfe7c2',
+        paddingHorizontal: 6,
         paddingTop: 15,
     },
     launcher: {
@@ -426,6 +440,9 @@ const container_styles = StyleSheet.create({
         alignItems: 'center',
         padding: 8,
     },
+    launcher_text: {
+        fontSize: normalizeFont(configs.LETTER_SIZE * 0.08),
+    }
 });
 
 module.exports = Daily;
