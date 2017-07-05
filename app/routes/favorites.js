@@ -96,7 +96,7 @@ class Favorites extends Component{
                     let expandArr = strExpand.split('.');
                     let tf = 0;
                     tf = (expandArr[2] == '1')?1:0;
-                    this.setState({questionOpacity: tf, expand: tf, infoString: `Storage of Favorites is limited to 3 Verses unless any item has been purchased in the app. A portion of the proceeds raised by the app will be donated to the WEB project of World Outreach Ministries.`});
+                    this.setState({expand: tf, infoString: `Storage of Favorites is limited to 3 Verses unless any item has been purchased in the app. A portion of the proceeds raised by the app will be donated to the WEB project of World Outreach Ministries.`});
                 }
             });
         }
@@ -600,8 +600,8 @@ class Favorites extends Component{
                                 <Image source={ require('../images/arrowback.png') } style={ { width: normalize(height*0.07), height: normalize(height*0.07) } } />
                             </Button>
                             <Text style={{fontSize: configs.LETTER_SIZE * 0.7, color: this.state.titleColor}} >{this.props.title}</Text>
-                            <Button style={collection_styles.button} onPress={ () => this.toggleInfoBox() }>
-                                <Image source={ require('../images/infoquestion.png') } style={ { width: normalize(height*0.07), height: normalize(height*0.07), opacity: this.state.questionOpacity } } />
+                            <Button style={[collection_styles.button, {opacity: this.state.questionOpacity}]} onPress={ () => this.toggleInfoBox() }>
+                                <Image source={ require('../images/infoquestion.png') } style={ { width: normalize(height*0.07), height: normalize(height*0.07) } } />
                             </Button>
                         </View>
                         <View style={ [collection_styles.tiles_container, {backgroundColor: this.state.bgColor}, this.darkBorder(this.state.bgColor)] }>
