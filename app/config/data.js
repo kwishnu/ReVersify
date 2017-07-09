@@ -90,30 +90,35 @@ module.exports = [
                 product_id: 'rv.verse.book.genesis',
                 show: 'true',
                 color: '#77c019',
+                num_verses: '100'
                 },
                 {
                 name: 'Exodus',
                 product_id: 'rv.verse.book.exodus',
                 show: 'true',
                 color: '#552b0c',
+                num_verses: '50'
                 },
                 {
                 name: 'Leviticus',
                 product_id: 'rv.verse.book.leviticus',
                 show: 'true',
                 color: '#448150',
+                num_verses: '50'
                 },
                 {
                 name: 'Numbers',
                 product_id: 'rv.verse.book.numbers',
                 show: 'true',
                 color: '#3e137a',
+                num_verses: '50'
                 },
                 {
                 name: 'Deuteronomy',
                 product_id: 'rv.verse.book.deuteronomy',
                 show: 'true',
                 color: '#2d1969',
+                num_verses: '50'
                 }
             ]
     },
@@ -128,24 +133,28 @@ module.exports = [
                 product_id: 'rv.verse.book.matthew',
                 show: 'true',
                 color: '#1780ec',
+                num_verses: '50'
                 },
                 {
                 name: 'Mark',
                 product_id: 'rv.verse.book.mark',
                 show: 'true',
                 color: '#6d920a',
+                num_verses: '50'
                 },
                 {
                 name: 'Luke',
                 product_id: 'rv.verse.book.luke',
                 show: 'true',
                 color: '#905f93',
+                num_verses: '50'
                 },
                 {
                 name: 'John',
                 product_id: 'rv.verse.book.john',
                 show: 'true',
                 color: '#107088',
+                num_verses: '50'
                 }
             ]
     },
@@ -219,7 +228,7 @@ module.exports = [
 		num_verses: '30',
 		num_solved: '0',
         product_id: '',
-		bg_color: '#FFB300',
+		bg_color: '#eea805',
 		verses:[
             `2**John 3:16**For God so loved the world, that he gave`,
             `2**John 3:16**For God so loved the world, that he gave`,
@@ -261,7 +270,7 @@ module.exports = [
 		num_verses: '30',
 		num_solved: '0',
 		solved: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        product_id: '',
+        product_id: '0.0.collection.0',
 		bg_color: '#2B0B30',
 		verses:[
             `2**John 3:16**For God so loved the world, that he gave`,
@@ -304,7 +313,7 @@ module.exports = [
 		num_verses: '0',
 		num_solved: '0',
 		solved: [],
-        product_id: '',
+        product_id: '0.0.favorites.0',
 		bg_color: '#b21111',
 		verses:[
         ]

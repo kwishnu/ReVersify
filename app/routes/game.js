@@ -54,9 +54,6 @@ const fanfare = new Sound('aah.mp3', Sound.MAIN_BUNDLE, (error) => {
     window.alert('Sound file not found');
   }
 });
-reverse = (s) => {
-    return s.split("").reverse().join("");
-}
 cleanup = (sentence) => {
    return sentence.toLowerCase().replace(/[^a-zA-Z]+/g, "");
 
@@ -623,7 +620,23 @@ class Game extends Component {
                 index: newIndex
             }
        });
-
+    }
+    reset_scene(){
+        this.props.navigator.replace({
+            id: 'bounce',
+            passProps: {
+                sender: 'game',
+                homeData: this.props.homeData,
+                daily_solvedArray: this.state.daily_solvedArray,
+                dataElement: this.props.dataElement,
+                textColor: this.props.textColor,
+                bgColor: this.props.bgColor,
+                senderTitle: this.props.myTitle,
+                fromWhere: this.props.fromWhere,
+                title: this.props.title,
+                index: this.props.index
+            }
+       });
     }
     closeGame(where){
         if (where == 'favorites'){
@@ -1131,7 +1144,7 @@ class Game extends Component {
             case 3://go to app intro 2nd page:
         try {
             this.props.navigator.push({
-                id: 'intro',
+                id: 'intro1',
                 passProps: {
                     destination: 'game',
                     introIndex: 1,
@@ -1167,7 +1180,7 @@ class Game extends Component {
 
 
     render() {
-        const rotateY = this.flip.interpolate({
+        const rotateX = this.flip.interpolate({
             inputRange: [0, 1],
             outputRange: ['0deg', '360deg']
         });
@@ -1175,7 +1188,7 @@ class Game extends Component {
             inputRange: [0, 1],
             outputRange: [0, 1]
         });
-        let imageStyle = {transform: [{rotateY}]};
+        let imageStyle = {transform: [{rotateX}]};
         let buttonsStyle = {opacity: this.opac.interpolate({
                                     inputRange: [0, 1],
                                     outputRange: [0, 1],
@@ -1293,16 +1306,11 @@ class Game extends Component {
                         </View>
                         <View style={[game_styles.footer, this.footerBorder(this.state.bgColor), this.headerFooterColor(this.state.bgColor)]}>
                         { this.state.showHintButton &&
-                            <View style={{flexDirection: 'row', justifyContent: 'space-between', width: width}}>
-                                <View style={game_styles.hint_container}>
-                                </View>
+                            <View style={{flexDirection: 'row', justifyContent: 'center', width: width}}>
                                 <View style={game_styles.hint_container} onStartShouldSetResponder={() => { this.giveHint(this.state.nextFrag) }}>
                                     <View style={game_styles.hint_button} >
                                         <Text style={game_styles.hint_text}>hint</Text>
                                     </View>
-                                </View>
-                                <View style={game_styles.hint_container}>
-                                    <Text style={[game_styles.hint_text, {opacity: this.state.hintNumOpacity}]}>{ this.state.numHints }</Text>
                                 </View>
                             </View>
                         }
@@ -1330,7 +1338,7 @@ class Game extends Component {
                         }
                     </View>
                     {this.state.shouldShowDropdown &&
-                            <DropdownMenu onPress={(num)=>{ this.onDropdownSelect(num); }} item1={this.state.soundString} item2={'Reset Verse'} item3={'How to Play'}/>
+                    <DropdownMenu onPress={(num)=>{ this.onDropdownSelect(num); }} item1={this.state.soundString} item2={'Reset Verse'} item3={'How to Play'}/>
                     }
                 </View>
             );

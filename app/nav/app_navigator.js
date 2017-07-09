@@ -3,7 +3,6 @@ import React, {Component} from 'react';
 //import { Navigator } from 'react-native';
 import NavigationExperimental from 'react-native-deprecated-custom-components';
 const Splash = require('../routes/splash');
-const Intro = require('../routes/intro');
 const Home = require('../routes/home');
 const Settings = require('../routes/settings');
 const Mission = require('../routes/mission');
@@ -18,7 +17,11 @@ const Bounce = require('../routes/bounce');
 const HintStore = require('../routes/hintstore');
 const Store = require('../routes/store');
 const Reader = require('../routes/reader');
+const Intro = require('../intro/intro');
 const Intro1 = require('../intro/intro1');
+const Intro2 = require('../intro/intro2');
+const Intro3 = require('../intro/intro3');
+const Intro4 = require('../intro/intro4');
 
 class AppNavigator extends React.Component {
     constructor(props) {
@@ -28,8 +31,6 @@ class AppNavigator extends React.Component {
         switch (routeID) {
             case 'splash':
                 return Splash;
-            case 'intro':
-                return Intro;
             case 'home':
                 return Home;
             case 'settings':
@@ -58,8 +59,16 @@ class AppNavigator extends React.Component {
                 return Store;
             case 'reader':
                 return Reader;
+            case 'intro':
+                return Intro;
             case 'intro1':
                 return Intro1;
+            case 'intro2':
+                return Intro2;
+            case 'intro3':
+                return Intro3;
+            case 'intro4':
+                return Intro4;
 
             // Add more ids here
         }

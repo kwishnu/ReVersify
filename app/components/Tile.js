@@ -36,7 +36,7 @@ class Tile extends Component {
       onMoveShouldSetResponderCapture: () => true,
       onMoveShouldSetPanResponderCapture: () => true,
       onStartShouldSetPanResponder: (e, gesture) => setTimeout(() => {
-        if (gesture.moveX == 0 && gesture.moveY == 0){
+        if (gesture.moveX == 0 && gesture.moveY == 0 && this.props.isIntro1 != true){
             this.flip.setValue(0);
             let str = reverse(this.state.text);
             this.setState({text: str});
