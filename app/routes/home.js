@@ -335,11 +335,10 @@ class Home extends Component{
                     break;
                 case 'intro':
                     this.props.navigator.push({
-                        id: 'intro',
+                        id: 'swiper',
                         passProps: {
-                            destination: 'menu',
+                            destination: 'home',
                             homeData: this.state.homeData,
-                            introIndex: 1,
                             seenIntro: 'true'
                         }
                     });

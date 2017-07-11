@@ -246,7 +246,7 @@ class SplashScreen extends Component {
                 }
                 return Promise.all(promises);
             }).then(() => {
-                var whereToGo = (this.state.seenStart == 'true')?'home':'intro';
+                var whereToGo = (this.state.seenStart == 'true')?'home':'swiper';
                 setTimeout(() => {this.gotoScene(whereToGo, this.state.pData)}, 500);//Hate to do this, but avoids warning of setting state on mounted component
             }).catch(function(error) {
                 window.alert('splash 256: ' + error.message);
@@ -499,7 +499,6 @@ class SplashScreen extends Component {
                 homeData: appData,
                 isPremium: this.state.hasPremium,
                 seenIntro: this.state.seenStart,
-                introIndex: 0,
                 connectionBool: connected,
                 destination: 'home'
                 },
