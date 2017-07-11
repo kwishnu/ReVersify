@@ -73,7 +73,6 @@ class Intro2 extends Component {
             panelBgColor: '#cfe7c2',
             panelBorderColor: invertColor('#cfe7c2', true),
             showingVerse: false,
-            pan0: new Animated.ValueXY(), pan1: new Animated.ValueXY(),
             rows2: true,
             rows3: true,
             rows4: true,
@@ -139,34 +138,56 @@ class Intro2 extends Component {
         BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
         homeData = this.props.homeData;
         this.setState({ letterImage: require('../images/letters/i.png') });
-        setTimeout(()=>{
-            Alert.alert('Showing Chapter and Verse', 'The panel under the Bible page hides the Chapter and Verse until the puzzle is completed--but you can show it earlier if you\'d like...',
-            [{text: 'OK', onPress: () => this.giveDirections()}], { onDismiss: () => {this.giveDirections()} }
-            );
-        }, 800);
     }
     componentWillUnmount () {
         BackHandler.removeEventListener('hardwareBackPress', this.handleHardwareBackButton);
     }
     handleHardwareBackButton() {
-        let goToHere = this.props.destination;
-        if (goToHere == 'home'){
+        this.props.navigator.pop({
+            id: 'intro3',
+            passProps: {
+                homeData: this.props.homeData,
+                isPremium: this.props.isPremium,
+                seenIntro: this.props.seenStart,
+                connectionBool: this.props.connectionBool,
+                destination: this.props.destination
+            }
+       });
+        return true;
+    }
+    start(){
+        setTimeout(()=>{
+            Alert.alert('Showing Chapter and Verse', 'The panel under the Bible page hides the Chapter and Verse until the puzzle is completed--but you can show it earlier if you\'d like...',
+            [{text: 'OK', onPress: () => this.giveDirections()}], { onDismiss: () => {this.giveDirections()} }
+            );
+        }, 500);
+    }
+    reset(){
+        setTimeout(()=>{
+            this.setState({ showText1: false,
+                            showText2: false,
+                            showNextArrow: false,
+                            panelText: '',
+                            showingVerse: false,
+            });
+            this.setPanelColors();
+        }, 500);
+    }
+    goSomewhere(){
+        if (this.props.seenIntro != 'true'){
             this.props.navigator.replace({
-                id: goToHere,
+                id: 'home',
                 passProps: {
                     homeData: this.props.homeData,
-                    connectionBool: this.props.connectionBool
+                    isPremium: this.props.isPremium,
+                    seenIntro: this.props.seenIntro,
+                    connectionBool: this.props.connectionBool,
+                    destination: this.props.destination
                 },
            });
         }else{
-            this.props.navigator.pop({
-                id: goToHere,
-                passProps: {
-                    homeData: this.props.homeData,
-                },
-           });
+            this.props.navigator.pop({});
         }
-        return true;
     }
     setPanelColors(){
         let darkerPanel = shadeColor('#cfe7c2', -10);
@@ -186,18 +207,6 @@ class Intro2 extends Component {
             setTimeout(() => {this.setState({ showText1: false, showText2: false, showTiles: false, showFooter: false })}, 1000);
             setTimeout(() => {this.setState({ showNextArrow: true, showFooter: true, showText2: true, text2text: 'One more' })}, 1001);
         }
-    }
-    intro3(){
-        this.props.navigator.push({
-            id: 'intro3',
-            passProps: {
-                destination: 'game',
-                }
-        });
-    }
-    playDropSound(){
-        if(!this.state.doneWithVerse && this.state.useSounds == true){plink1.play();}
-
     }
     footerBorder(color) {
         let bgC = '#cfe7c2';
@@ -301,7 +310,7 @@ class Intro2 extends Component {
                         </Animated.View>
                     </View>
                     { this.state.showNextArrow &&
-                    <View style={intro_styles.next_arrow} onStartShouldSetResponder={() => { this.intro3() }} >
+                    <View style={intro_styles.next_arrow}>
                         <Image source={this.state.arrowImage}/>
                     </View>
                     }
@@ -316,37 +325,15 @@ class Intro2 extends Component {
                     </View>
                     }
                     <View style={intro_styles.game}>
-                     { this.state.showTiles &&
-                        <View>
-                           <View style={intro_styles.tile_row} >
-                                <Tile opac={0} ref={(a) => { this.a = a; }}  text={ 'nthebegi' } nextFrag={ 'nthebegi' } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                <Tile ref={(b) => { this.b = b; }} text={ 'sandt' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                <Tile opac={0} ref={(c) => { this.c = c; }} text={ 'edtheh' } nextFrag={ 'edtheh' } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                            </View>
-                            <View style={intro_styles.tile_row} >
-                                <Tile opac={0} ref={(d) => { this.d = d; }} text={ 'taerc' } nextFrag={ 'creat' } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                <Tile ref={(e) => { this.e = e; }} text={ 'eaven' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                <Tile opac={0} ref={(f) => { this.f = f; }} text={ 'ninggod' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                            </View>
-                            <View style={intro_styles.tile_row} >
-                                <Tile ref={(g) => { this.g = g; }} text={ 'heearth' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                            </View>
-                        </View>
-                    }
                     </View>
-                    { this.state.showFooter &&
                     <View style={[intro_styles.footer, this.footerBorder(this.state.bgColor), this.headerFooterColor(this.state.bgColor)]}>
-                    { this.state.showHintButton &&
-                            <View style={{flexDirection: 'row', justifyContent: 'center', width: width}}>
-                                <View style={intro_styles.hint_container}>
-                                    <View style={intro_styles.hint_button} >
-                                        <Text style={intro_styles.hint_text}>hint</Text>
-                                    </View>
-                                </View>
-                            </View>
-                    }
+                        <View style={{padding: height*.015}} onStartShouldSetResponder={()=>this.goSomewhere()}>
+                            <Text style={intro_styles.footer_text}>Skip</Text>
+                        </View>
+                        <View style={{height:height*.09, width: height*.09, alignItems: 'center', justifyContent: 'center'}}>
+                            <Text style={intro_styles.footer_text}></Text>
+                        </View>
                     </View>
-                    }
                 </View>
             </View>
         );
@@ -401,7 +388,7 @@ const intro_styles = StyleSheet.create({
         justifyContent: 'center',
         width: width,
         height: height*.15,
-        top: height*.45,
+        top: height*.48,
         paddingHorizontal: height*.06
     },
     text2: {
@@ -410,7 +397,7 @@ const intro_styles = StyleSheet.create({
         justifyContent: 'center',
         width: width,
         height: height*.15,
-        top: height*.74,
+        top: height*.72,
         paddingHorizontal: height*.06
     },
     letter: {
@@ -474,9 +461,15 @@ const intro_styles = StyleSheet.create({
         flex: 3,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'space-between',
         width: width,
         borderTopWidth: 6,
+        paddingHorizontal: normalize(height*0.01),
+    },
+    footer_text: {
+        fontSize: normalizeFont(configs.LETTER_SIZE*0.14),
+        fontWeight: 'bold',
+        color: '#ffffff',
     },
     hint_container: {
         alignItems: 'center',

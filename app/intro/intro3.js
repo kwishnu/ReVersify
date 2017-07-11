@@ -73,7 +73,6 @@ class Intro2 extends Component {
             panelBgColor: '#cfe7c2',
             panelBorderColor: invertColor('#cfe7c2', true),
             showingVerse: false,
-            pan0: new Animated.ValueXY(), pan1: new Animated.ValueXY(),
             rows2: true,
             rows3: true,
             rows4: true,
@@ -140,34 +139,52 @@ class Intro2 extends Component {
         BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
         homeData = this.props.homeData;
         this.setState({ letterImage: require('../images/letters/i.png') });
-        setTimeout(()=>{
-            Alert.alert('Hints', 'If you get stumped, try using the hint button...',
-            [{text: 'OK', onPress: () => this.giveDirections()}], { onDismiss: () => {this.giveDirections()} }
-            );
-        }, 800);
     }
     componentWillUnmount () {
         BackHandler.removeEventListener('hardwareBackPress', this.handleHardwareBackButton);
     }
     handleHardwareBackButton() {
-        let goToHere = this.props.destination;
-        if (goToHere == 'home'){
+        this.props.navigator.pop({});
+        return true;
+    }
+    start(){
+        setTimeout(()=>{
+            Alert.alert('Hints', 'If you get stumped, try using the hint button...',
+            [{text: 'OK', onPress: () => this.giveDirections()}], { onDismiss: () => {this.giveDirections()} }
+            );
+        }, 500);
+    }
+    reset(){
+        setTimeout(()=>{
+            this.setState({ text1text: 'Tap the \'hint\' button below to show the next tile...',
+                            text2text: '...and now, drop it on the page.',
+                            showText1: false,
+                            showText2: false,
+                            showTiles: true,
+                            nextFrag: 'edtheh',
+                            played: false,
+                            line0Text: 'n the beginning God',
+                            line1Text: 'creat',
+                            showNextArrow: false,
+
+            });
+        }, 500);
+    }
+    goSomewhere(){
+        if (this.props.seenIntro != 'true'){
             this.props.navigator.replace({
-                id: goToHere,
+                id: 'home',
                 passProps: {
                     homeData: this.props.homeData,
-                    connectionBool: this.props.connectionBool
+                    isPremium: this.props.isPremium,
+                    seenIntro: this.props.seenIntro,
+                    connectionBool: this.props.connectionBool,
+                    destination: this.props.destination
                 },
            });
         }else{
-            this.props.navigator.pop({
-                id: goToHere,
-                passProps: {
-                    homeData: this.props.homeData,
-                },
-           });
+            this.props.navigator.pop({});
         }
-        return true;
     }
     setPanelColors(){
         let darkerPanel = shadeColor('#cfe7c2', -10);
@@ -184,18 +201,6 @@ class Intro2 extends Component {
             setTimeout(() => {this.setState({ text1text: 'Two hints per verse unless you\'ve purchased a hint package', showText2: false, showTiles: false, showFooter: false })}, 1000);
             setTimeout(() => {this.setState({ showNextArrow: true, showFooter: true, showText2: true, text2text: 'Next...' })}, 1001);
         }
-    }
-    intro4(){
-        this.props.navigator.push({
-            id: 'intro4',
-            passProps: {
-                destination: 'game',
-                }
-        });
-    }
-    playDropSound(){
-        if(!this.state.doneWithVerse && this.state.useSounds == true){plink1.play();}
-
     }
     footerBorder(color) {
         let bgC = '#cfe7c2';
@@ -297,7 +302,7 @@ class Intro2 extends Component {
                         </Animated.View>
                     </View>
                     { this.state.showNextArrow &&
-                    <View style={intro_styles.next_arrow} onStartShouldSetResponder={() => { this.intro4() }} >
+                    <View style={intro_styles.next_arrow}>
                         <Image source={this.state.arrowImage}/>
                     </View>
                     }
@@ -333,7 +338,7 @@ class Intro2 extends Component {
                     { this.state.showFooter &&
                     <View style={[intro_styles.footer, this.footerBorder(this.state.bgColor), this.headerFooterColor(this.state.bgColor)]}>
                             <View style={{flexDirection: 'row', justifyContent: 'space-between', width: width}}>
-                                <View style={{padding: height*.015}} onStartShouldSetResponder={()=>this.handleHardwareBackButton()}>
+                                <View style={{padding: height*.015}} onStartShouldSetResponder={()=>this.goSomewhere()}>
                                     <Text style={intro_styles.footer_text}>Skip</Text>
                                 </View>
                                 <View style={intro_styles.hint_container} onStartShouldSetResponder={() => { this.giveHint('edtheh') }}>
@@ -404,7 +409,7 @@ const intro_styles = StyleSheet.create({
         justifyContent: 'center',
         width: width,
         height: height*.15,
-        top: height*.45,
+        top: height*.47,
         paddingHorizontal: height*.06
     },
     text2: {
@@ -413,7 +418,7 @@ const intro_styles = StyleSheet.create({
         justifyContent: 'center',
         width: width,
         height: height*.15,
-        top: height*.74,
+        top: height*.72,
         paddingHorizontal: height*.06
     },
     letter: {

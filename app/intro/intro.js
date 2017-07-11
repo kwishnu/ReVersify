@@ -13,59 +13,34 @@ import {
 } from 'react-native';
 import configs from '../config/configs';
 import { normalize, normalizeFont }  from '../config/pixelRatio';
-const KEY_MyHints = 'myHintsKey';
-const KEY_Premium = 'premiumOrNot';
-const KEY_InfinteHints = 'infHintKey';
-const KEY_PlayFirst = 'playFirstKey';
-const KEY_ShowVerse = 'showVerseKey';
-const KEY_ratedTheApp = 'ratedApp';
-const KEY_ThankRated = 'thankRatedApp';
-const KEY_expandInfo = 'expandInfoKey';
-const KEY_Solved = 'numSolvedKey';
-const KEY_Favorites = 'numFavoritesKey';
-const KEY_show_score = 'showScoreKey';
 const {width, height} = require('Dimensions').get('window');
 
 class Intro extends Component {
     constructor(props) {
         super(props);
         this.offsetX = new Animated.Value(0);
-        this.moveValue = new Animated.Value(0)
+        this.moveValue = new Animated.Value(0);
+        this.grow = new Animated.Value(0);
+        this.opac = new Animated.Value(0);
         this.state = {
             id: 'intro',
             arrowImage: require('../images/arrowforward.png'),
             showNextArrow: false,
             showWelcome: false,
+            showSkip: false,
             showText: false
         };
         this.handleHardwareBackButton = this.handleHardwareBackButton.bind(this);
     }
     componentDidMount() {
+        setTimeout(()=>{
         this.animate_image_delay();
-        setTimeout(()=> {this.setState({showNextArrow: true})}, 1800);
-        setTimeout(()=> {this.setState({showWelcome: true})}, 2500);
-        setTimeout(()=> {this.setState({showText: true})}, 3000);
+        }, 500);
+        setTimeout(()=> {this.showArrowImage()}, 1800);
+        setTimeout(()=> {this.setState({showWelcome: true})}, 1500);
+        setTimeout(()=> {this.setState({showText: true})}, 1500);
+        setTimeout(()=> {this.setState({showSkip: true})}, 3200);
         BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
-        if (this.props.seenIntro != 'true'){
-            var initArray = [
-                [KEY_MyHints, '-1'],
-                [KEY_Premium, 'false'],
-                [KEY_InfinteHints, 'false'],
-                [KEY_PlayFirst, 'false'],
-                [KEY_ShowVerse, 'false'],
-                [KEY_ratedTheApp, 'false'],
-                [KEY_ThankRated, 'false'],
-                [KEY_expandInfo, '1.1.1'],
-                [KEY_Solved, '0'],
-                [KEY_Favorites, '0'],
-                [KEY_show_score, '1']
-            ];
-            try {
-                AsyncStorage.multiSet(initArray);
-            } catch (error) {
-                window.alert('AsyncStorage error: ' + error.message);
-            }
-        }
     }
     componentWillUnmount () {
         BackHandler.removeEventListener('hardwareBackPress', this.handleHardwareBackButton);
@@ -74,37 +49,57 @@ class Intro extends Component {
         this.goSomewhere();
     }
     goSomewhere(){
-        let goToHere = this.props.destination;
-        if (goToHere == 'home'){
+        if (this.props.seenIntro != 'true'){
             this.props.navigator.replace({
-                id: goToHere,
+                id: 'home',
                 passProps: {
                     homeData: this.props.homeData,
-                    connectionBool: this.props.connectionBool
+                    isPremium: this.props.isPremium,
+                    seenIntro: this.props.seenIntro,
+                    connectionBool: this.props.connectionBool,
+                    destination: this.props.destination
                 },
            });
         }else{
-            this.props.navigator.pop({
-                id: goToHere,
-                passProps: {
-                    homeData: this.props.homeData,
-                },
-           });
+            this.props.navigator.pop({});
         }
     }
     animate_image_delay(){
         this.moveValue.setValue(0);
-        Animated.sequence([
-            Animated.delay(500),
+//        Animated.sequence([
+//            Animated.delay(1000),
             Animated.spring(
             this.moveValue,
                 {
                     toValue: 1,
-                    easing: Easing.back,
-                    duration: 2000,
+                    friction: 4,
+                    Easing: Easing.back,
+                    useNativeDriver: true
                 }
-            )
-        ]).start()
+            ).start()
+//        ]).start()
+    }
+    showArrowImage(){
+        this.grow.setValue(0);
+        this.opac.setValue(0);
+        this.setState({showNextArrow: true});
+
+        Animated.parallel([
+            Animated.timing(this.opac, {
+                toValue: 1,
+                duration: 200,
+                delay: 100
+            }),
+            Animated.timing(this.grow, {
+                    toValue: 1.1,
+                    delay: 100
+            })
+        ]).start(()=>{
+            Animated.spring(
+                this.grow,
+                { toValue: 1, friction: 3 }
+            ).start()
+        });
     }
     intro1(){
         this.props.navigator.push({
@@ -115,32 +110,37 @@ class Intro extends Component {
         });
     }
 
-    render() {
-        const move = this.moveValue.interpolate({
+  render() {
+            const move = this.moveValue.interpolate({
             inputRange: [0, 1],
             outputRange: [0, -200]
-        })
+        });
+        const scale = this.grow.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 1]
+        });
+        const arrowStyle = {opacity: this.opac.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: [0, 1],
+                                  }), transform: [{scale}]};
         return (
-			<View style={ styles.container } >
+			<View style={ styles.container }>
                 <View>
                     <Animated.Image style={[styles.image, {transform: [{translateY: move}]}] } source={require('../images/logo.png')} />
                 </View>
-                <View style={styles.skip} onStartShouldSetResponder={()=>this.handleHardwareBackButton()}>
-                    <Text style={styles.skip_text}>Skip</Text>
-                </View>
-                { this.state.showWelcome &&
-                <View style={styles.welcome_container}>
-                    <Text style={styles.text_welcome}>Welcome!</Text>
-                </View>
-                }
                 { this.state.showText &&
                 <View style={styles.text_container}>
-                    <Text style={styles.text}>Tap the arrow to take a quick tutorial...</Text>
+                    <Text style={styles.text}>Learn to Play</Text>
                 </View>
                 }
                 { this.state.showNextArrow &&
-                <View style={styles.next_arrow} onStartShouldSetResponder={() => { this.intro1() }} >
-                    <Image source={this.state.arrowImage}/>
+                <View style={styles.next_arrow}>
+                    <Animated.Image style={arrowStyle} source={this.state.arrowImage}/>
+                </View>
+                }
+                { this.state.showSkip &&
+                <View style={styles.skip} onStartShouldSetResponder={()=>this.handleHardwareBackButton()}>
+                    <Text style={styles.skip_text}>Skip</Text>
                 </View>
                 }
             </View>
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         width: width*.65,
-        height: height/5.5,
+        height: height*.18,
         top: height*.4
     },
     text_container: {
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         width: width*.65,
-        height: height/5.5,
+        height: height*.18,
         top: height*.5
     },
     next_arrow: {
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         width: width,
-        height: height/5.5,
+        height: height*.18,
         top: height*.65
     },
     skip: {
@@ -197,14 +197,14 @@ const styles = StyleSheet.create({
         textAlign: 'center'
     },
     text: {
-        fontSize: normalizeFont(configs.LETTER_SIZE*0.1),
+        fontSize: normalizeFont(configs.LETTER_SIZE*0.14),
         color: '#486bdd',
         textAlign: 'center'
     },
     skip_text: {
         fontSize: normalizeFont(configs.LETTER_SIZE*0.14),
         fontWeight: 'bold',
-        color: '#ffffff'
+        color: '#777777'
     }
 });
 
