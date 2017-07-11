@@ -22,6 +22,8 @@ const Intro1 = require('../intro/intro1');
 const Intro2 = require('../intro/intro2');
 const Intro3 = require('../intro/intro3');
 const Intro4 = require('../intro/intro4');
+const Intro5 = require('../intro/intro5');
+const SwipeNavigator = require('../nav/swiper');
 
 class AppNavigator extends React.Component {
     constructor(props) {
@@ -69,6 +71,10 @@ class AppNavigator extends React.Component {
                 return Intro3;
             case 'intro4':
                 return Intro4;
+            case 'intro5':
+                return Intro5;
+            case 'swiper':
+                return SwipeNavigator;
 
             // Add more ids here
         }
