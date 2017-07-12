@@ -494,10 +494,6 @@ class SplashScreen extends Component {
             }
         }
         let connected = this.state.connectionBool;
-
-        console.log(this.state.isPremium);
-
-
         this.props.navigator.replace({
             id: whichScene,
             passProps: {
