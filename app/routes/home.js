@@ -272,7 +272,6 @@ class Home extends Component{
             this.props.navigator.pop({});
                 }
             }
-            console.log(typeof this.props.isPremium + ' ' + this.props.isPremium);
             if (this.props.isPremium){
                 if (!this.state.thankedPremium && !this.state.thankedRating){
                     try {
