@@ -103,13 +103,13 @@ const KEY_Score = 'scoreKey';
 const KEY_NextBonus = 'bonusKey';
 const KEY_Color = 'colorKey';
 const KEY_midnight = 'midnight';
-const KEY_Premium = 'premiumOrNot';
 const KEY_Verses = 'versesKey';
 const KEY_Time = 'timeKey';
 const KEY_solvedTP = 'solvedTP';
 const KEY_ratedTheApp = 'ratedApp';
 const KEY_reverse = 'reverseFragments';
 const KEY_ThankRated = 'thankRatedApp';
+const KEY_ThankPremium = 'thankPremium';
 const KEY_Solved = 'numSolvedKey';
 let homeData = [];
 let dsArray = [];
@@ -145,6 +145,7 @@ class Home extends Component{
             isPremium: this.props.isPremium,
             hasRated: false,
             thankedRating: false,
+            thankedPremium: false,
             menuImage: require('../images/menu.png'),
             solved: 0,
             solved_opacity: 1,
@@ -177,6 +178,10 @@ class Home extends Component{
         }).then((rated) => {
             let ratedOrNot = (rated == 'true')?true:false;
             this.setState({hasRated: ratedOrNot});
+            return AsyncStorage.getItem(KEY_ThankPremium);
+        }).then((have_thanked) => {
+            let thankedOrNot = (have_thanked == 'true')?true:false;
+            this.setState({thankedPremium: thankedOrNot});
             return AsyncStorage.getItem(KEY_reverse);
         }).then((revBool) => {
             let reverseBool = (revBool == 'true')?true:false;
@@ -259,8 +264,23 @@ class Home extends Component{
                     } catch (error) {
                         window.alert('AsyncStorage error: 252' + error.message);
                     }
-                    Alert.alert('Thank You!', `You now have a new feature: the first tile will already be played in each Verse. You can change this in 'Settings' if you wish`);
+                    if (this.state.isPremium){
+                        Alert.alert('Thanks', `Thank you for the feedback, we hope you enjoy the app!`);
+                    }else{
+                        Alert.alert('Thank You!', `You now have a new feature: the first tile will already be played in each Verse. You can change this in 'Settings' if you wish`);
+                    }
             this.props.navigator.pop({});
+                }
+            }
+            console.log(typeof this.props.isPremium + ' ' + this.props.isPremium);
+            if (this.props.isPremium){
+                if (!this.state.thankedPremium && !this.state.thankedRating){
+                    try {
+                        AsyncStorage.setItem(KEY_ThankPremium, 'true');
+                    } catch (error) {
+                        window.alert('AsyncStorage error: 252' + error.message);
+                    }
+                    Alert.alert('Thank You!', `You now have a new feature: the first tile will already be played in each Verse. You can change this in 'Settings' if you wish`);
                 }
             }
         }).catch(function(error) {
@@ -613,14 +633,16 @@ class Home extends Component{
             });
         });
     }
-    showDialog(index, type){
+    showDialog(index, type, id){
         if(index < 16)return;
         if(index == 17){
-            this.setState({item2Color: '#555555'})
+            this.setState({item2Color: '#555555'});
         }else{
-            this.setState({item2Color: '#ffffff'})
+            this.setState({item2Color: '#ffffff'});
         }
-        Vibration.vibrate(25);
+        let idArray = id.split('.');
+        if (idArray[2] == 'book')this.setState({item2Color: '#555555'});
+        Vibration.vibrate(34);
         BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
         if(type == 'mypack' || type == 'solved'){
             let strSolvedOrNot = (type == 'solved')?'Move to My Collections':'Move to Completed';
@@ -719,7 +741,7 @@ class Home extends Component{
                                         renderRow={(rowData) =>
                                              <View>
                                                  <TouchableHighlight onPress={() => this.onSelect(rowData.index, rowData.title, rowData.bg_color, rowData.product_id)}
-                                                                     onLongPress={()=> this.showDialog(rowData.index, rowData.type)}
+                                                                     onLongPress={()=> this.showDialog(rowData.index, rowData.type, rowData.product_id)}
                                                                      style={[container_styles.launcher, this.bg(rowData.bg_color), this.lightBorder(rowData.bg_color, rowData.type)]}
                                                                      underlayColor={rowData.bg_color} >
                                                      <Text style={[container_styles.launcher_text, this.getTextColor(rowData.bg_color, rowData.index)]}>{this.getTitle(rowData.title)}</Text>
