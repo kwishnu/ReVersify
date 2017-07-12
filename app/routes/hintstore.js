@@ -7,7 +7,8 @@ import { normalize, normalizeFont }  from '../config/pixelRatio';
 import moment from 'moment';
 const styles = require('../styles/styles');
 const {width, height} = require('Dimensions').get('window');
-const KEY_ratedTheApp = 'ratedApp';
+const KEY_MyHints = 'myHintsKey';
+const KEY_Premium = 'premiumOrNot';
 let year = moment().year();
 
 module.exports = class HintStore extends Component {
@@ -15,10 +16,14 @@ module.exports = class HintStore extends Component {
         super(props);
         this.state = {
             id: 'hints',
+            currentHints: ''
         };
         this.goSomewhere = this.goSomewhere.bind(this);
     }
     componentDidMount(){
+        AsyncStorage.getItem(KEY_MyHints).then((hintStr) => {
+            this.setState({currentHints: hintStr});
+        })
         BackHandler.addEventListener('hardwareBackPress', this.goSomewhere);
     }
     componentWillUnmount () {
@@ -26,18 +31,7 @@ module.exports = class HintStore extends Component {
     }
     goSomewhere() {
         try {
-            this.props.navigator.pop({
-                id: this.props.destination,
-                passProps: {
-                    destination: this.props.destination,
-                    homeData: this.props.homeData,
-                    daily_solvedArray: this.props.daily_solvedArray,
-                    title: this.props.title,
-                    dataSource: this.props.dataSource,
-                    dataElement: this.props.dataElement,
-                    bgColor: this.props.bgColor
-                }
-            });
+            this.props.navigator.pop({});
         }
         catch(err) {
             window.alert(err.message);
@@ -45,6 +39,9 @@ module.exports = class HintStore extends Component {
         return true;
     }
     startPurchase(hintPackage){
+        if (this.state.currentHints == 'infinite'){
+            Alert.alert('Thanks, but...', 'You already have unlimited hints!')
+        }
         NetInfo.isConnected.fetch().then(isConnected => {
             if (isConnected && Meteor.status().status == 'connected'){
 //rv.hint.package.100, 500, 1000
@@ -52,21 +49,32 @@ module.exports = class HintStore extends Component {
 //            InAppBilling.open()
 //            .then(() => InAppBilling.purchase(itemID))
 //            .then((details) => {
-//                try {
-//                    AsyncStorage.setItem(KEY_Premium, 'true');//
-//                } catch (error) {
-//                    window.alert('AsyncStorage error: ' + error.message);
-//                }
+                let packArray = hintPackage.split('.');
+                let strHowMany = '';
+                if (packArray[3] == '0'){
+                    strHowMany = 'infinite';
+                }else{
+                    let numBuying = parseInt(packArray[3], 10);
+                    let numOwned = (this.state.currentHints == '-1')?0:parseInt(this.state.currentHints, 10);
+                    let total = numBuying + numOwned;
+                    strHowMany = String(total);
+                }
+                try {
+                    AsyncStorage.setItem(KEY_Premium, 'true');
+                    AsyncStorage.setItem(KEY_MyHints, strHowMany);
+                } catch (error) {
+                    window.alert('AsyncStorage error: ' + error.message);
+                }
                 try {
                     this.props.navigator.pop({});
-//                    this.props.navigator.replace({
-//                        id: 'home',
-//                        passProps: {
-//                            destination: this.props.fromWhere,
-//                            homeData: this.props.homeData,
-//                            isPremium: 'true'
-//                        }
-//                    });
+                    this.props.navigator.replace({
+                        id: 'home',
+                        passProps: {
+                            destination: this.props.fromWhere,
+                            homeData: this.props.homeData,
+                            isPremium: 'true'
+                        }
+                    });
                 } catch(err)  {
                     window.alert(err.message)
                     return true;

@@ -18,7 +18,6 @@ const KEY_daily_solved_array = 'solved_array';
 const KEY_Time = 'timeKey';
 const KEY_MyHints = 'myHintsKey';
 const KEY_Premium = 'premiumOrNot';
-const KEY_InfinteHints = 'infHintKey';
 const KEY_PlayFirst = 'playFirstKey';
 const KEY_ShowVerse = 'showVerseKey';
 let dsArray = [];
@@ -123,7 +122,6 @@ class Game extends Component {
             panelBgColor: this.props.bgColor,
             panelBorderColor: invertColor(this.props.bgColor, true),
             showingVerse: false,
-            pan0: new Animated.ValueXY(), pan1: new Animated.ValueXY(),
             rows2: true,
             rows3: true,
             rows4: true,
@@ -170,114 +168,116 @@ class Game extends Component {
             isPremium: false,
             numHints: 0,
             numSolved: 0,
-            myHintsInitialNum: -1,
+            hasPaidForHints: false,
             hintNumOpacity: 1,
             hasInfiniteHints: false,
-            entireVerse: ''
+            entireVerse: '',
+            openedAll: false
         }
         this.handleHardwareBackButton = this.handleHardwareBackButton.bind(this);
     }
     componentDidMount() {
         if (this.props.dataElement == 17)this.setState({showFavorites: false});
         if (this.props.fromWhere == 'book')this.setState({showBible: true});
+        let reverseTiles = this.props.reverse;
         this.setPanelColors();
         let titleText=(this.props.fromWhere == 'book')?'':this.props.title;
         this.setState({title: titleText});
         BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
         AppState.addEventListener('change', this.handleAppStateChange);
         homeData = this.props.homeData;
+        if (homeData[this.props.dataElement].num_solved == homeData[this.props.dataElement].num_verses)this.setState({openedAll: true});
         let verseArray = this.props.homeData[this.props.dataElement].verses[this.props.index].split('**');
         dsArray = this.props.daily_solvedArray;
-        let numHints = parseInt(verseArray[0]);
+        let numHints = parseInt(verseArray[0], 10);
         let chapterVerse = verseArray[1];
         let verseStr = verseArray[2];
         let saveVerse = verseStr;
         let initial = verseStr.substr(0, 1);
         verseStr = verseStr.substring(1);
         switch(initial){
-//            case 'A':
-//                this.setState({ letterImage: require('../images/letters/a.png') });
-//                break;
-//            case 'B':
-//                this.setState({ letterImage: require('../images/letters/b.png') });
-//                break;
-//            case 'C':
-//                this.setState({ letterImage: require('../images/letters/c.png') });
-//                break;
-//            case 'D':
-//                this.setState({ letterImage: require('../images/letters/d.png') });
-//                break;
-//            case 'E':
-//                this.setState({ letterImage: require('../images/letters/e.png') });
-//                break;
-            case 'F':
+            case 'A': case 'a':
+                this.setState({ letterImage: require('../images/letters/a.png') });
+                break;
+            case 'B': case 'b':
+                this.setState({ letterImage: require('../images/letters/b.png') });
+                break;
+            case 'C': case 'c':
+                this.setState({ letterImage: require('../images/letters/c.png') });
+                break;
+            case 'D': case 'd':
+                this.setState({ letterImage: require('../images/letters/d.png') });
+                break;
+            case 'E': case 'e':
+                this.setState({ letterImage: require('../images/letters/e.png') });
+                break;
+            case 'F': case 'f':
                 this.setState({ letterImage: require('../images/letters/f.png') });
                 break;
-//            case 'G':
-//                this.setState({ letterImage: require('../images/letters/i.png') });
-//                break;
-//            case 'H':
-//                this.setState({ letterImage: require('../images/letters/i.png') });
-//                break;
-            case 'I':
+            case 'G': case 'g':
+                this.setState({ letterImage: require('../images/letters/g.png') });
+                break;
+            case 'H': case 'h':
+                this.setState({ letterImage: require('../images/letters/h.png') });
+                break;
+            case 'I': case 'i':
                 this.setState({ letterImage: require('../images/letters/i.png') });
                 break;
-//            case 'J':
-//                this.setState({ letterImage: require('../images/letters/j.png') });
-//                break;
-//            case 'K':
-//                this.setState({ letterImage: require('../images/letters/k.png') });
-//                break;
-//            case 'L':
-//                this.setState({ letterImage: require('../images/letters/l.png') });
-//                break;
-//            case 'M':
-//                this.setState({ letterImage: require('../images/letters/m.png') });
-//                break;
-//            case 'N':
-//                this.setState({ letterImage: require('../images/letters/n.png') });
-//                break;
-//            case 'O':
-//                this.setState({ letterImage: require('../images/letters/o.png') });
-//                break;
-//            case 'P':
-//                this.setState({ letterImage: require('../images/letters/p.png') });
-//                break;
-//            case 'Q':
-//                this.setState({ letterImage: require('../images/letters/q.png') });
-//                break;
-//            case 'R':
-//                this.setState({ letterImage: require('../images/letters/r.png') });
-//                break;
-//            case 'S':
-//                this.setState({ letterImage: require('../images/letters/s.png') });
-//                break;
-//            case 'T':
-//                this.setState({ letterImage: require('../images/letters/t.png') });
-//                break;
-//            case 'U':
-//                this.setState({ letterImage: require('../images/letters/u.png') });
-//                break;
-//            case 'V':
-//                this.setState({ letterImage: require('../images/letters/v.png') });
-//                break;
-//            case 'W':
-//                this.setState({ letterImage: require('../images/letters/w.png') });
-//                break;
-//            case 'X':
-//                this.setState({ letterImage: require('../images/letters/x.png') });
-//                break;
-//            case 'Y':
-//                this.setState({ letterImage: require('../images/letters/y.png') });
-//                break;
-//            case 'Z':
-//                this.setState({ letterImage: require('../images/letters/z.png') });
-//                break;
+            case 'J': case 'j':
+                this.setState({ letterImage: require('../images/letters/j.png') });
+                break;
+            case 'K': case 'k':
+                this.setState({ letterImage: require('../images/letters/k.png') });
+                break;
+            case 'L': case 'l':
+                this.setState({ letterImage: require('../images/letters/l.png') });
+                break;
+            case 'M': case 'm':
+                this.setState({ letterImage: require('../images/letters/m.png') });
+                break;
+            case 'N': case 'n':
+                this.setState({ letterImage: require('../images/letters/n.png') });
+                break;
+            case 'O': case 'o':
+                this.setState({ letterImage: require('../images/letters/o.png') });
+                break;
+            case 'P': case 'p':
+                this.setState({ letterImage: require('../images/letters/p.png') });
+                break;
+            case 'Q': case 'q':
+                this.setState({ letterImage: require('../images/letters/q.png') });
+                break;
+            case 'R': case 'r':
+                this.setState({ letterImage: require('../images/letters/r.png') });
+                break;
+            case 'S': case 's':
+                this.setState({ letterImage: require('../images/letters/s.png') });
+                break;
+            case 'T': case 't':
+                this.setState({ letterImage: require('../images/letters/t.png') });
+                break;
+            case 'U': case 'u':
+                this.setState({ letterImage: require('../images/letters/u.png') });
+                break;
+            case 'V': case 'v':
+                this.setState({ letterImage: require('../images/letters/v.png') });
+                break;
+            case 'W': case 'w':
+                this.setState({ letterImage: require('../images/letters/w.png') });
+                break;
+            case 'X': case 'x':
+                this.setState({ letterImage: require('../images/letters/x.png') });
+                break;
+            case 'Y': case 'y':
+                this.setState({ letterImage: require('../images/letters/y.png') });
+                break;
+            case 'Z': case 'z':
+                this.setState({ letterImage: require('../images/letters/z.png') });
+                break;
             default:
                 this.setState({ letterImage: require('../images/letters/i.png') });
         }
-
-        this.populateArrays(verseStr, numHints).then((values) => {
+        this.populateArrays(verseStr, numHints, reverseTiles).then((values) => {
             if(values){
                 this.setState({ numHints: values.hints, fragmentOrder: values.fragmentOrder, nextFrag: values.nextFrag, frag0: values.frag0, frag1: values.frag1, frag2: values.frag2, frag3: values.frag3, frag4: values.frag4, frag5: values.frag5, frag6: values.frag6, frag7: values.frag7, frag8: values.frag8, frag9: values.frag9, frag10: values.frag10,
                                 frag11: values.frag11, frag12: values.frag12,  frag13: values.frag13, frag14: values.frag14, frag15: values.frag15, frag16: values.frag16, frag17: values.frag17, frag18: values.frag18, frag19: values.frag19, frag20: values.frag20, frag21: values.frag21, frag22: values.frag22, frag23: values.frag23,
@@ -314,27 +314,34 @@ class Game extends Component {
                                            showingVerse: true
                 })
             }
-            return AsyncStorage.getItem(KEY_InfinteHints);
-        }).then((infHintsStr) => {
-            let infHints = (infHintsStr == 'true')?true:false;
-            if(infHints)this.setState({ hasInfiniteHints: infHints, hintNumOpacity: 0 });
-            return AsyncStorage.getItem(KEY_MyHints);
-        }).then((numHintsStr) => {
-            let num = parseInt(numHintsStr);
-            if (num > -1){
-                this.setState({ numHints: num, myHintsInitialNum: num });
-            }
             return AsyncStorage.getItem(KEY_Premium);
         }).then((premium) => {
             let hasPremium = (premium == 'true')?true:false;
-            if (hasPremium)this.setState({isPremium: hasPremium});
+            if (hasPremium){
+                this.setState({isPremium: hasPremium, hintNumOpacity: 1});
+            }else{
+                this.setState({ hintNumOpacity: 0 });
+            }
+            return AsyncStorage.getItem(KEY_MyHints);
+        }).then((numHintsStr) => {
+            if (numHintsStr == 'infinite'){
+                this.setState({hasInfiniteHints: true, hintNumOpacity: 0});
+            }else{
+                let num = parseInt(numHintsStr, 10);
+                if (num > -1){
+                    this.setState({hasPaidForHints: true, hintNumOpacity: 1});
+                    if (num > 1)this.setState({numHints: num});
+                }else{
+                    this.setState({hasPaidForHints: false, hintNumOpacity: 0});
+                }
+            }
             return AsyncStorage.getItem(KEY_Solved);
         }).then((solved) => {
-            let ns = parseInt(solved);
+            let ns = parseInt(solved, 10);
             this.setState({numSolved: ns});
             return AsyncStorage.getItem(KEY_Favorites);
         }).then((favs) => {
-            let numFavs = parseInt(favs);
+            let numFavs = parseInt(favs, 10);
             this.setState({numFavorites: numFavs});
             return AsyncStorage.getItem(KEY_PlayFirst);
         }).then((playFirst) => {
@@ -343,9 +350,10 @@ class Game extends Component {
             }else{
                 this.setState({playedFirst: true});
             }
-        }).then(() => {setTimeout(()=>{ this.setState({ isLoading: false });
-                                        if (this.props.fromWhere == 'book')this.flipPanel(true);
-                      }, 250); })
+        }).then(() =>
+            {setTimeout(()=>{ this.setState({ isLoading: false });
+                if (this.props.fromWhere == 'book')this.flipPanel(true);
+            }, 250); })
     }
     componentWillUnmount () {
         BackHandler.removeEventListener('hardwareBackPress', this.handleHardwareBackButton);
@@ -472,7 +480,7 @@ class Game extends Component {
                 }
         });
     }
-    populateArrays(theVerse, num){
+    populateArrays(theVerse, num, reverseTiles){
         return new Promise(
             function (resolve, reject) {
                 let verseKeyString = cleanup(theVerse);
@@ -544,10 +552,12 @@ class Game extends Component {
                     }
                 }
                 let f2 = owl.deepCopy(fragments);
-                for (let j=0; j<f2.length; j++){
-                    let rnd = randomBetween(1, 3);
-                    if (rnd == 1){
-                        f2[j] = reverse(f2[j]);
+                if (reverseTiles){
+                    for (let j=0; j<f2.length; j++){
+                        let rnd = randomBetween(1, 3);
+                        if (rnd == 1){
+                            f2[j] = reverse(f2[j]);
+                        }
                     }
                 }
                 f2 = shuffleArray(f2);
@@ -569,15 +579,26 @@ class Game extends Component {
     getText(verse){
         let verseArray = verse.split('**');
         let bookName = this.props.title.substring(0, this.props.title.indexOf(' ', -1));
-        return bookName + ' ' + verseArray[1];
+        return verseArray[1];
 
     }
     seeVerseInReader(){
         let chV = this.state.panelText;
         chV = chV.substring(chV.indexOf(' ', -1) + 1);
         let chvArray = chV.split(':');
-        let chapterNum = parseInt(chvArray[0]) - 1;
-
+        let chapterNum = parseInt(chvArray[0], 10) - 1;
+        let startPoint = '';
+        let endPoint = '';
+        if (chvArray[1].indexOf('-') > -1){
+            let splitOnHyphen = chvArray[1].split('-');
+            startPoint = splitOnHyphen[0];
+            let nextNum = parseInt(splitOnHyphen[1], 10) + 1;
+            endPoint = String(nextNum);
+        }else{
+            startPoint = chvArray[1];
+            let nextNum = parseInt(chvArray[1], 10) + 1;
+            endPoint = String(nextNum);
+        }
         this.props.navigator.push({
             id: 'reader',
             passProps: {
@@ -585,7 +606,8 @@ class Game extends Component {
                 dataElement: this.props.dataElement,
                 chapterIndex: chapterNum,
                 fromWhere: 'game',
-                entireVerse: this.state.entireVerse
+                startPoint: startPoint,
+                endPoint: endPoint
             }
         });
     }
@@ -805,10 +827,10 @@ class Game extends Component {
         this.showButtonPanel();
         if(this.props.fromWhere == 'collection'){
             let newNumSolved = (parseInt(homeData[this.props.dataElement].num_solved, 10) + 1).toString();
-            homeData[this.props.dataElement].num_solved = newNumSolved;
+            if(!this.state.openedAll)homeData[this.props.dataElement].num_solved = newNumSolved;
             homeData[this.props.dataElement].solved[this.state.index] = 1;
             let onLastVerse=(parseInt(this.state.index, 10) + 1 == parseInt(homeData[this.props.dataElement].num_verses, 10))?true:false;
-            if(onLastVerse){homeData[this.props.dataElement].type = 'solved';}
+            if(onLastVerse && !this.state.openedAll)homeData[this.props.dataElement].type = 'solved';
             try {
                 AsyncStorage.setItem(KEY_Verses, JSON.stringify(homeData));
             } catch (error) {
@@ -986,15 +1008,22 @@ class Game extends Component {
     giveHint(frag){
         let hints = this.state.numHints;
         let hasInfinite = this.state.hasInfiniteHints;
-        let myHintNum = this.state.myHintsInitialNum;
+        let hasPaid = this.state.hasPaidForHints;
         if (hints > 0 && !hasInfinite){
             let newHintNum = hints - 1;
             this.setState({numHints: newHintNum});
             let newVerseStr = newHintNum + '**' + this.state.chapterVerse + '**' + this.state.entireVerse;
             homeData[this.props.dataElement].verses[this.props.index] = newVerseStr;
+            if (hasPaid){
+                try {
+                    AsyncStorage.setItem(KEY_MyHints, String(newHintNum));
+                } catch (error) {
+                    window.alert('AsyncStorage error: ' + error.message);
+                }
+            }
         }
-        if (hints < 1){
-        let alertString = (myHintNum > -1)?`Would you like to purchase more hints?`:`Sorry, only 2 hints per Verse unless you've purchased a hint package!`;
+        if (hints < 1 && !hasInfinite){
+        let alertString = (hasPaid == true)?`Would you like to purchase more hints?`:`Sorry, only 2 hints per Verse unless you've purchased a hint package!`;
             Alert.alert( 'No more hints...',  alertString,
                 [
                     {text: 'See Packages', onPress: () => this.goToHintStore()},
@@ -1144,10 +1173,10 @@ class Game extends Component {
             case 3://go to app intro 2nd page:
         try {
             this.props.navigator.push({
-                id: 'intro1',
+                id: 'swiper',
                 passProps: {
                     destination: 'game',
-                    introIndex: 1,
+                    seenIntro: 'true',
                     }
             });
         } catch(err)  {
@@ -1306,15 +1335,20 @@ class Game extends Component {
                         </View>
                         <View style={[game_styles.footer, this.footerBorder(this.state.bgColor), this.headerFooterColor(this.state.bgColor)]}>
                         { this.state.showHintButton &&
-                            <View style={{flexDirection: 'row', justifyContent: 'center', width: width}}>
+                            <View style={{flexDirection: 'row', justifyContent: 'space-between', width: width}}>
+                                <View style={game_styles.hint_container}>
+                                </View>
                                 <View style={game_styles.hint_container} onStartShouldSetResponder={() => { this.giveHint(this.state.nextFrag) }}>
                                     <View style={game_styles.hint_button} >
                                         <Text style={game_styles.hint_text}>hint</Text>
                                     </View>
                                 </View>
+                                <View style={game_styles.hint_container}>
+                                    <Text style={[game_styles.hint_text, {opacity: this.state.hintNumOpacity}]}>{ this.state.numHints }</Text>
+                                </View>
                             </View>
-                        }
-                        </View>
+                         }
+                         </View>
                         { this.state.showButtons &&
                         <View style={game_styles.after_buttons}>
                             { this.state.showFB &&
