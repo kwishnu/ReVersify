@@ -8,6 +8,7 @@ const styles = require('../styles/styles');
 const {width, height} = require('Dimensions').get('window');
 const KEY_ratedTheApp = 'ratedApp';
 const KEY_PlayFirst = 'playFirstKey';
+const KEY_Premium = 'premiumOrNot';
 let year = moment().year();
 
 module.exports = class Mission extends Component {
@@ -15,11 +16,17 @@ module.exports = class Mission extends Component {
         super(props);
         this.state = {
             id: 'mission',
-            ratedApp: false
+            ratedApp: false,
+            ratingText: `Ratings are important! They not only give us valuable feedback about our app, they promote awareness of the app to the wider world as well...please help us by rating us in the app store via the button below, and we'll thank you with a special Game setting!`
         };
         this.goSomewhere = this.goSomewhere.bind(this);
     }
     componentDidMount(){
+        AsyncStorage.getItem(KEY_Premium).then((premium) => {
+            if (premium == 'true'){
+                this.setState({ratingText: `Ratings are important! They not only give us valuable feedback about our app, they promote awareness of the app to the wider world as well...please help us by rating us in the app store via the button below. Thanks!`});
+            }
+        });
         BackHandler.addEventListener('hardwareBackPress', this.goSomewhere);
         AppState.addEventListener('change', this.handleAppStateChange);
     }
@@ -91,7 +98,7 @@ module.exports = class Mission extends Component {
                         </Text>
                     </View>
                         <View style={about_styles.divider}/>
-                    <Text style={about_styles.mediumPrint}>{`Ratings are important! They not only give us valuable feedback about our app, they promote awareness of the app to the wider world as well...please help us by rating us in the app store via the button below, and we'll thank you with a special Game setting!`}</Text>
+                    <Text style={about_styles.mediumPrint}>{this.state.ratingText}</Text>
                     <Button style={about_styles.rate_button} onPress={() => this.rateApp()}>
                         <Text style={about_styles.sure}>Sure!</Text>
                     </Button>

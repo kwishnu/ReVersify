@@ -4,25 +4,29 @@ import Button from '../components/Button';
 import configs from '../config/configs';
 import { normalize, normalizeFont }  from '../config/pixelRatio';
 import moment from 'moment';
+let year = moment().year();
 const styles = require('../styles/styles');
 const {width, height} = require('Dimensions').get('window');
 const KEY_PlayFirst = 'playFirstKey';
 const KEY_ratedTheApp = 'ratedApp';
-const KEY_reverse = 'reverseFragments';
-let year = moment().year();
-//const KEY_ThankRated = 'thankRatedApp';
-
+const KEY_Premium = 'premiumOrNot';
 
 module.exports = class About extends Component {
     constructor(props) {
         super(props);
         this.state = {
             id: 'about',
-            ratedApp: false
+            ratedApp: false,
+            ratingText: 'If you enjoy our app, please take a moment to rate us in the store via the button below, and we\'ll thank you with a special Game setting!'
         };
         this.goSomewhere = this.goSomewhere.bind(this);
     }
     componentDidMount(){
+        AsyncStorage.getItem(KEY_Premium).then((premium) => {
+            if (premium == 'true'){
+                this.setState({ratingText: 'If you enjoy our app, please take a moment to rate us in the store via the button below. Thanks!'});
+            }
+        });
         BackHandler.addEventListener('hardwareBackPress', this.goSomewhere);
         AppState.addEventListener('change', this.handleAppStateChange);
     }
@@ -32,12 +36,15 @@ module.exports = class About extends Component {
     }
     handleAppStateChange=(appState)=>{//for coming back from rating app
         if(appState == 'active'){
-            this.props.navigator.replace({
-                id: 'splash',
-                passProps: {
-                    motive: 'initialize'
-                }
-            });
+            setTimeout(()=> {
+                this.props.navigator.replace({
+                    id: 'splash',
+                    passProps: {
+                        motive: 'initialize'
+                    }
+                });
+                }, 500);
+            this.props.navigator.pop({});
         }
     }
     goSomewhere() {
@@ -55,7 +62,7 @@ module.exports = class About extends Component {
     }
     rateApp(){
 //                        try {
-//                            AsyncStorage.setItem(KEY_reverse, 'true');//
+//                            AsyncStorage.setItem(KEY_ThankRated, 'false');
 //                        } catch (error) {
 //                            window.alert('AsyncStorage error: ' + error.message);
 //                        }
@@ -70,7 +77,6 @@ module.exports = class About extends Component {
                     .then(()=>{
                         return AsyncStorage.setItem(KEY_PlayFirst, 'true');
                     }).then(()=>{
-//                        this.props.navigator.pop({});
                         Linking.openURL(storeUrl);
                     })
                 } catch (error) {
@@ -108,9 +114,9 @@ module.exports = class About extends Component {
                         <View style={about_styles.divider}>
                         </View>
                     </View>
-                    <Text style={about_styles.mediumPrint}>{'If you enjoy our app, please take a moment to rate us in the store via the button below, and we\'ll thank you with a special Game setting!'}</Text>
+                    <Text style={about_styles.mediumPrint}>{this.state.ratingText}</Text>
                     <Button style={about_styles.rate_button} onPress={() => this.rateApp()}>
-                        <Text style={about_styles.sure}>Sure!</Text>
+                        <Text style={about_styles.sure}>OK</Text>
                     </Button>
                 </View>
             </View>
