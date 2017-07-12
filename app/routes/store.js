@@ -57,16 +57,13 @@ module.exports = class Store extends Component {
             id: 'store',
             dataSource: this.props.availableList,
             expand: true,
-            infoString: `All Bible Books are priced $0.99USD and may be read in their entirety. A portion of the proceeds raised by the app will be donated to the WEB project of World Outreach Ministries.`,
-            infoText: `All Bible Books are priced $0.99USD and may be read in their entirety. A portion of the proceeds raised by the app will be donated to the WEB project of World Outreach Ministries.`
+            infoText: `All Bible Books are priced $0.99USD and may be read in their entirety in the app. A portion of the proceeds raised by the app will be donated to the WEB project of World Outreach Ministries.`
         };
         this.handleHardwareBackButton = this.handleHardwareBackButton.bind(this);
     }
     componentDidMount(){
         if (this.props.dataIndex == 5){
-            this.setState({ infoText: `All Verse Collections contain 50 Verse Puzzles and are priced $0.99USD. A portion of the proceeds raised by the app will be donated to the WEB project of World Outreach Ministries.`,
-                            infoString: `All Verse Collections contain 50 Verse Puzzles and are priced $0.99USD. A portion of the proceeds raised by the app will be donated to the WEB project of World Outreach Ministries.`
-            });
+            this.setState({ infoText: `All Verse Collections contain 50 Verse Puzzles and are priced $0.99USD. A portion of the proceeds raised by the app will be donated to the WEB project of World Outreach Ministries.` });
         }
         AsyncStorage.getItem(KEY_expandInfo).then((strExpand) => {
             if(strExpand){
@@ -104,7 +101,7 @@ module.exports = class Store extends Component {
         return true;
     }
     toggleInfoBox(bool){
-        this.setState({expand: !bool, infoText: this.state.infoString});
+        this.setState({expand: !bool, infoText: this.state.infoText});
         AsyncStorage.getItem(KEY_expandInfo).then((strExpand) => {
             let expArr = strExpand.split('.');
             let ind = 0;
