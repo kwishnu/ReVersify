@@ -14,6 +14,8 @@ const KEY_PlayFirst = 'playFirstKey';
 const KEY_ratedTheApp = 'ratedApp';
 const KEY_ThankRated = 'thankRatedApp';
 const KEY_ThankPremium = 'thankPremium';
+const KEY_showFB = 'showFBKey';
+const KEY_showTwitter = 'showTwitterKey';
 const KEY_HideVerse = 'hideVerseKey';
 const KEY_reverse = 'reverseFragments';
 const KEY_expandInfo = 'expandInfoKey';
@@ -40,6 +42,8 @@ class SwipeNavigator extends Component {
                 [KEY_ThankRated, 'false'],
                 [KEY_ThankPremium, 'false'],
                 [KEY_HideVerse, 'true'],
+                [KEY_showFB, 'true'],
+                [KEY_showTwitter, 'true'],
                 [KEY_reverse, 'true'],
                 [KEY_expandInfo, '1.1.1'],
                 [KEY_MyHints, '-1'],

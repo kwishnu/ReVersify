@@ -13,6 +13,8 @@ const KEY_Sound = 'soundKey';
 const KEY_Verses = 'versesKey';
 const KEY_solvedTP = 'solvedTP';
 const KEY_Solved = 'numSolvedKey';
+const KEY_showFB = 'showFBKey';
+const KEY_showTwitter = 'showTwitterKey';
 const KEY_Favorites = 'numFavoritesKey';
 const KEY_daily_solved_array = 'solved_array';
 const KEY_Time = 'timeKey';
@@ -339,6 +341,14 @@ class Game extends Component {
         }).then((solved) => {
             let ns = parseInt(solved, 10);
             this.setState({numSolved: ns});
+            return AsyncStorage.getItem(KEY_showFB);
+        }).then((fb) => {
+            let showFB = (fb == 'true')?true:false;
+            this.setState({showFB: showFB});
+            return AsyncStorage.getItem(KEY_showTwitter);
+        }).then((tw) => {
+            let showTwitter = (tw == 'true')?true:false;
+            this.setState({showTwitter: showTwitter});
             return AsyncStorage.getItem(KEY_Favorites);
         }).then((favs) => {
             let numFavs = parseInt(favs, 10);
@@ -1206,6 +1216,41 @@ class Game extends Component {
             Alert.alert('Favorites full', 'Sorry, Favorites storage is limited to 3 unless you have purchased something within the app');
         }
     }
+    linkToUrl(which){
+        if (which == 'FB'){
+            Linking.canOpenURL(configs.FB_URL_APP)
+            .then(supported => {
+                if (supported) {
+                    Linking.openURL(configs.FB_URL_APP);
+                } else {
+                    Linking.canOpenURL(configs.FB_URL_BROWSER)
+                    .then(isSupported => {
+                        if (isSupported) {
+                            Linking.openURL(configs.FB_URL_BROWSER);
+                        } else {
+                            console.log('Don\'t know how to open URL: ' + configs.FB_URL_BROWSER);
+                        }
+                    });
+                }
+            });
+        }else{
+            Linking.canOpenURL(configs.TWITTER_URL_APP)
+            .then(supported => {
+                if (supported) {
+                    Linking.openURL(configs.TWITTER_URL_APP);
+                } else {
+                    Linking.canOpenURL(configs.TWITTER_URL_BROWSER)
+                    .then(isSupported => {
+                        if (isSupported) {
+                            Linking.openURL(configs.TWITTER_URL_BROWSER);
+                        } else {
+                            console.log('Don\'t know how to open URL: ' + configs.TWITTER_URL_BROWSER);
+                        }
+                    });
+                }
+            });
+        }
+    }
 
 
     render() {
@@ -1352,16 +1397,16 @@ class Game extends Component {
                         { this.state.showButtons &&
                         <View style={game_styles.after_buttons}>
                             { this.state.showFB &&
-                            <Animated.Image style={[ game_styles.button_image, buttonsStyle ]} source={require('../images/buttonfb.png')}/>
+                            <Animated.Image style={[ game_styles.button_image, buttonsStyle ]} source={require('../images/buttonfb.png')} onStartShouldSetResponder={() => { this.linkToUrl('FB') }}/>
                             }
                             { this.state.showTwitter &&
-                            <Animated.Image style={[ game_styles.button_image, buttonsStyle ]} source={require('../images/buttontwitter.png')}/>
+                            <Animated.Image style={[ game_styles.button_image, buttonsStyle ]} source={require('../images/buttontwitter.png')} onStartShouldSetResponder={() => { this.linkToUrl('Twitter') }}/>
                             }
                             { this.state.showFavorites &&
-                            <Animated.Image style={[ {width: 65, height: 65, margin: 1}, buttonsStyle ]} source={require('../images/favorites.png')} onStartShouldSetResponder={() => { this.addToFavorites() }} />
+                            <Animated.Image style={[ {width: 65, height: 65, margin: 1}, buttonsStyle ]} source={require('../images/favorites.png')} onStartShouldSetResponder={() => { this.addToFavorites() }}/>
                             }
                             { this.state.showBible &&
-                            <Animated.Image style={[ {width: 65, height: 65, margin: 1}, buttonsStyle ]} source={require('../images/bible.png')} onStartShouldSetResponder={() => { this.seeVerseInReader() }} />
+                            <Animated.Image style={[ {width: 65, height: 65, margin: 1}, buttonsStyle ]} source={require('../images/bible.png')} onStartShouldSetResponder={() => { this.seeVerseInReader() }}/>
                             }
                         </View>
                         }
