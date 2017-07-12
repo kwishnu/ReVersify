@@ -351,12 +351,13 @@ class Book extends Component{
         });
     }
     launchReader(){
+        let chapterNum = parseInt(this.props.homeData[this.props.dataElement].on_chapter, 10);
         this.props.navigator.push({
             id: 'reader',
             passProps: {
                 homeData: this.props.homeData,
                 dataElement: this.props.dataElement,
-                chapterIndex: 0,
+                chapterIndex: chapterNum,
                 fromWhere: 'book'
             }
         });

@@ -451,7 +451,8 @@ class SplashScreen extends Component {
                                 product_id: ID,
                                 bg_color: bg_color,
                                 verses: verses,
-                                chapters: chapters
+                                chapters: chapters,
+                                on_chapter: '0'
                             });
                             resolve(theData);
                         },

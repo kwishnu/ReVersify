@@ -6,6 +6,7 @@ import { normalize, normalizeFont }  from '../config/pixelRatio';
 import moment from 'moment';
 const styles = require('../styles/styles');
 const {width, height} = require('Dimensions').get('window');
+const KEY_Verses = 'versesKey';
 
 
 module.exports = class Reader extends Component {
@@ -22,11 +23,16 @@ module.exports = class Reader extends Component {
             initial: '',
             backOpacity: 0,
             forwardOpacity: 0,
-            bgColor: ''
+            bookmarkImage: require('../images/bookmarkgray.png'),
+            bgColor: '',
+            homeData: this.props.homeData
         };
         this.goBack = this.goBack.bind(this);
     }
     componentDidMount(){
+        if (this.state.homeData[this.props.dataElement].on_chapter == String(this.props.chapterIndex)){
+            this.setState({bookmarkImage: require('../images/bookmarkred.png')});
+        }
         let chapterText = this.props.homeData[this.props.dataElement].chapters[this.props.chapterIndex];
         let s1 = '';
         let s2 = '';
@@ -108,6 +114,15 @@ module.exports = class Reader extends Component {
             }
        });
     }
+    setBookmark(){
+        this.setState({bookmarkImage: require('../images/bookmarkred.png')});
+        this.state.homeData[this.props.dataElement].on_chapter = String(this.props.chapterIndex);
+        try {
+            AsyncStorage.setItem(KEY_Verses, JSON.stringify(this.state.homeData));
+        } catch (error) {
+            window.alert('AsyncStorage error: ' + error.message);
+        }
+    }
 
     render() {
         if(this.state.isLoading == true){
@@ -130,8 +145,8 @@ module.exports = class Reader extends Component {
                         <Button style={[reader_styles.button, {opacity: this.state.forwardOpacity}]} onPress={ () => this.nextChapter(1)}>
                             <Image source={ require('../images/playarrowforward.png') } style={ { width: normalize(height*0.1), height: normalize(height*0.1) } } />
                         </Button>
-                        <Button style={reader_styles.button}>
-                            <Image source={ require('../images/noimage.png') } style={ { width: normalize(height*0.07), height: normalize(height*0.07) } } />
+                        <Button style={reader_styles.button}  onPress={ () => this.setBookmark() }>
+                            <Image source={this.state.bookmarkImage} style={ { width: normalize(height*0.07), height: normalize(height*0.07) } } />
                         </Button>
                     </View>
                     <View style={[reader_styles.reader_container, {backgroundColor: this.state.bgColor}]}>
