@@ -9,14 +9,15 @@ import Intro2 from '../intro/intro2';
 import Intro3 from '../intro/intro3';
 import Intro4 from '../intro/intro4';
 import Intro5 from '../intro/intro5';
-const KEY_MyHints = 'myHintsKey';
 const KEY_Premium = 'premiumOrNot';
 const KEY_PlayFirst = 'playFirstKey';
-const KEY_ShowVerse = 'showVerseKey';
 const KEY_ratedTheApp = 'ratedApp';
-const KEY_reverse = 'reverseFragments';
 const KEY_ThankRated = 'thankRatedApp';
+const KEY_ThankPremium = 'thankPremium';
+const KEY_HideVerse = 'hideVerseKey';
+const KEY_reverse = 'reverseFragments';
 const KEY_expandInfo = 'expandInfoKey';
+const KEY_MyHints = 'myHintsKey';
 const KEY_Solved = 'numSolvedKey';
 const KEY_Favorites = 'numFavoritesKey';
 const KEY_show_score = 'showScoreKey';
@@ -33,14 +34,15 @@ class SwipeNavigator extends Component {
         setTimeout(()=> {this.setState({isLoading: false})}, 1000);
         if (this.props.seenIntro != 'true'){
             var initArray = [
-                [KEY_MyHints, '-1'],
                 [KEY_Premium, 'false'],
                 [KEY_PlayFirst, 'false'],
-                [KEY_ShowVerse, 'false'],
                 [KEY_ratedTheApp, 'false'],
-                [KEY_reverse, 'true'],
                 [KEY_ThankRated, 'false'],
+                [KEY_ThankPremium, 'false'],
+                [KEY_HideVerse, 'true'],
+                [KEY_reverse, 'true'],
                 [KEY_expandInfo, '1.1.1'],
+                [KEY_MyHints, '-1'],
                 [KEY_Solved, '0'],
                 [KEY_Favorites, '0'],
                 [KEY_show_score, '1']
