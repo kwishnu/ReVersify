@@ -80,7 +80,6 @@ class Book extends Component{
     }
     componentDidMount() {
         homeData = this.state.homeData;
-
         this.setColors();
         AppState.addEventListener('change', this.handleAppStateChange);
         BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
@@ -284,25 +283,10 @@ class Book extends Component{
             return {borderColor: darkerColor};
     }
     bg(num){
-         let strToReturn='';
-         let numberSolved = parseInt(this.props.homeData[this.props.dataElement].num_solved, 10);
-         let numPuzzles = parseInt(this.props.homeData[this.props.dataElement].num_verses, 10);
-         if (numberSolved == numPuzzles){
+        let strToReturn = (this.props.homeData[this.props.dataElement].solved[num] == 0)?'#ffffff':'#cae6ef';
             return {
-                backgroundColor: '#00FF00'
+                backgroundColor: strToReturn
             };
-         }
-         let onThis = parseInt(this.props.homeData[this.props.dataElement].num_solved, 10);
-         if(num==onThis){
-             strToReturn='#00FF00';
-             }else if(num<onThis){
-             strToReturn='#079707';
-             }else{
-             strToReturn='#999ba0';
-         }
-         return {
-             backgroundColor: strToReturn
-         };
     }
     getUnderlay(num){
          let strToReturn='';
@@ -432,7 +416,7 @@ class Book extends Component{
                                         renderRow={(rowData, sectionID, rowID) =>
                                          <View>
                                              <TouchableHighlight onPress={() => this.onSelect(rowData, rowID)}
-                                                                 style={book_styles.launcher} >
+                                                                 style={[book_styles.launcher, this.bg(rowID)]} >
                                                  <Text style={ book_styles.launcher_text }>{this.getText(rowData)}</Text>
                                              </TouchableHighlight>
                                          </View>}
@@ -487,8 +471,7 @@ const book_styles = StyleSheet.create({
         borderWidth: 1,
         margin: height*.002,
         justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#ffffff'
+        alignItems: 'center'
     },
     launcher_text: {
         fontSize: normalizeFont(configs.LETTER_SIZE*.09),
