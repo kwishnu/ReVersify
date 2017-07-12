@@ -11,10 +11,10 @@ import Intro4 from '../intro/intro4';
 import Intro5 from '../intro/intro5';
 const KEY_MyHints = 'myHintsKey';
 const KEY_Premium = 'premiumOrNot';
-const KEY_InfinteHints = 'infHintKey';
 const KEY_PlayFirst = 'playFirstKey';
 const KEY_ShowVerse = 'showVerseKey';
 const KEY_ratedTheApp = 'ratedApp';
+const KEY_reverse = 'reverseFragments';
 const KEY_ThankRated = 'thankRatedApp';
 const KEY_expandInfo = 'expandInfoKey';
 const KEY_Solved = 'numSolvedKey';
@@ -35,10 +35,10 @@ class SwipeNavigator extends Component {
             var initArray = [
                 [KEY_MyHints, '-1'],
                 [KEY_Premium, 'false'],
-                [KEY_InfinteHints, 'false'],
                 [KEY_PlayFirst, 'false'],
                 [KEY_ShowVerse, 'false'],
                 [KEY_ratedTheApp, 'false'],
+                [KEY_reverse, 'true'],
                 [KEY_ThankRated, 'false'],
                 [KEY_expandInfo, '1.1.1'],
                 [KEY_Solved, '0'],
