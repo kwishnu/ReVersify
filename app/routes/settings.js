@@ -15,6 +15,7 @@ const KEY_NotifTime = 'notifTimeKey';
 const KEY_PlayFirst = 'playFirstKey';
 const KEY_show_score = 'showScoreKey';
 const KEY_reverse = 'reverseFragments';
+const KEY_HideVerse = 'hideVerseKey';
 const KEY_Premium = 'premiumOrNot';
 const KEY_ratedTheApp = 'ratedApp';
 var nowISO = moment().valueOf();
@@ -30,6 +31,8 @@ module.exports = class Settings extends Component {
             sounds_text: 'Game sounds on',
             reverse_state: true,
             reverse_text: 'Reverse some Verse tiles',
+            hide_verse_state: true,
+            hide_verse_text: 'Hide Chapter and Verse in puzzles',
             color_state: true,
             use_colors: 'Use Verse Collection colors',
             notifs_state: true,
@@ -46,7 +49,12 @@ module.exports = class Settings extends Component {
     }
     componentDidMount(){
         BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
-        AsyncStorage.getItem(KEY_ratedTheApp).then((rated) => {
+        AsyncStorage.getItem(KEY_Premium).then((premium) => {
+            if (premium == 'true'){
+                this.setState({showPlayFirst: true});
+            }
+            return AsyncStorage.getItem(KEY_ratedTheApp)
+        }).then((rated) => {
             if (rated == 'true')this.setState({showPlayFirst: true});
             return AsyncStorage.getItem(KEY_Sound);
         }).then((sounds) => {
@@ -137,6 +145,14 @@ module.exports = class Settings extends Component {
                 reverse_state: stateToUse,
                 reverse_text: strToUse
             });
+            return AsyncStorage.getItem(KEY_HideVerse);
+        }).then((hide) => {
+            var stateToUse = (hide == 'true')?true:false;
+            var strToUse = (hide == 'true')?'Hide Chapter and Verse in puzzles':'Showing Chapter and Verse';
+            this.setState({
+                hide_verse_state: stateToUse,
+                hide_verse_text: strToUse
+            });
             return true;
         }).then((done) => {
             if(done){
@@ -210,6 +226,16 @@ module.exports = class Settings extends Component {
         this.setState({reverse_text: strToUse});
         try {
             AsyncStorage.setItem(KEY_reverse, reverseBool);
+        } catch (error) {
+            window.alert('AsyncStorage error: ' + error.message);
+        }
+    }
+    toggleHideVerse(state){
+        var strToUse = (state)?'Hide Chapter and Verse in puzzles':'Showing Chapter and Verse';
+        var flipBool = (state)?'true':'false';
+        this.setState({hide_verse_text: strToUse});
+        try {
+            AsyncStorage.setItem(KEY_HideVerse, flipBool);
         } catch (error) {
             window.alert('AsyncStorage error: ' + error.message);
         }
@@ -354,6 +380,14 @@ module.exports = class Settings extends Component {
                                 </View>
                                 <View style={settings_styles.switch_container}>
                                     <Switch value={this.state.reverse_state} onValueChange={(state)=>{this.toggleReverse(state)}}/>
+                                </View>
+                            </View>
+                            <View style={[settings_styles.parameter_container, {marginTop: height*0.02}]}>
+                                <View style={[settings_styles.text_container, {alignItems: 'flex-end'}]}>
+                                    <Text style={settings_styles.text}>{this.state.hide_verse_text}</Text>
+                                </View>
+                                <View style={settings_styles.switch_container}>
+                                    <Switch value={this.state.hide_verse_state} onValueChange={(state)=>{this.toggleHideVerse(state)}}/>
                                 </View>
                             </View>
                         </View>

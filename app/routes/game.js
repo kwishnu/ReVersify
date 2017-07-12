@@ -19,7 +19,7 @@ const KEY_Time = 'timeKey';
 const KEY_MyHints = 'myHintsKey';
 const KEY_Premium = 'premiumOrNot';
 const KEY_PlayFirst = 'playFirstKey';
-const KEY_ShowVerse = 'showVerseKey';
+const KEY_HideVerse = 'hideVerseKey';
 let dsArray = [];
 let homeData = {};
 let Sound = require('react-native-sound');
@@ -305,9 +305,9 @@ class Game extends Component {
                     window.alert('AsyncStorage error: ' + error.message);
                 }
             }
-            return AsyncStorage.getItem(KEY_ShowVerse);
-        }).then((show) => {
-            if (show == 'true' || this.props.fromWhere == 'favorites'){
+            return AsyncStorage.getItem(KEY_HideVerse);
+        }).then((hide) => {
+            if (hide == 'false' || this.props.fromWhere == 'favorites'){
                 this.setState({panelText:  chapterVerse,
                                            panelBgColor: '#555555',
                                            panelBorderColor: '#000000',
@@ -825,7 +825,7 @@ class Game extends Component {
         if (this.props.fromWhere != 'book')this.flipPanel(false);
         this.setState({doneWithVerse: true, showHintButton: false, showNextArrow: true});
         this.showButtonPanel();
-        if(this.props.fromWhere == 'collection'){
+        if(this.props.fromWhere == 'collection' || this.props.fromWhere == 'book'){
             let newNumSolved = (parseInt(homeData[this.props.dataElement].num_solved, 10) + 1).toString();
             if(!this.state.openedAll)homeData[this.props.dataElement].num_solved = newNumSolved;
             homeData[this.props.dataElement].solved[this.state.index] = 1;
