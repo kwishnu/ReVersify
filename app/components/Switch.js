@@ -7,6 +7,8 @@ import {
 	PanResponder,
 	TouchableWithoutFeedback
 } from 'react-native';
+import { normalize }  from '../config/pixelRatio';
+const {width, height} = require('Dimensions').get('window');
 
 export class Switch extends Component {
 	static propTypes = {
@@ -36,7 +38,7 @@ export class Switch extends Component {
 
 	  this.state = {
 	  	value: props.value,
-	  	transformSwitch: new Animated.Value(props.value ? 21 : -21),
+	  	transformSwitch: new Animated.Value(props.value ? normalize(height*.02) : -normalize(height*.02)),
 			backgroundColor: new Animated.Value(props.value ? 75 : -75),
 			circleColor: new Animated.Value(props.value ? 75 : -75)
 	  };
@@ -74,7 +76,7 @@ export class Switch extends Component {
 	animateSwitch(value, cb = () => {}) {
 		Animated.parallel([
 			Animated.spring(this.state.transformSwitch, {
-				toValue: value ? 21 : -21,
+				toValue: value ? normalize(height*.02) : -normalize(height*.02),
 				duration: 200
 			}),
 			Animated.timing(this.state.backgroundColor, {
@@ -105,41 +107,29 @@ export class Switch extends Component {
 		} = this.props;
 
 		const interpolatedColorAnimation = backgroundColor.interpolate({
-		  inputRange: [-75, 75],
+		  inputRange: [-normalize(height*.08), normalize(height*.08)],
       outputRange: [backgroundInactive, backgroundActive]
 		});
 
     const interpolatedCircleColor = circleColor.interpolate({
-      inputRange: [-75, 75],
+      inputRange: [-normalize(height*.08), normalize(height*.08)],
       outputRange: [circleInActiveColor, circleActiveColor]
 		});
 
     return (
-			<TouchableWithoutFeedback
-        onPress={this.handleSwitch}
-			>
-				<Animated.View
-          style={[
-            styles.container,
-            { backgroundColor: interpolatedColorAnimation }
-          ]}
-				>
-					<Animated.View
-						style={[
-							styles.animatedContainer,
-							{ transform: [{ translateX: transformSwitch }] },
-						]}
-					>
-						<Text style={[styles.text, styles.inactiveText, styles.paddingRight]}>
-							{activeText}
-						</Text>
-						<Animated.View style={[styles.circle, { backgroundColor: interpolatedCircleColor }]} />
-						<Text style={[styles.text, styles.active, styles.paddingLeft]}>
-							{inActiveText}
-						</Text>
-					</Animated.View>
-				</Animated.View>
-			</TouchableWithoutFeedback>
+        <TouchableWithoutFeedback onPress={this.handleSwitch}>
+            <Animated.View style={[styles.container, { backgroundColor: interpolatedColorAnimation }]}>
+                <Animated.View style={[styles.animatedContainer, { transform: [{ translateX: transformSwitch }] }]}>
+                    <Text style={[styles.text, styles.inactiveText, styles.paddingRight]}>
+                        {activeText}
+                    </Text>
+                    <Animated.View style={[styles.circle, { backgroundColor: interpolatedCircleColor }]} />
+                    <Text style={[styles.text, styles.active, styles.paddingLeft]}>
+                        {inActiveText}
+                    </Text>
+                </Animated.View>
+            </Animated.View>
+        </TouchableWithoutFeedback>
 		);
 	}
 }
@@ -147,23 +137,23 @@ export class Switch extends Component {
 
 const styles = StyleSheet.create({
 	container: {
-		width: 75,
-		height: 30,
-		borderRadius: 30,
+		width: normalize(height*.07),
+		height: normalize(height*.03),
+		borderRadius: normalize(height*.03),
 		backgroundColor: 'black',
-		// overflow: 'hidden'
+		marginLeft: 10
 	},
 	animatedContainer: {
 		flex: 1,
-		width: 78,
+		width: normalize(height*.07),
 		flexDirection: 'row',
 		justifyContent: 'center',
 		alignItems: 'center',
 	},
 	circle: {
-		width: 30,
-		height: 30,
-		borderRadius: 15,
+		width: normalize(height*.03),
+		height: normalize(height*.03),
+		borderRadius: (normalize(height*.03))*.5,
 		backgroundColor: 'white',
 		borderWidth: 1,
 		borderColor: 'rgb(100, 100, 100)',
