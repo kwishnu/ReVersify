@@ -184,138 +184,89 @@ class Collection extends Component{
         this.setState({ isOpen: isOpen });
     }
     onMenuItemSelected = (item) => {
-            var myPackArray = [];
-            var keepInList = [];
-            switch (item.link){
-                case 'home':
-                    this.props.navigator.replace({
-                        id: 'home',
+        var index = parseInt(item.index, 10);
+        var myPackArray = [];
+        var keepInList = [];
+        switch (item.link){
+            case 'home':
+                this.props.navigator.replace({
+                    id: 'home',
+                    passProps: {
+                        homeData: this.props.homeData,
+                    }
+                });
+                break;
+            case 'intro':
+                this.props.navigator.push({
+                    id: 'swiper',
+                    passProps: {
+                        destination: 'collection',
+                        homeData: this.state.homeData,
+                        seenIntro: 'true'
+                    }
+                });
+                break;
+            case 'store':
+                if (item.title == 'Hint Packages'){
+                    this.props.navigator.push({
+                        id: 'hints',
                         passProps: {
-                            homeData: this.props.homeData,
+                            destination: 'collection',
+                            homeData: this.state.homeData,
                         }
-                    });
-                    break;
-                case 'game':
-                    this.props.navigator.replace({
-                        id: 'game',
-                        passProps: {
-                            homeData: this.props.homeData,
-                            daily_solvedArray: this.props.sArray,
-                            title: this.props.todayFull,
-                            index: '0',
-                            bgColor: '#055105',
-                            fromWhere: 'home',
-                            dataElement: '16',
-                            isPremium: this.props.isPremium
-                        },
                     });
                     return;
-                case 'daily':
-                    if(this.props.isPremium == 'true'){
-                        this.goToDaily('18');
-                    }else{
-                        this.goToDaily('17');
+                }
+                for (var j=0; j<this.state.homeData.length; j++){
+                    if (this.state.homeData[j].type == 'mypack'){
+                        myPackArray.push(this.state.homeData[j].title);
                     }
-                    break;
-                case 'intro':
-                    this.props.navigator.push({
-                        id: 'intro',
-                        passProps: {
-                            destination: 'collection',
-                            homeData: this.props.homeData,
-                            introIndex: 1,
-                            seenIntro: 'true'
-                        }
-                    });
-                    break;
-                case 'store':
-                    for (var j=0; j<this.props.homeData.length; j++){
-                        if (this.props.homeData[j].type == 'mypack'){
-                            myPackArray.push(this.props.homeData[j].title);
-                        }
+                }
+                for (var i=this.state.homeData[index].data.length - 1; i>=0; i--){
+                    if(myPackArray.indexOf(this.state.homeData[index].data[i].name) < 0){
+                        keepInList.unshift(this.state.homeData[index].data[i]);
                     }
-                    for (var i=this.props.homeData[item.index].data.length - 1; i>=0; i--){
-                        if(myPackArray.indexOf(this.props.homeData[item.index].data[i].name) < 0){
-                            keepInList.push(this.props.homeData[item.index].data[i]);
-                        }
+                }
+                if (index == 5)keepInList = shuffleArray(keepInList);
+                this.props.navigator.push({
+                    id: 'store',
+                    passProps: {
+                        dataIndex: index,
+                        title: item.title,
+                        availableList: keepInList,
+                        homeData: this.state.homeData,
                     }
-                    keepInList = keepInList.reverse();
-                    this.props.navigator.push({
-                        id: 'store',
-                        passProps: {
-                            dataIndex: item.index,
-                            title: item.title + ' Puzzle Packs',
-                            availableList: keepInList,
-                            homeData: this.props.homeData,
-                        }
-                    });
-                    break;
-                case 'store3':
-                    if(this.props.homeData[item.index].data.length == 0){
-                        Alert.alert('Coming soon...', 'Sorry, no combo packs available yet; please check back!');
-                        return;
+                });
+                break;
+            case 'facebook':
+                this.props.navigator.push({
+                    id: 'social',
+                    passProps: {
+                        which: 'FB',
+                        color: '#3b5998',
+                        homeData: this.state.homeData,
                     }
-                    keepInList = this.props.homeData[item.index].data;
-
-                    for (var j=0; j<this.props.homeData.length; j++){
-                        if (this.props.homeData[j].type == 'mypack'){
-                            myPackArray.push(this.props.homeData[j].title);
-                        }
+                });
+                break;
+            case 'twitter'://#1da1f2
+                this.props.navigator.push({
+                    id: 'social',
+                    passProps: {
+                        which: 'TW',
+                        color: '#1da1f2',
+                        homeData: this.state.homeData,
                     }
-                    for (var i=this.props.homeData[item.index].data.length - 1; i>=0; i--){
-                        if((myPackArray.indexOf(this.props.homeData[item.index].data[i].name[0]) > -1) && (myPackArray.indexOf(this.props.homeData[item.index].data[i].name[1]) > -1) && (myPackArray.indexOf(this.props.homeData[item.index].data[i].name[2]) > -1)){
-                            keepInList.splice(i, 1);
-                        }
+                });
+                break;
+            case 'settings': case 'about': case 'mission':
+                this.props.navigator.push({
+                    id: item.link,
+                    passProps: {
+                        homeData: this.state.homeData,
                     }
-                    this.props.navigator.push({
-                        id: 'combo store',
-                        passProps: {
-                            dataIndex: item.index,
-                            title: item.title + ' Value Packs',
-                            availableList: keepInList,
-                            homeData: this.props.homeData,
-                        }
-                    });
-                    break;
-                case 'facebook':
-                    this.props.navigator.push({
-                        id: 'social',
-                        passProps: {
-                            which: 'FB',
-                            color: '#3b5998',
-                            homeData: this.props.homeData,
-                        }
-                    });
-                    break;
-                case 'twitter'://#1da1f2
-                    this.props.navigator.push({
-                        id: 'social',
-                        passProps: {
-                            which: 'TW',
-                            color: '#1da1f2',
-                            homeData: this.props.homeData,
-                        }
-                    });
-                    break;
-                case 'settings':
-                    this.props.navigator.push({
-                        id: 'settings',
-                        passProps: {
-                            destination: 'collection',
-                            homeData: this.props.homeData,
-                        }
-                    });
-                    break;
-                case 'about':
-                    this.props.navigator.push({
-                        id: 'about',
-                        passProps: {
-                            destination: 'collection',
-                            homeData: this.props.homeData,
-                        }
-                    });
-                    break;
-            }
+                });
+                break;
+        }
     }
     border(color) {
         return {
@@ -332,9 +283,9 @@ class Collection extends Component{
          let numberSolved = parseInt(this.props.homeData[this.props.dataElement].num_solved, 10);
          let numPuzzles = parseInt(this.props.homeData[this.props.dataElement].num_verses, 10);
          if (numberSolved == numPuzzles){
-//            strToReturn = (this.props.homeData[this.props.dataElement].solved[num] == 0)?'#00FF00':'#079707';
+            strToReturn = (this.props.homeData[this.props.dataElement].solved[num] == 0)?'#00FF00':'#079707';
             return {
-                backgroundColor: '#00FF00'
+                backgroundColor: strToReturn
             };
          }
          let onThis = parseInt(this.props.homeData[this.props.dataElement].num_solved, 10);
@@ -398,6 +349,7 @@ class Collection extends Component{
                     homeData: this.props.homeData,
                     daily_solvedArray: sArray,
                     title: 'Daily Verses',
+                    reverse: this.props.reverse,
                     todayFull: this.props.todayFull,
                     gripeText: gripeText,
                     dataElement: index,
@@ -407,7 +359,7 @@ class Collection extends Component{
         });
     }
     onSelect(strIndex) {
-        let index = parseInt(strIndex);
+        let index = parseInt(strIndex, 10);
         let bgC = this.props.bgColor;
         let newColor = (bgC == '#000000')? '#cfe7c2':this.props.bgColor;
         if(index>parseInt(this.props.homeData[this.props.dataElement].num_solved, 10))return;
@@ -419,6 +371,7 @@ class Collection extends Component{
                 index: index,
                 fromWhere: 'collection',
                 daily_solvedArray: this.props.daily_solvedArray,
+                reverse: this.props.reverse,
                 dataElement: this.props.dataElement,
                 bgColor: newColor,
                 myTitle: this.props.title
