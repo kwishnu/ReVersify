@@ -18,6 +18,7 @@ var nowISO = 0;
 var tonightMidnight = 0;
 const bonuses = [['10', 'Welcome +10', '5', '#620887'], ['50', 'Dedicated +50', '10', '#f4ce57'], ['100', 'Talented +100', '10', '#f2404c'], ['250', 'Skilled +250', '10', '#0817a2'], ['500', 'Seasoned +500', '20', '#6e097d'], ['1000', 'Expert +1000', '25', '#f5eaf6'], ['100000000000', 'TooMuch', '1', '#000000']];
 const KEY_Premium = 'premiumOrNot';
+const KEY_PlayFirst = 'playFirstKey';
 const KEY_Verses = 'versesKey';
 const KEY_SeenStart = 'seenStartKey';
 const KEY_Notifs = 'notifsKey';
@@ -39,7 +40,7 @@ class SplashScreen extends Component {
             id: 'splash',
             seenStart: 'false',
             notif_time: '',
-            hasPremium: 'false',
+            isPremium: false,
             connectionBool: true,
             getPurchased: false,
             nextBonus: '0',
@@ -59,7 +60,7 @@ class SplashScreen extends Component {
         if(this.props.motive == 'initialize'){
             var ownedPacks = [];
             var getPurchasedBool = true;
-            var premiumBool = 'false';
+            var premiumBool = false;
 
             AsyncStorage.getItem(KEY_Verses).then((verses) => {
                 if (verses !== null) {//get current data:
@@ -77,13 +78,13 @@ class SplashScreen extends Component {
                         if (homeData[chk].product_id.indexOf('bonus') < 0){
                             homeData[14].show = 'false';//purchased something, gets access to last 30 daily verses rather than last 3 days
                             homeData[15].show = 'true';
-                            premiumBool = 'true';
+                            premiumBool = true;
                             getPurchasedBool = false;//a purchased pack is here, we don't need to retrieve them which would erase progress stats
                             continue;
                         }
                     }
                 }
-                this.setState({ hasPremium: premiumBool,
+                this.setState({ isPremium: premiumBool,
                                 getPurchased: getPurchasedBool,
                                 pData: homeData
                 });
@@ -162,14 +163,14 @@ class SplashScreen extends Component {
                     return this.getData(this.state.pData, startNum);//load daily puzzles
                 }else{//still let have access to 30 days already on device even if no internet connection
                     AsyncStorage.getItem(KEY_Premium).then((prem) => {
-                        premiumBool = 'false';
+                        premiumBool = false;
                         if(prem == 'true'){
                             homeData[14].show = 'false';
                             homeData[15].show = 'true';
-                            premiumBool = 'true';
+                            premiumBool = true;
                         }
                         this.setState({ connectionBool: false,
-                                        hasPremium: premiumBool
+                                        isPremium: premiumBool
                         })
                         return false;
                     });
@@ -252,9 +253,10 @@ class SplashScreen extends Component {
                 window.alert('splash 256: ' + error.message);
             });
         }else{//purchased verse pack...
-            this.setState({hasPremium: 'true'});
+            this.setState({isPremium: true});
             try {
-                AsyncStorage.setItem(KEY_Premium, 'true');//
+                AsyncStorage.setItem(KEY_Premium, 'true');
+                AsyncStorage.setItem(KEY_PlayFirst, 'true');
             } catch (error) {
                 window.alert('AsyncStorage error: ' + error.message);
             }
@@ -486,18 +488,21 @@ class SplashScreen extends Component {
             if (titleIndex > -1){
                 appData[18 + i].title = '*' + appData[levels[i]].data[titleIndex].name;
                 appData[18 + i].product_id = appData[levels[i]].data[titleIndex].product_id;
-//                appData[18 + i].num_verses = appData[levels[i]].data[titleIndex].num_verses;
                 appData[18 + i].bg_color = appData[levels[i]].data[titleIndex].color;
             }else{
                 appData[18 + i].show = 'false';
             }
         }
         let connected = this.state.connectionBool;
+
+        console.log(this.state.isPremium);
+
+
         this.props.navigator.replace({
             id: whichScene,
             passProps: {
                 homeData: appData,
-                isPremium: this.state.hasPremium,
+                isPremium: this.state.isPremium,
                 seenIntro: this.state.seenStart,
                 connectionBool: connected,
                 destination: 'home'
@@ -505,7 +510,6 @@ class SplashScreen extends Component {
        });
     }
     setNotifications(time){
-//        var time = this.state.notif_time;
         if (time == '0'){return}
         var date = new Date(Date.now() + (10 * 1000));
         var tomorrowAM = new Date(Date.now() + (moment(tonightMidnight).add(parseInt(time, 10), 'hours').valueOf()) - nowISO);
