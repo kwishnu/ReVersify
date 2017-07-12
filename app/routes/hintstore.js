@@ -40,7 +40,8 @@ module.exports = class HintStore extends Component {
     }
     startPurchase(hintPackage){
         if (this.state.currentHints == 'infinite'){
-            Alert.alert('Thanks, but...', 'You already have unlimited hints!')
+            Alert.alert('Thanks, but...', 'You already have unlimited hints!');
+            return;
         }
         NetInfo.isConnected.fetch().then(isConnected => {
             if (isConnected && Meteor.status().status == 'connected'){
