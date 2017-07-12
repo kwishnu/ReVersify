@@ -14,6 +14,8 @@ const KEY_Notifs = 'notifsKey';
 const KEY_NotifTime = 'notifTimeKey';
 const KEY_PlayFirst = 'playFirstKey';
 const KEY_show_score = 'showScoreKey';
+const KEY_showFB = 'showFBKey';
+const KEY_showTwitter = 'showTwitterKey';
 const KEY_reverse = 'reverseFragments';
 const KEY_HideVerse = 'hideVerseKey';
 const KEY_Premium = 'premiumOrNot';
@@ -31,6 +33,10 @@ module.exports = class Settings extends Component {
             sounds_text: 'Game sounds on',
             reverse_state: true,
             reverse_text: 'Reverse some Verse tiles',
+            show_fb_state: true,
+            show_fb_text: 'Show Facebook button on completion',
+            show_twitter_state: true,
+            show_twitter_text: 'Show Twitter button on completion',
             hide_verse_state: true,
             hide_verse_text: 'Hide Chapter and Verse in puzzles',
             color_state: true,
@@ -145,6 +151,22 @@ module.exports = class Settings extends Component {
                 reverse_state: stateToUse,
                 reverse_text: strToUse
             });
+            return AsyncStorage.getItem(KEY_showFB);
+        }).then((showFB) => {
+            var stateToUse = (showFB == 'true')?true:false;
+            var strToUse = (showFB == 'true')?'Show Facebook button on completion':'Not showing Facebook button';
+            this.setState({
+                show_fb_state: stateToUse,
+                show_fb_text: strToUse
+            });
+            return AsyncStorage.getItem(KEY_showTwitter);
+        }).then((showTwitter) => {
+            var stateToUse = (showTwitter == 'true')?true:false;
+            var strToUse = (showTwitter == 'true')?'Show Twitter button on completion':'Not showing Twitter button';
+            this.setState({
+                show_twitter_state: stateToUse,
+                show_twitter_text: strToUse
+            });
             return AsyncStorage.getItem(KEY_HideVerse);
         }).then((hide) => {
             var stateToUse = (hide == 'true')?true:false;
@@ -226,6 +248,26 @@ module.exports = class Settings extends Component {
         this.setState({reverse_text: strToUse});
         try {
             AsyncStorage.setItem(KEY_reverse, reverseBool);
+        } catch (error) {
+            window.alert('AsyncStorage error: ' + error.message);
+        }
+    }
+    toggleShowFB(state){
+        var strToUse = (state)?'Show Facebook button on completion':'Not showing Facebook button';
+        var fbBool = (state)?'true':'false';
+        this.setState({show_fb_text: strToUse});
+        try {
+            AsyncStorage.setItem(KEY_showFB, fbBool);
+        } catch (error) {
+            window.alert('AsyncStorage error: ' + error.message);
+        }
+    }
+    toggleShowTwitter(state){
+        var strToUse = (state)?'Show Twitter button on completion':'Not showing Twitter button';
+        var twBool = (state)?'true':'false';
+        this.setState({show_twitter_text: strToUse});
+        try {
+            AsyncStorage.setItem(KEY_showTwitter, twBool);
         } catch (error) {
             window.alert('AsyncStorage error: ' + error.message);
         }
@@ -315,6 +357,43 @@ module.exports = class Settings extends Component {
                                     <Switch value={this.state.sounds_state} onValueChange={(state)=>{this.toggleGameSounds(state)}}/>
                                 </View>
                             </View>
+                            {(this.state.showPlayFirst == true) &&
+                            <View>
+                                <View style={[settings_styles.parameter_container, {marginTop: height*0.02}]}>
+                                    <View style={[settings_styles.text_container, {alignItems: 'flex-end'}]}>
+                                        <Text style={settings_styles.text}>{this.state.play_first_text}</Text>
+                                    </View>
+                                    <View style={settings_styles.switch_container}>
+                                        <Switch value={this.state.play_first_state} onValueChange={(state)=>{this.togglePlayFirst(state)}}/>
+                                    </View>
+                                </View>
+                            </View>
+                            }
+                            <View style={[settings_styles.parameter_container, {marginTop: height*0.02}]}>
+                                <View style={[settings_styles.text_container, {alignItems: 'flex-end'}]}>
+                                    <Text style={settings_styles.text}>{this.state.reverse_text}</Text>
+                                </View>
+                                <View style={settings_styles.switch_container}>
+                                    <Switch value={this.state.reverse_state} onValueChange={(state)=>{this.toggleReverse(state)}}/>
+                                </View>
+                            </View>
+                            <View style={[settings_styles.parameter_container, {marginTop: height*0.02}]}>
+                                <View style={[settings_styles.text_container, {alignItems: 'flex-end'}]}>
+                                    <Text style={settings_styles.text}>{this.state.hide_verse_text}</Text>
+                                </View>
+                                <View style={settings_styles.switch_container}>
+                                    <Switch value={this.state.hide_verse_state} onValueChange={(state)=>{this.toggleHideVerse(state)}}/>
+                                </View>
+                            </View>
+                            <View style={settings_styles.parameter_container}><View style={settings_styles.divider}></View></View>
+                            <View style={[settings_styles.parameter_container, {marginTop: height*0.02}]}>
+                                <View style={[settings_styles.text_container, {alignItems: 'flex-end'}]}>
+                                    <Text style={settings_styles.text}>{this.state.score_text}</Text>
+                                </View>
+                                <View style={settings_styles.switch_container}>
+                                    <Switch value={this.state.score_state} onValueChange={(state)=>{this.toggleScore(state)}}/>
+                                </View>
+                            </View>
                             <View style={[settings_styles.parameter_container, {marginTop: height*0.02}]}>
                                 <View style={[settings_styles.text_container, {alignItems: 'flex-end'}]}>
                                     <Text style={settings_styles.text}>{this.state.use_colors}</Text>
@@ -323,6 +402,24 @@ module.exports = class Settings extends Component {
                                     <Switch value={this.state.color_state} onValueChange={(state)=>{this.toggleColor(state)}}/>
                                 </View>
                             </View>
+                            <View style={settings_styles.parameter_container}><View style={settings_styles.divider}></View></View>
+                            <View style={[settings_styles.parameter_container, {marginTop: height*0.02}]}>
+                                <View style={[settings_styles.text_container, {alignItems: 'flex-end'}]}>
+                                    <Text style={settings_styles.text}>{this.state.show_fb_text}</Text>
+                                </View>
+                                <View style={settings_styles.switch_container}>
+                                    <Switch value={this.state.show_fb_state} onValueChange={(state)=>{this.toggleShowFB(state)}}/>
+                                </View>
+                            </View>
+                            <View style={[settings_styles.parameter_container, {marginTop: height*0.02}]}>
+                                <View style={[settings_styles.text_container, {alignItems: 'flex-end'}]}>
+                                    <Text style={settings_styles.text}>{this.state.show_twitter_text}</Text>
+                                </View>
+                                <View style={settings_styles.switch_container}>
+                                    <Switch value={this.state.show_twitter_state} onValueChange={(state)=>{this.toggleShowTwitter(state)}}/>
+                                </View>
+                            </View>
+                            <View style={settings_styles.parameter_container}><View style={settings_styles.divider}></View></View>
                             <View style={[settings_styles.parameter_container, {marginTop: height*0.02}]}>
                                 <View style={settings_styles.text_container}>
                                     <Text style={[settings_styles.text, {paddingLeft: 15}]}>Receive new Verse notifications...</Text>
@@ -352,42 +449,6 @@ module.exports = class Settings extends Component {
                                         <Picker.Item label='8:00 am' value={'8'} />
                                         <Picker.Item label='9:00 am' value={'9'} />
                                     </Picker>
-                                </View>
-                            </View>
-                            {(this.state.showPlayFirst == true) &&
-                            <View>
-                                <View style={[settings_styles.parameter_container, {marginTop: height*0.02}]}>
-                                    <View style={[settings_styles.text_container, {alignItems: 'flex-end'}]}>
-                                        <Text style={settings_styles.text}>{this.state.play_first_text}</Text>
-                                    </View>
-                                    <View style={settings_styles.switch_container}>
-                                        <Switch value={this.state.play_first_state} onValueChange={(state)=>{this.togglePlayFirst(state)}}/>
-                                    </View>
-                                </View>
-                            </View>
-                            }
-                            <View style={[settings_styles.parameter_container, {marginTop: height*0.02}]}>
-                                <View style={[settings_styles.text_container, {alignItems: 'flex-end'}]}>
-                                    <Text style={settings_styles.text}>{this.state.score_text}</Text>
-                                </View>
-                                <View style={settings_styles.switch_container}>
-                                    <Switch value={this.state.score_state} onValueChange={(state)=>{this.toggleScore(state)}}/>
-                                </View>
-                            </View>
-                            <View style={[settings_styles.parameter_container, {marginTop: height*0.02}]}>
-                                <View style={[settings_styles.text_container, {alignItems: 'flex-end'}]}>
-                                    <Text style={settings_styles.text}>{this.state.reverse_text}</Text>
-                                </View>
-                                <View style={settings_styles.switch_container}>
-                                    <Switch value={this.state.reverse_state} onValueChange={(state)=>{this.toggleReverse(state)}}/>
-                                </View>
-                            </View>
-                            <View style={[settings_styles.parameter_container, {marginTop: height*0.02}]}>
-                                <View style={[settings_styles.text_container, {alignItems: 'flex-end'}]}>
-                                    <Text style={settings_styles.text}>{this.state.hide_verse_text}</Text>
-                                </View>
-                                <View style={settings_styles.switch_container}>
-                                    <Switch value={this.state.hide_verse_state} onValueChange={(state)=>{this.toggleHideVerse(state)}}/>
                                 </View>
                             </View>
                         </View>
@@ -450,7 +511,7 @@ const settings_styles = StyleSheet.create({
     },
     text: {
         color: '#ffffff',
-        fontSize: normalizeFont(configs.LETTER_SIZE * 0.5/6)
+        fontSize: normalizeFont(configs.LETTER_SIZE*.072)
     },
     picker: {
         width: normalize(height/5.5)
