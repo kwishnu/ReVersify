@@ -8,6 +8,7 @@ const styles = require('../styles/styles');
 const {width, height} = require('Dimensions').get('window');
 const KEY_PlayFirst = 'playFirstKey';
 const KEY_ratedTheApp = 'ratedApp';
+const KEY_reverse = 'reverseFragments';
 let year = moment().year();
 //const KEY_ThankRated = 'thankRatedApp';
 
@@ -54,7 +55,7 @@ module.exports = class About extends Component {
     }
     rateApp(){
 //                        try {
-//                            AsyncStorage.setItem(KEY_ThankRated, 'false');//
+//                            AsyncStorage.setItem(KEY_reverse, 'true');//
 //                        } catch (error) {
 //                            window.alert('AsyncStorage error: ' + error.message);
 //                        }
