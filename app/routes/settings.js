@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, Image, Picker, BackHandler, AsyncStorage, ActivityIndicator } from 'react-native';
 import {Switch} from '../components/Switch';
 import Button from '../components/Button';
-//import PushNotification from 'react-native-push-notification';
+import PushNotification from 'react-native-push-notification';
 import moment from 'moment';
 import configs from '../config/configs';
 import { normalize, normalizeFont }  from '../config/pixelRatio';
@@ -14,7 +14,9 @@ const KEY_Notifs = 'notifsKey';
 const KEY_NotifTime = 'notifTimeKey';
 const KEY_PlayFirst = 'playFirstKey';
 const KEY_show_score = 'showScoreKey';
+const KEY_reverse = 'reverseFragments';
 const KEY_Premium = 'premiumOrNot';
+const KEY_ratedTheApp = 'ratedApp';
 var nowISO = moment().valueOf();
 var tonightMidnight = moment().endOf('day').valueOf();
 
@@ -26,6 +28,8 @@ module.exports = class Settings extends Component {
             isLoading: true,
             sounds_state: true,
             sounds_text: 'Game sounds on',
+            reverse_state: true,
+            reverse_text: 'Reverse some Verse tiles',
             color_state: true,
             use_colors: 'Use Verse Collection colors',
             notifs_state: true,
@@ -42,8 +46,8 @@ module.exports = class Settings extends Component {
     }
     componentDidMount(){
         BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
-        AsyncStorage.getItem(KEY_Premium).then((prem) => {
-            if (prem == 'true')this.setState({showPlayFirst: true});
+        AsyncStorage.getItem(KEY_ratedTheApp).then((rated) => {
+            if (rated == 'true')this.setState({showPlayFirst: true});
             return AsyncStorage.getItem(KEY_Sound);
         }).then((sounds) => {
             if (sounds !== null) {
@@ -64,7 +68,7 @@ module.exports = class Settings extends Component {
         }).then((colors) => {
             if (colors !== null) {
                 var stateToUse = (colors == 'true')?true:false;
-                var strToUse = (colors == 'true')?'Use Puzzle Pack colors':'Using default colors';
+                var strToUse = (colors == 'true')?'Use Verse Collection colors':'Using default colors';
                 this.setState({
                     color_state: stateToUse,
                     use_colors: strToUse
@@ -125,10 +129,18 @@ module.exports = class Settings extends Component {
                     window.alert('AsyncStorage error: ' + error.message);
                 }
             }
+            return AsyncStorage.getItem(KEY_reverse);
+        }).then((revBool) => {
+            var stateToUse = (revBool == 'true')?true:false;
+            var strToUse = (revBool == 'true')?'Reverse some Verse tiles':'Not reversing any Verse tiles';
+            this.setState({
+                reverse_state: stateToUse,
+                reverse_text: strToUse
+            });
             return true;
         }).then((done) => {
             if(done){
-                this.setState({isLoading: false});
+                setTimeout(()=>{this.setState({isLoading: false})}, 500);
             }
         });
     }
@@ -192,8 +204,18 @@ module.exports = class Settings extends Component {
             window.alert('AsyncStorage error: ' + error.message);
         }
     }
+    toggleReverse(state){
+        var strToUse = (state)?'Reverse some Verse tiles':'Not reversing any Verse tiles';
+        var reverseBool = (state)?'true':'false';
+        this.setState({reverse_text: strToUse});
+        try {
+            AsyncStorage.setItem(KEY_reverse, reverseBool);
+        } catch (error) {
+            window.alert('AsyncStorage error: ' + error.message);
+        }
+    }
     toggleUseNotifs(state){
-//        PushNotification.cancelLocalNotifications({id: '777'});
+        PushNotification.cancelLocalNotifications({id: '777'});
         var yesOrNo = '';
         var strNotifs = '';
         var textColor = '';
@@ -215,7 +237,7 @@ module.exports = class Settings extends Component {
         }
     }
     setNotifTime(key: value){
-//        PushNotification.cancelLocalNotifications({id: '777'});
+        PushNotification.cancelLocalNotifications({id: '777'});
         this.startNotifications(key.selectedValue);
         this.setState({ notif_time: key.selectedValue });
         try {
@@ -267,11 +289,7 @@ module.exports = class Settings extends Component {
                                     <Switch value={this.state.sounds_state} onValueChange={(state)=>{this.toggleGameSounds(state)}}/>
                                 </View>
                             </View>
-                            <View style={settings_styles.parameter_container}>
-                                <View style={settings_styles.divider}>
-                                </View>
-                            </View>
-                            <View style={[settings_styles.parameter_container, {marginTop: height*0.04}]}>
+                            <View style={[settings_styles.parameter_container, {marginTop: height*0.02}]}>
                                 <View style={[settings_styles.text_container, {alignItems: 'flex-end'}]}>
                                     <Text style={settings_styles.text}>{this.state.use_colors}</Text>
                                 </View>
@@ -279,11 +297,7 @@ module.exports = class Settings extends Component {
                                     <Switch value={this.state.color_state} onValueChange={(state)=>{this.toggleColor(state)}}/>
                                 </View>
                             </View>
-                            <View style={settings_styles.parameter_container}>
-                                <View style={settings_styles.divider}>
-                                </View>
-                            </View>
-                            <View style={[settings_styles.parameter_container, {marginTop: height*0.04}]}>
+                            <View style={[settings_styles.parameter_container, {marginTop: height*0.02}]}>
                                 <View style={settings_styles.text_container}>
                                     <Text style={[settings_styles.text, {paddingLeft: 15}]}>Receive new Verse notifications...</Text>
                                 </View>
@@ -314,13 +328,9 @@ module.exports = class Settings extends Component {
                                     </Picker>
                                 </View>
                             </View>
-                            <View style={settings_styles.parameter_container}>
-                                <View style={settings_styles.divider}>
-                                </View>
-                            </View>
                             {(this.state.showPlayFirst == true) &&
                             <View>
-                                <View style={[settings_styles.parameter_container, {marginTop: height*0.04}]}>
+                                <View style={[settings_styles.parameter_container, {marginTop: height*0.02}]}>
                                     <View style={[settings_styles.text_container, {alignItems: 'flex-end'}]}>
                                         <Text style={settings_styles.text}>{this.state.play_first_text}</Text>
                                     </View>
@@ -328,18 +338,22 @@ module.exports = class Settings extends Component {
                                         <Switch value={this.state.play_first_state} onValueChange={(state)=>{this.togglePlayFirst(state)}}/>
                                     </View>
                                 </View>
-                                <View style={settings_styles.parameter_container}>
-                                    <View style={settings_styles.divider}>
-                                    </View>
-                                </View>
                             </View>
                             }
-                            <View style={[settings_styles.parameter_container, {marginTop: height*0.04}]}>
+                            <View style={[settings_styles.parameter_container, {marginTop: height*0.02}]}>
                                 <View style={[settings_styles.text_container, {alignItems: 'flex-end'}]}>
                                     <Text style={settings_styles.text}>{this.state.score_text}</Text>
                                 </View>
                                 <View style={settings_styles.switch_container}>
                                     <Switch value={this.state.score_state} onValueChange={(state)=>{this.toggleScore(state)}}/>
+                                </View>
+                            </View>
+                            <View style={[settings_styles.parameter_container, {marginTop: height*0.02}]}>
+                                <View style={[settings_styles.text_container, {alignItems: 'flex-end'}]}>
+                                    <Text style={settings_styles.text}>{this.state.reverse_text}</Text>
+                                </View>
+                                <View style={settings_styles.switch_container}>
+                                    <Switch value={this.state.reverse_state} onValueChange={(state)=>{this.toggleReverse(state)}}/>
                                 </View>
                             </View>
                         </View>
@@ -395,7 +409,7 @@ const settings_styles = StyleSheet.create({
         padding: 6,
     },
     switch_container: {
-        flex: 2,
+        flex: 1,
         justifyContent: 'center',
         alignItems: 'flex-start',
         paddingLeft: 6,
