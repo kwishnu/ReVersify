@@ -108,6 +108,7 @@ const KEY_Verses = 'versesKey';
 const KEY_Time = 'timeKey';
 const KEY_solvedTP = 'solvedTP';
 const KEY_ratedTheApp = 'ratedApp';
+const KEY_reverse = 'reverseFragments';
 const KEY_ThankRated = 'thankRatedApp';
 const KEY_Solved = 'numSolvedKey';
 let homeData = [];
@@ -148,6 +149,7 @@ class Home extends Component{
             solved: 0,
             solved_opacity: 1,
             nextBonus: 0,
+            reverse: true,
             homeData: this.props.homeData,
             dataSource: ds.cloneWithRowsAndSections(dataBlob, sectionIds, rowIds)
         };
@@ -175,6 +177,10 @@ class Home extends Component{
         }).then((rated) => {
             let ratedOrNot = (rated == 'true')?true:false;
             this.setState({hasRated: ratedOrNot});
+            return AsyncStorage.getItem(KEY_reverse);
+        }).then((revBool) => {
+            let reverseBool = (revBool == 'true')?true:false;
+            this.setState({reverse: reverseBool});
             return AsyncStorage.getItem(KEY_Solved);
         }).then((numSolved) => {
             this.setState({solved: numSolved})
@@ -260,9 +266,9 @@ class Home extends Component{
         }).catch(function(error) {
             window.alert('home.js: ' + error.message);
         });
-//        if (this.props.connectionBool == false){
-//            Alert.alert('No Server Connection', 'Sorry, unable to load Daily Verses');
-//        }
+        if (this.props.connectionBool == false){
+            Alert.alert('No Server Connection', 'Sorry, unable to load Daily Verses');
+        }
     }
     componentWillUnmount(){
         BackHandler.removeEventListener('hardwareBackPress', this.handleHardwareBackButton);
@@ -318,15 +324,23 @@ class Home extends Component{
             this.setState({menuImage: require('../images/arrowback.png')});
             BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
         } else {
-            AsyncStorage.getItem(KEY_show_score).then((showScore) => {
-                this.setState({solved_opacity: parseInt(showScore, 10)});
-            });
+            setTimeout(()=>{
+                AsyncStorage.getItem(KEY_show_score).then((showScore) => {
+                    this.setState({solved_opacity: parseInt(showScore, 10)});
+                    return AsyncStorage.getItem(KEY_reverse);
+                }).then((rev) => {
+                    let reverseBool = (rev == 'true')?true:false;
+                    this.setState({reverse: reverseBool});
+                }).catch((error) => {
+                    window.alert('splash 256: ' + error.message);
+                });
+            }, 800);
             this.setState({menuImage: require('../images/menu.png')});
             BackHandler.removeEventListener('hardwareBackPress', this.handleHardwareBackButton);
         }
     }
     onMenuItemSelected = (item) => {
-            var index = parseInt(item.index);
+            var index = parseInt(item.index, 10);
             var myPackArray = [];
             var keepInList = [];
             switch (item.link){
@@ -512,12 +526,14 @@ class Home extends Component{
             for (let v=0; v< this.state.homeData[17].verses.length; v++){
                 verseArray.push(v + '**' + this.state.homeData[17].verses[v]);
             }
+            console.log(this.state.isPremium);
             this.props.navigator.replace({
                 id: 'favorites',
                 passProps: {
                     homeData: this.state.homeData,
                     daily_solvedArray: dsArray,
                     title: 'My Favorites',
+                    reverse: this.state.reverse,
                     dataSource: verseArray,
                     dataElement: index,
                     isPremium: this.state.isPremium,
@@ -543,9 +559,9 @@ class Home extends Component{
                         title: this.state.todayFull,
                         index: '0',
                         bgColor: bg,
+                        reverse: this.state.reverse,
                         fromWhere: 'home',
-                        dataElement: index,
-                        isPremium: this.state.isPremium,
+                        dataElement: index
                     },
                 });
                 return;
@@ -562,6 +578,7 @@ class Home extends Component{
                         title: theTitle,
                         todayFull: this.state.todayFull,
                         gripeText: gripeText,
+                        reverse: this.state.reverse,
                         dataElement: index,
                         isPremium: this.state.isPremium,
                         bgColor: '#cfe7c2'//'#795959'
@@ -588,6 +605,7 @@ class Home extends Component{
                     daily_solvedArray: dsArray,
                     title: title,
                     todayFull: this.state.todayFull,
+                    reverse: this.state.reverse,
                     dataElement: index,
                     isPremium: this.state.isPremium,
                     bgColor: bgColorToSend
