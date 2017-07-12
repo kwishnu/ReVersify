@@ -32,29 +32,19 @@ module.exports = class Reader extends Component {
         let s2 = '';
         let s3 = '';
         if (this.props.fromWhere == 'game'){
-            let v = this.props.entireVerse;
-            let v1 = v.substr(0, 20);
-            let v2 = v.substr(v.length - 20);
-            let startIndex = 0;
-            let endIndex = 0;
-            startIndex = chapterText.indexOf(v1);
-            endIndex = chapterText.indexOf(v2, startIndex + 1);
-            console.log(startIndex + ', ' + endIndex);
+        console.log(chapterText);
+            let startIndex = (this.props.startPoint == '1')?0:chapterText.indexOf(this.props.startPoint + ' ');
+            let endIndex = (chapterText.indexOf(this.props.endPoint) > -1)?chapterText.indexOf(this.props.endPoint, startIndex + 1):chapterText.length;
             if (startIndex > -1 && endIndex > -1){
                 s1 = chapterText.substring(0, startIndex - 1);
-                s2 = chapterText.substring(startIndex, endIndex + 20);
-                s3 = chapterText.substring(endIndex + 20);
+                s2 = chapterText.substring(startIndex, endIndex - 2);
+                s3 = chapterText.substring(endIndex - 2);
             }else{
                 s1 = chapterText
             }
         }else{
              s1 = chapterText
         }
-
-
-
-
-
         let title = this.props.homeData[this.props.dataElement].title;
         let bg = this.props.homeData[this.props.dataElement].bg_color;
         let chapNum = s1.substr(0, s1.indexOf(' '));
@@ -63,8 +53,6 @@ module.exports = class Reader extends Component {
         s1 = s1.substring(1);
         let backOpac = (this.props.chapterIndex > 0)?1:0;
         let forwardOpac = (this.props.chapterIndex < this.props.homeData[this.props.dataElement].chapters.length - 1)?1:0;
-
-//setTimeout(() => { this.setState({ isLoading: false }); }, 500);
         this.setState({ title: title,
                         chapterNumber: chapNum,
                         initial: initialLetter,
@@ -75,7 +63,6 @@ module.exports = class Reader extends Component {
                         forwardOpacity: forwardOpac,
                         bgColor: bg,
                         isLoading: false
-
         })
         BackHandler.addEventListener('hardwareBackPress', this.goBack);
         AppState.addEventListener('change', this.handleAppStateChange);
