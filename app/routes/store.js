@@ -210,15 +210,17 @@ startPurchase = (item_name, itemID, nav) => {
 //            InAppBilling.open()
 //            .then(() => InAppBilling.purchase(itemID))
 //            .then((details) => {
+                setTimeout(()=> {
+                    nav.replace({
+                        id: 'splash',
+                        passProps: {
+                            motive: 'purchase',
+                            packName: item_name,
+                            productID: itemID
+                        }
+                    });
+                }, 500);
                 nav.pop({});
-                nav.replace({
-                    id: 'splash',
-                    passProps: {
-                        motive: 'purchase',
-                        packName: item_name,
-                        productID: itemID
-                    }
-                });
 //                console.log("You purchased: ", details)
 //                return InAppBilling.close()
 //            }).catch((err) => {
