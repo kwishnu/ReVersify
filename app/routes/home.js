@@ -545,7 +545,6 @@ class Home extends Component{
             for (let v=0; v< this.state.homeData[17].verses.length; v++){
                 verseArray.push(v + '**' + this.state.homeData[17].verses[v]);
             }
-            console.log(this.state.isPremium);
             this.props.navigator.replace({
                 id: 'favorites',
                 passProps: {
@@ -681,13 +680,11 @@ class Home extends Component{
                 this.state.homeData[this.state.indexSelected].type = whatToCallIt;
                 break;
             case 2://open all or first only
-            console.log(this.state.openClose);
                 if(this.state.openClose){
                     this.state.homeData[this.state.indexSelected].num_solved = this.state.homeData[this.state.indexSelected].num_verses;
                 }else{
                     this.state.homeData[this.state.indexSelected].num_solved = '0';
                 }
-                   console.log(JSON.stringify(this.state.homeData[this.state.indexSelected].num_solved));
                 break;
             case 3://hide or show
                 this.state.homeData[this.state.indexSelected].show = 'false';
