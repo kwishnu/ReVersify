@@ -20,7 +20,7 @@ class Overlay extends Component {
                     <View>
                         <Image style={ styles.image } source={require('../images/overlaygraphic.png')} />
                         <View style={styles.text_container}>
-                            <Text style={ styles.text }>Read the actual text of this Book of the Bible by tapping the icon in the upper right</Text>
+                            <Text style={ styles.text }>{ this.props.text }</Text>
                         </View>
                     </View>
                 </TouchableOpacity>
@@ -65,8 +65,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'flex-start',
         top: normalize(height*.098),
-        left: normalize(height*.028),
-        width: normalize(height*.35),
+        left: normalize(height*.03),
+        width: normalize(height*.3),
         height: normalize(height*.12),
         marginRight: 20
     },

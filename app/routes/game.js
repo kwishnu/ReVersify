@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, BackHandler, AsyncStorage, Animated, ActivityIndicator, Alert, Platform, Linking, AppState } from 'react-native';
 import moment from 'moment';
 import Button from '../components/Button';
+import Overlay from '../components/Overlay';
 import Tile from '../components/Tile';
 import DropdownMenu from '../components/DropdownMenu';
 import configs from '../config/configs';
@@ -18,6 +19,7 @@ const KEY_showTwitter = 'showTwitterKey';
 const KEY_Favorites = 'numFavoritesKey';
 const KEY_daily_solved_array = 'solved_array';
 const KEY_Time = 'timeKey';
+const KEY_ShowedGameOverlay = 'showedOverlay';
 const KEY_MyHints = 'myHintsKey';
 const KEY_Premium = 'premiumOrNot';
 const KEY_PlayFirst = 'playFirstKey';
@@ -174,7 +176,8 @@ class Game extends Component {
             hintNumOpacity: 1,
             hasInfiniteHints: false,
             entireVerse: '',
-            openedAll: false
+            openedAll: false,
+            shouldShowOverlay: false
         }
         this.handleHardwareBackButton = this.handleHardwareBackButton.bind(this);
     }
@@ -303,6 +306,16 @@ class Game extends Component {
             }else{
                 try {
                     AsyncStorage.setItem(KEY_Sound, 'true');//
+                } catch (error) {
+                    window.alert('AsyncStorage error: ' + error.message);
+                }
+            }
+            return AsyncStorage.getItem(KEY_ShowedGameOverlay);
+        }).then((showedOrNot) => {
+            if (showedOrNot == 'false'){
+                this.setState({shouldShowOverlay: true});
+                try {
+                    AsyncStorage.setItem(KEY_ShowedGameOverlay, 'true');
                 } catch (error) {
                     window.alert('AsyncStorage error: ' + error.message);
                 }
@@ -1251,6 +1264,9 @@ class Game extends Component {
             });
         }
     }
+    dismissOverlay(){
+       this.setState({shouldShowOverlay: false});
+    }
 
 
     render() {
@@ -1418,6 +1434,9 @@ class Game extends Component {
                     </View>
                     {this.state.shouldShowDropdown &&
                     <DropdownMenu onPress={(num)=>{ this.onDropdownSelect(num); }} item1={this.state.soundString} item2={'Reset Verse'} item3={'How to Play'}/>
+                    }
+                    {this.state.shouldShowOverlay &&
+                            <Overlay onPress={()=>{ this.dismissOverlay(); }} text={`Mute game sounds and reset the Verse with this menu`} />
                     }
                 </View>
             );

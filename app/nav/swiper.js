@@ -14,6 +14,7 @@ const KEY_PlayFirst = 'playFirstKey';
 const KEY_ratedTheApp = 'ratedApp';
 const KEY_ThankRated = 'thankRatedApp';
 const KEY_ThankPremium = 'thankPremium';
+const KEY_ShowedGameOverlay = 'showedOverlay';
 const KEY_ShowedOverlay = 'showOverlay';
 const KEY_showFB = 'showFBKey';
 const KEY_showTwitter = 'showTwitterKey';
@@ -42,6 +43,7 @@ class SwipeNavigator extends Component {
                 [KEY_ratedTheApp, 'false'],
                 [KEY_ThankRated, 'false'],
                 [KEY_ThankPremium, 'false'],
+                [KEY_ShowedGameOverlay, 'false'],
                 [KEY_ShowedOverlay, 'false'],
                 [KEY_HideVerse, 'true'],
                 [KEY_showFB, 'true'],
