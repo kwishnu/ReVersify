@@ -428,6 +428,7 @@ class Book extends Component{
                         <View style={ [book_styles.tiles_container, {backgroundColor: this.state.bgColor}, this.darkBorder(this.state.bgColor)] }>
                              <ListView  showsVerticalScrollIndicator ={false}
                                         initialListSize ={100}
+                                        enableEmptySections ={true}
                                         contentContainerStyle={ book_styles.listview }
                                         dataSource={ds}
                                         renderRow={(rowData, sectionID, rowID) =>
@@ -440,7 +441,7 @@ class Book extends Component{
                              />
                         </View>
                         {this.state.shouldShowOverlay &&
-                                <Overlay onPress={()=>{ this.dismissOverlay(); }} />
+                        <Overlay onPress={()=>{ this.dismissOverlay(); }} text={`Read the actual text of this Book of the Bible by tapping the icon in the upper right`} />
                         }
                      </View>
                 </SideMenu>
