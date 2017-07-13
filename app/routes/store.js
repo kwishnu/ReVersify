@@ -156,6 +156,7 @@ module.exports = class Store extends Component {
                         <View style={{flex: 8}}>
                             <ListView  showsVerticalScrollIndicator ={false}
                                     contentContainerStyle={ store_styles.listview }
+                                    enableEmptySections ={true}
                                     dataSource={rows}
                                     renderRow={(data) => <Row props= {data} navigator= {this.props.navigator} /> }
                             />
@@ -179,6 +180,7 @@ module.exports = class Store extends Component {
                         <View style={{flex: 12}}>
                             <ListView  showsVerticalScrollIndicator ={false}
                                     contentContainerStyle={ store_styles.listview }
+                                    enableEmptySections ={true}
                                     dataSource={rows}
                                     renderRow={(data) => <Row props= {data} navigator= {this.props.navigator} /> }
                             />
