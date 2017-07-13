@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, Image, TouchableHighlight, ListView, BackHandler, AsyncStorage, ActivityIndicator, AppState } from 'react-native';
 import moment from 'moment';
 import Button from '../components/Button';
+import Overlay from '../components/Overlay';
 import configs from '../config/configs';
 import { normalize, normalizeFont }  from '../config/pixelRatio';
 shuffleArray = (array) => {
@@ -56,6 +57,7 @@ const TILE_WIDTH = (CELL_WIDTH - CELL_PADDING * 2) - 7;
 const BORDER_RADIUS = CELL_PADDING * .2 + 3;
 const KEY_daily_solved_array = 'solved_array';
 const KEY_Time = 'timeKey';
+const KEY_ShowedOverlay = 'showOverlay';
 
 class Book extends Component{
     constructor(props) {
@@ -75,10 +77,21 @@ class Book extends Component{
             headerColor: '',
             titleColor: '',
             isLoading: true,
+            shouldShowOverlay: false
         };
         this.handleHardwareBackButton = this.handleHardwareBackButton.bind(this);
     }
     componentDidMount() {
+        AsyncStorage.getItem(KEY_ShowedOverlay).then((showedOrNot) => {
+            if (showedOrNot == 'false'){
+                this.setState({shouldShowOverlay: true});
+                try {
+                    AsyncStorage.setItem(KEY_ShowedOverlay, 'true');
+                } catch (error) {
+                    window.alert('AsyncStorage error: ' + error.message);
+                }
+            }
+        });
         homeData = this.state.homeData;
         this.setColors();
         AppState.addEventListener('change', this.handleAppStateChange);
@@ -382,6 +395,9 @@ class Book extends Component{
             },
        });
     }
+    dismissOverlay(){
+       this.setState({shouldShowOverlay: false});
+    }
 
     render() {
         const menu = <Menu onItemSelected={ this.onMenuItemSelected } data = {this.props.homeData} />;
@@ -423,6 +439,9 @@ class Book extends Component{
                                          </View>}
                              />
                         </View>
+                        {this.state.shouldShowOverlay &&
+                                <Overlay onPress={()=>{ this.dismissOverlay(); }} />
+                        }
                      </View>
                 </SideMenu>
             );
