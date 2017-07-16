@@ -115,7 +115,7 @@ class SplashScreen extends Component {
                         window.alert('AsyncStorage error: ' + error.message);
                     }
                 }
-                if (solvNum >= bonusScore){
+                if (solvNum >= bonusScore && Meteor.status().status == 'connected'){
                     const bID = 'bonus.' + strNextBonus + '.collection';
                     for (let getNext=0; getNext<bonuses.length; getNext++){
                         if (bonuses[getNext][0] == strNextBonus){
