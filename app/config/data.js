@@ -170,6 +170,30 @@ module.exports = [
 		type: 'donate',
         link: 'store',
         data:[
+                {
+                name: ['Genesis', 'Psalms', '1000 Hints'],
+                product_id: 'rv.combo.Genesis.Psalms.1000_Hints',
+                show: 'true',
+                price: '$4.99',
+                color: '#4ab919',
+                num_verses: ['100', '100', '1000']
+                },
+                {
+                name: ['Matthew', 'Revelations', '500 Hints'],
+                product_id: 'rv.combo.Matthew.Revelations.500_Hints',
+                show: 'true',
+                price: '$3.99',
+                color: '#536ac0',
+                num_verses: ['50', '50', '500']
+                },
+                {
+                name: ['Exodus', 'John', '500 Hints'],
+                product_id: 'rv.combo.Exodus.John.500_Hints',
+                show: 'true',
+                price: '$3.99',
+                color: '#aa22a5',
+                num_verses: ['50', '50', '500']
+                }
             ]
     },
     {
@@ -178,6 +202,57 @@ module.exports = [
 		type: 'donate',
         link: 'store',
         data:[
+                {
+                name: ['Genesis', 'Psalms', '1000 Hints'],
+                product_id: 'rv.combo.Genesis.Psalms.1000_Hints',
+                show: 'true',
+                price: '$4.99',
+                color: '#4ab919',
+                num_verses: ['100', '100', '1000']
+                },
+                {
+                name: 'John',
+                product_id: 'rv.verse.book.John',
+                show: 'true',
+                color: '#107088',
+                num_verses: '50'
+                },
+                {
+                name: 'Proverbs',
+                product_id: 'rv.verse.book.Proverbs',
+                show: 'true',
+                color: '#c0e182',
+                num_verses: '50'
+                },
+                {
+                name: ['Matthew', 'Revelations', '500 Hints'],
+                product_id: 'rv.combo.Matthew.Revelations.500_Hints',
+                show: 'true',
+                price: '$3.99',
+                color: '#536ac0',
+                num_verses: ['50', '50', '500']
+                },
+                {
+                name: 'Romans',
+                product_id: 'rv.verse.book.Romans',
+                show: 'true',
+                color: '#bdb057',
+                num_verses: '50'
+                },
+                {
+                name: '1 Corinthians',
+                product_id: 'rv.verse.book.1_Corinthians',
+                show: 'true',
+                color: '#df6854',
+                num_verses: '50'
+                },
+                {
+                name: 'Luke',
+                product_id: 'rv.verse.book.Luke',
+                show: 'true',
+                color: '#905f93',
+                num_verses: '50'
+                }
             ]
     },
     {
