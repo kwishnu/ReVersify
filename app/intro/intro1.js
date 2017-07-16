@@ -5,7 +5,7 @@ import Button from '../components/Button';
 import Tile from '../components/Tile';
 import GrayTile from '../components/GrayTile';
 import configs from '../config/configs';
-import { normalize, normalizeFont }  from '../config/pixelRatio';
+import { normalize, normalizeFont, getArrowSize, getArrowMargin }  from '../config/pixelRatio';
 const deepCopy = require('../config/deepCopy.js');
 const styles = require('../styles/styles');
 const {width, height} = require('Dimensions').get('window');
@@ -137,7 +137,7 @@ class Intro1 extends Component {
     }
     start(){
         setTimeout(()=>{
-            Alert.alert('Solving Verse puzzles', 'Solve Verse puzzles by dropping the right tiles onto the Bible page. \r\n\r\nThe first letter is already given...\r\ngive it a try!',
+            Alert.alert('Solving Verse puzzles', 'Solve Verse puzzles by dropping the correct tiles onto the Bible page. \r\n\r\nThe first letter is already given...\r\ngive it a try!',
             [{text: 'OK', onPress: () => this.giveDirections()}], { onDismiss: () => {this.giveDirections()} }
             );
         }, 500);
@@ -220,11 +220,11 @@ class Intro1 extends Component {
             <View style={{flex: 1}}>
                 <View style={[intro_styles.container, {backgroundColor: this.state.bgColor}]}>
                     <View style={[intro_styles.header, this.headerBorder(this.state.bgColor), this.headerFooterColor(this.state.bgColor)]}>
-                        <Button style={intro_styles.button}>
-                            <Image source={ require('../images/close.png') } style={{ width: normalize(height*0.07), height: normalize(height*0.07) }} />
+                        <Button style={[intro_styles.button, {marginLeft: getArrowMargin()}]} onPress={() => this.closeGame(this.props.fromWhere)}>
+                            <Image source={ require('../images/close.png') } style={{ width: getArrowSize(), height: getArrowSize()}} />
                         </Button>
-                        <Button style={intro_styles.button}>
-                            <Image source={ require('../images/dropdown.png') } style={{ width: normalize(height*0.07), height: normalize(height*0.07) }} />
+                        <Button style={[intro_styles.button, {marginRight: getArrowMargin()}]} onPress={ () => this.showDropdown()}>
+                            <Image source={ require('../images/dropdown.png') } style={{ width: getArrowSize(), height: getArrowSize()}} />
                         </Button>
                     </View>
                     <View style={intro_styles.tablet}>

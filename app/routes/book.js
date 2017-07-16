@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Image, TouchableHighlight, ListView, BackHandler, AsyncStorage, ActivityIndicator, AppState } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableHighlight, ListView, BackHandler, AsyncStorage, ActivityIndicator, AppState, PixelRatio } from 'react-native';
 import moment from 'moment';
 import Button from '../components/Button';
 import Overlay from '../components/Overlay';
 import configs from '../config/configs';
-import { normalize, normalizeFont }  from '../config/pixelRatio';
+import { normalize, normalizeFont, getMargin, getImageSize, getArrowSize, getArrowMargin }  from '../config/pixelRatio';
 shuffleArray = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
         let j = Math.floor(Math.random() * (i + 1));
@@ -47,6 +47,7 @@ shadeColor = (color, percent) => {
 }
 let SideMenu = require('react-native-side-menu');
 let Menu = require('../nav/menu');
+let pixelRatio = PixelRatio.get();
 let homeData = {};
 const styles = require('../styles/styles');
 const {width, height} = require('Dimensions').get('window');
@@ -395,6 +396,26 @@ class Book extends Component{
             },
        });
     }
+    getImageStyle(){
+        if (pixelRatio < 1.4){
+            return {
+                width: normalize(height*0.07), height: normalize(height*0.07)
+            }
+        }
+        return {
+            width: normalize(height*0.14), height: normalize(height*0.14)
+        }
+    }
+    getMargin(){
+        if (pixelRatio < 1.4){
+            return {
+                marginRight: normalize(height*0.05)
+            }
+        }
+        return {
+            marginRight: normalize(height*0.02)
+        }
+    }
     dismissOverlay(){
        this.setState({shouldShowOverlay: false});
     }
@@ -417,12 +438,12 @@ class Book extends Component{
 
                     <View style={ [book_styles.container, {backgroundColor: this.state.bgColor}, this.darkBorder(this.state.bgColor)] }>
                         <View style={ [book_styles.header, {backgroundColor: this.state.headerColor}]}>
-                            <Button style={book_styles.button} onPress={ () => this.handleHardwareBackButton() }>
-                                <Image source={ require('../images/arrowback.png') } style={ { width: normalize(height*0.07), height: normalize(height*0.07) } } />
+                            <Button style={[book_styles.button, {marginLeft: getArrowMargin()}]} onPress={ () => this.handleHardwareBackButton() }>
+                                <Image source={ require('../images/arrowback.png') } style={ { width: getArrowSize(), height: getArrowSize() } } />
                             </Button>
                             <Text style={{fontSize: configs.LETTER_SIZE * 0.7, color: this.state.titleColor}} >{this.props.title}</Text>
-                            <Button style={[book_styles.button, {marginRight: 10}]} onPress={ () => this.launchReader()}>
-                                <Image source={ require('../images/bible.png') } style={ { width: normalize(height*0.14), height: normalize(height*0.14) } } />
+                            <Button style={[book_styles.button, {marginRight: getMargin()}]} onPress={ () => this.launchReader()}>
+                                <Image source={ require('../images/bible.png') } style={{height: getImageSize(), width: getImageSize()}} />
                             </Button>
                         </View>
                         <View style={ [book_styles.tiles_container, {backgroundColor: this.state.bgColor}, this.darkBorder(this.state.bgColor)] }>

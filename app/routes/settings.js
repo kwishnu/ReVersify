@@ -5,7 +5,7 @@ import Button from '../components/Button';
 import PushNotification from 'react-native-push-notification';
 import moment from 'moment';
 import configs from '../config/configs';
-import { normalize, normalizeFont }  from '../config/pixelRatio';
+import { normalize, normalizeFont, getArrowSize, getArrowMargin }  from '../config/pixelRatio';
 const styles = require('../styles/styles');
 const {width, height} = require('Dimensions').get('window');
 const KEY_Sound = 'soundKey';
@@ -338,13 +338,13 @@ module.exports = class Settings extends Component {
             return (
                 <View style={settings_styles.container}>
                     <View style={ settings_styles.header }>
-                        <Button style={settings_styles.button} onPress={ () => this.handleHardwareBackButton() }>
-                            <Image source={ require('../images/arrowback.png') } style={ { width: normalize(height*0.07), height: normalize(height*0.07) } } />
+                        <Button style={[settings_styles.button, {marginLeft: getArrowMargin()}]} onPress={ () => this.handleHardwareBackButton() }>
+                            <Image source={ require('../images/arrowback.png') } style={{ width: getArrowSize(), height: getArrowSize()}} />
                         </Button>
                         <Text style={styles.header_text} >Settings
                         </Text>
-                        <Button style={settings_styles.button}>
-                            <Image source={ require('../images/noimage.png') } style={ { width: normalize(height*0.07), height: normalize(height*0.07) } } />
+                        <Button style={[settings_styles.button, {marginRight: getArrowMargin()}]}>
+                        <Image source={ require('../images/noimage.png') } style={{ width: getArrowSize(), height: getArrowSize()}} />
                         </Button>
                     </View>
                     <View style={ settings_styles.settings_container }>

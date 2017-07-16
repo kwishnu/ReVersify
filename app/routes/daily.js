@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, Image, TouchableHighlight, ListView, BackHandle
 import moment from 'moment';
 import Button from '../components/Button';
 import configs from '../config/configs';
-import { normalize, normalizeFont }  from '../config/pixelRatio';
+import { normalize, normalizeFont, getArrowSize, getArrowMargin }  from '../config/pixelRatio';
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         let j = Math.floor(Math.random() * (i + 1));
@@ -302,12 +302,12 @@ class Daily extends Component{
                             onChange={ (isOpen) => this.updateMenuState(isOpen) }>
                     <View style={ [daily_styles.container, this.border('#070f4e')] }>
                         <View style={ daily_styles.header }>
-                            <Button style={daily_styles.button} onPress={ () => this.handleHardwareBackButton() }>
-                                <Image source={ require('../images/arrowback.png') } style={ { width: normalize(height*0.07), height: normalize(height*0.07) } } />
+                            <Button style={[daily_styles.button, {marginLeft: getArrowMargin()}]} onPress={ () => this.handleHardwareBackButton() }>
+                                <Image source={ require('../images/arrowback.png') } style={{ width: getArrowSize(), height: getArrowSize()}} />
                             </Button>
                             <Text style={styles.header_text} >{this.props.title}</Text>
-                            <Button style={daily_styles.button}>
-                                <Image source={ require('../images/noimage.png') } style={ { width: normalize(height*0.07), height: normalize(height*0.07) } } />
+                            <Button style={[daily_styles.button, {marginRight: getArrowMargin()}]}>
+                                <Image source={ require('../images/noimage.png') } style={{ width: getArrowSize(), height: getArrowSize()}} />
                             </Button>
                         </View>
                         <View style={ [daily_styles.tiles_container, this.border('#070f4e')] }>

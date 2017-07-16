@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, ScrollView, Image, Alert, BackHandler, AsyncStorage, AppState, ActivityIndicator } from 'react-native';
 import Button from '../components/Button';
 import configs from '../config/configs';
-import { normalize, normalizeFont }  from '../config/pixelRatio';
+import { normalize, normalizeFont, getArrowSize, getArrowMargin }  from '../config/pixelRatio';
 import moment from 'moment';
 const styles = require('../styles/styles');
 const {width, height} = require('Dimensions').get('window');
@@ -24,6 +24,7 @@ module.exports = class Reader extends Component {
             backOpacity: 0,
             forwardOpacity: 0,
             bookmarkImage: require('../images/bookmarkgray.png'),
+            bookmarkSet: false,
             bgColor: '',
             homeData: this.props.homeData
         };
@@ -31,7 +32,7 @@ module.exports = class Reader extends Component {
     }
     componentDidMount(){
         if (this.state.homeData[this.props.dataElement].on_chapter == String(this.props.chapterIndex)){
-            this.setState({bookmarkImage: require('../images/bookmarkred.png')});
+            this.setState({bookmarkImage: require('../images/bookmarkred.png'), bookmarkSet: true});
         }
         let chapterText = this.props.homeData[this.props.dataElement].chapters[this.props.chapterIndex];
         let s1 = '';
@@ -114,9 +115,14 @@ module.exports = class Reader extends Component {
             }
        });
     }
-    setBookmark(){
-        this.setState({bookmarkImage: require('../images/bookmarkred.png')});
-        this.state.homeData[this.props.dataElement].on_chapter = String(this.props.chapterIndex);
+    setBookmark(set){
+        if(!set){
+            this.setState({bookmarkImage: require('../images/bookmarkred.png')});
+            this.state.homeData[this.props.dataElement].on_chapter = String(this.props.chapterIndex);
+        }else{
+            this.setState({bookmarkImage: require('../images/bookmarkgray.png')});
+            this.state.homeData[this.props.dataElement].on_chapter = '0';
+        }
         try {
             AsyncStorage.setItem(KEY_Verses, JSON.stringify(this.state.homeData));
         } catch (error) {
@@ -134,19 +140,19 @@ module.exports = class Reader extends Component {
         }else{
             return (
                 <View style={reader_styles.container}>
-                    <View style={ reader_styles.header }>
-                        <Button style={reader_styles.button} onPress={ () => this.goBack() }>
-                            <Image source={ require('../images/arrowback.png') } style={ { width: normalize(height*0.07), height: normalize(height*0.07) } } />
+                    <View style={reader_styles.header}>
+                        <Button style={[reader_styles.button, {marginLeft: getArrowMargin()}]} onPress={ () => this.goBack() }>
+                            <Image source={ require('../images/arrowback.png') } style={{ width: getArrowSize(), height: getArrowSize()}} />
                         </Button>
                         <Button style={[reader_styles.button, {opacity: this.state.backOpacity}]} onPress={ () => this.nextChapter(-1) }>
-                            <Image source={ require('../images/playarrowback.png') } style={ { width: normalize(height*0.1), height: normalize(height*0.1) } } />
+                            <Image source={ require('../images/playarrowback.png') } style={{ width: normalize(height*0.08), height: normalize(height*0.08) }} />
                         </Button>
                         <Text style={styles.header_text} >{this.state.title}</Text>
                         <Button style={[reader_styles.button, {opacity: this.state.forwardOpacity}]} onPress={ () => this.nextChapter(1)}>
-                            <Image source={ require('../images/playarrowforward.png') } style={ { width: normalize(height*0.1), height: normalize(height*0.1) } } />
+                            <Image source={ require('../images/playarrowforward.png') } style={{ width: normalize(height*0.08), height: normalize(height*0.08) }} />
                         </Button>
-                        <Button style={reader_styles.button}  onPress={ () => this.setBookmark() }>
-                            <Image source={this.state.bookmarkImage} style={ { width: normalize(height*0.07), height: normalize(height*0.07) } } />
+                        <Button style={[reader_styles.button, {marginRight: getArrowMargin()}]}  onPress={ () => this.setBookmark(this.state.bookmarkSet) }>
+                            <Image source={this.state.bookmarkImage} style={{ width: getArrowSize(), height: getArrowSize()}} />
                         </Button>
                     </View>
                     <View style={[reader_styles.reader_container, {backgroundColor: this.state.bgColor}]}>
@@ -188,8 +194,8 @@ const reader_styles = StyleSheet.create({
     button: {
         alignItems: 'center',
         justifyContent: 'center',
-        width: normalize(height*0.06),
-        height: normalize(height*0.06)
+        width: normalize(height*0.08),
+        height: normalize(height*0.08)
     },
     reader_container: {
         flex: 15,

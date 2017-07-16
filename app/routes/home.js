@@ -6,7 +6,7 @@ import Button from '../components/Button';
 import Dialog from '../components/Dialog';
 import Meteor from 'react-native-meteor';
 import configs from '../config/configs';
-import { normalize, normalizeFont }  from '../config/pixelRatio';
+import { normalize, normalizeFont, getArrowSize, getArrowMargin }  from '../config/pixelRatio';
 let Orientation = require('react-native-orientation');
 shuffleArray = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
@@ -265,9 +265,9 @@ class Home extends Component{
                         window.alert('AsyncStorage error: 252' + error.message);
                     }
                     if (this.state.isPremium){
-                        Alert.alert('Thanks', `Thank you for the feedback, we hope you enjoy the app!`);
+                        Alert.alert('Thanks', `Thank you for the feedback, we hope you are enjoying the app!`);
                     }else{
-                        Alert.alert('Thank You!', `You now have a new feature: the first tile will already be played in each Verse. You can change this in 'Settings' if you wish`);
+                        Alert.alert('Thank You!', `You now have a new feature--the first tile will already be played in each Verse. You can change this in 'Settings' if you wish`);
                     }
             this.props.navigator.pop({});
                 }
@@ -387,6 +387,7 @@ class Home extends Component{
                         });
                         return;
                     }
+                    let showInfoBox = (item.title == 'Value Combinations' || item.title == 'Popular')?false:true;
                     for (var j=0; j<this.state.homeData.length; j++){
                         if (this.state.homeData[j].type == 'mypack'){
                             myPackArray.push(this.state.homeData[j].title);
@@ -404,6 +405,7 @@ class Home extends Component{
                             dataIndex: index,
                             title: item.title,
                             availableList: keepInList,
+                            showInfoBox: showInfoBox,
                             homeData: this.state.homeData,
                         }
                     });
@@ -718,12 +720,12 @@ class Home extends Component{
                 <SideMenu menu={ menu } isOpen={ this.state.isOpen } onChange={ (isOpen) => this.updateMenuState(isOpen) }>
                     <View style={ [container_styles.container, this.border('#070f4e')] }>
                         <View style={ container_styles.header }>
-                            <Button style={container_styles.button} onPress={ () => this.toggle() }>
-                                <Image source={this.state.menuImage} style={ { width: normalize(height/15), height: normalize(height/15) } } />
+                            <Button style={[container_styles.button, {marginLeft: getArrowMargin()}]} onPress={ () => this.toggle() }>
+                                <Image source={this.state.menuImage} style={ { width: getArrowSize(), height: getArrowSize() } } />
                             </Button>
                             <Image source={ require('../images/logo2.png') } style={ { width: normalize(height * .2), height: normalize(height * .07) } } />
-                            <Button style={container_styles.button}>
-                                <Image source={ require('../images/noimage.png') } style={ { width: normalize(height/15), height: normalize(height/15) } } />
+                            <Button style={[container_styles.button, {marginRight: getArrowMargin()}]} >
+                                <Image source={ require('../images/noimage.png') } style={ { width: getArrowSize(), height: getArrowSize() } } />
                             </Button>
                             <View style={ container_styles.solved }>
                                 <Text style={[container_styles.total_text, {opacity: this.state.solved_opacity}]}>Solved:</Text>

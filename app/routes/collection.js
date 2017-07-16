@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, Image, TouchableHighlight, ListView, BackHandle
 import moment from 'moment';
 import Button from '../components/Button';
 import configs from '../config/configs';
-import { normalize }  from '../config/pixelRatio';
+import { normalize, getArrowSize, getArrowMargin }  from '../config/pixelRatio';
 shuffleArray = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
         let j = Math.floor(Math.random() * (i + 1));
@@ -396,12 +396,12 @@ class Collection extends Component{
 
                     <View style={ [collection_styles.container, {backgroundColor: this.state.bgColor}, this.darkBorder(this.state.bgColor)] }>
                         <View style={ [collection_styles.header, {backgroundColor: this.state.headerColor}]}>
-                            <Button style={collection_styles.button} onPress={ () => this.handleHardwareBackButton() }>
-                                <Image source={ require('../images/arrowback.png') } style={ { width: normalize(height*0.07), height: normalize(height*0.07) } } />
+                            <Button style={[collection_styles.button, {marginLeft: getArrowMargin()}]} onPress={ () => this.handleHardwareBackButton() }>
+                                <Image source={ require('../images/arrowback.png') } style={{ width: getArrowSize(), height: getArrowSize()}} />
                             </Button>
                             <Text style={{fontSize: configs.LETTER_SIZE * 0.7, color: this.state.titleColor}} >{this.props.title}</Text>
-                            <Button style={collection_styles.button}>
-                                <Image source={ require('../images/noimage.png') } style={ { width: normalize(height*0.07), height: normalize(height*0.07) } } />
+                            <Button style={[collection_styles.button, {marginRight: getArrowMargin()}]}>
+                                <Image source={ require('../images/noimage.png') } style={{ width: getArrowSize(), height: getArrowSize()}} />
                             </Button>
                         </View>
                         <View style={ [collection_styles.tiles_container, {backgroundColor: this.state.bgColor}, this.darkBorder(this.state.bgColor)] }>

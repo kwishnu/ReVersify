@@ -23,5 +23,33 @@ export const normalizeFont = (size) => {
   if (pixelRatio < 1.4){
       return Math.sqrt((height*height)+(width*width))*(size/175);
   }
-  return Math.sqrt((height*height)+(width*width))*(size/100);
+  return Math.sqrt((height*height)+(width*width))*(size*.01);
 }
+
+export const getImageSize = () => {
+    if (pixelRatio < 1.4){
+        return height*0.06
+    }
+        return height*0.14
+}
+
+export const getMargin = () => {
+    if (pixelRatio < 1.4){
+        return height*0.06
+    }
+    return height*0.02
+}
+export const getArrowSize = () => {
+    if (pixelRatio < 1.4){
+        return height*0.04
+    }
+        return height*0.08
+}
+
+export const getArrowMargin = () => {
+    if (pixelRatio < 1.4){
+        return height*0.01
+    }
+    return 0
+}
+

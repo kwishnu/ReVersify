@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Image, TouchableHighlight, ListView, BackHandler, AsyncStorage, NetInfo } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableHighlight, ListView, BackHandler, AsyncStorage, NetInfo, ActivityIndicator } from 'react-native';
 import Meteor from 'react-native-meteor';
 import Button from '../components/Button';
 import configs from '../config/configs';
-import { normalize, normalizeFont }  from '../config/pixelRatio';
+import { normalize, normalizeFont, getArrowSize, getArrowMargin }  from '../config/pixelRatio';
 //var InAppBilling = require("react-native-billing");
 const styles = require('../styles/styles');
 const { width, height } = require('Dimensions').get('window');
@@ -57,11 +57,20 @@ module.exports = class Store extends Component {
             id: 'store',
             dataSource: this.props.availableList,
             expand: true,
+            isLoading: true,
+            questionOpacity: 1,
+            questionImage: require('../images/infoquestion.png'),
             infoText: `All Bible Books are priced $0.99USD and may be read in their entirety in the app. A portion of the proceeds raised by the app will be donated to the WEB project of World Outreach Ministries.`
         };
         this.handleHardwareBackButton = this.handleHardwareBackButton.bind(this);
     }
     componentDidMount(){
+        setTimeout(()=>{this.setState({isLoading: false})}, 700);
+        BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
+        if (!this.props.showInfoBox){
+            this.setState({expand: false, questionOpacity: 0, questionImage: require('../images/noimage.png')})
+            return;
+        }
         if (this.props.dataIndex == 5){
             this.setState({ infoText: `All Verse Collections contain 50 Verse Puzzles and are priced $0.99USD. A portion of the proceeds raised by the app will be donated to the WEB project of World Outreach Ministries.` });
         }
@@ -81,7 +90,6 @@ module.exports = class Store extends Component {
                 }
             }
         });
-        BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
     }
     componentWillUnmount () {
         BackHandler.removeEventListener('hardwareBackPress', this.handleHardwareBackButton);
@@ -101,6 +109,7 @@ module.exports = class Store extends Component {
         return true;
     }
     toggleInfoBox(bool){
+        if (this.state.questionOpacity == 0)return;
         this.setState({expand: !bool, infoText: this.state.infoText});
         AsyncStorage.getItem(KEY_expandInfo).then((strExpand) => {
             let expArr = strExpand.split('.');
@@ -125,122 +134,163 @@ module.exports = class Store extends Component {
 
         });
     }
+    renderStoreRow = (data) => {
+        let productIDArray = data.product_id.split('.');
+        if (productIDArray[1] != 'combo'){
+            return (//single Collection or Book
+                <View style={ store_styles.purchase_row }>
+                    <View style={[store_styles.purchase_text_container, {backgroundColor: data.color}]}>
+                        <Text style={[store_styles.launcher_text, {color: invertColor(data.color, true)}]}>{data.name}</Text>
+                        <Text style={[store_styles.launcher_text_small, {color: invertColor(data.color, true)}]}>{data.num_verses + ' Verse Puzzles'}</Text>
+                        <Text style={[store_styles.launcher_text_small, {color: invertColor(data.color, true)}]}>Complete Text</Text>
+                    </View>
+                    <View style={ store_styles.purchase_button_container } onStartShouldSetResponder={ ()=> {this.startPurchase(data.name, data.product_id)}}>
+                        <View style={store_styles.buy_button} >
+                            <Text style={store_styles.buy_text}>Purchase</Text>
+                        </View>
+                    </View>
+                </View>
+            )
+        }else{
+            return (//combo
+                <View style={ store_styles.purchase_row }>
+                    <View style={[store_styles.purchase_text_container, {backgroundColor: data.color}]}>
+                        <Text style={[store_styles.launcher_text, {color: invertColor(data.color, true)}]}>{data.name[0]}</Text>
+                        <Text style={[store_styles.launcher_text_small, {color: invertColor(data.color, true)}]}>{data.num_verses[0] + ' Verse Puzzles'}</Text>
+                        <Text style={[store_styles.launcher_text_small, {color: invertColor(data.color, true)}]}>Complete Text</Text>
+                            <View style={store_styles.divider}/>
+                        <Text style={[store_styles.launcher_text, {color: invertColor(data.color, true)}]}>{data.name[1]}</Text>
+                        <Text style={[store_styles.launcher_text_small, {color: invertColor(data.color, true)}]}>{data.num_verses[1] + ' Verse Puzzles'}</Text>
+                        <Text style={[store_styles.launcher_text_small, {color: invertColor(data.color, true)}]}>Complete Text</Text>
+                            <View style={store_styles.divider}/>
+                        <Text style={[store_styles.launcher_text, {color: invertColor(data.color, true)}]}>{data.name[2]}</Text>
+                        <Text style={[store_styles.launcher_text_small, {color: invertColor(data.color, true)}]}>{data.num_verses[2] + ' reVersify Hints'}</Text>
+                            <View style={store_styles.spacer}/>
+                        <Text style={[store_styles.launcher_text, {color: invertColor(data.color, true)}]}>{data.price}</Text>
+                    </View>
+                    <View style={ store_styles.purchase_button_container } onStartShouldSetResponder={ ()=> {this.startPurchase(data.name, data.product_id)}}>
+                        <View style={store_styles.buy_button} >
+                            <Text style={store_styles.buy_text}>Purchase</Text>
+                        </View>
+                    </View>
+                </View>
+            )
+        }
+    }
+    startPurchase(item_name, itemID){
+        NetInfo.isConnected.fetch().then(isConnected => {
+            if (isConnected && Meteor.status().status == 'connected'){
+    //            InAppBilling.open()
+    //            .then(() => InAppBilling.purchase(itemID))
+    //            .then((details) => {
+                    setTimeout(()=> {
+                        this.props.navigator.replace({
+                            id: 'splash',
+                            passProps: {
+                                motive: 'purchase',
+                                packName: item_name,
+                                productID: itemID
+                            }
+                        });
+                    }, 500);
+                    this.props.navigator.pop({});
+    //                console.log("You purchased: ", details)
+    //                return InAppBilling.close()
+    //            }).catch((err) => {
+    //                console.log(err);
+    //                return InAppBilling.close()
+    //            });
+            }else{
+                Alert.alert('Not Connected', `Sorry, we can't reach our servers right now. Please try again later!`);
+            }
+        });
+    }
+
 
     render() {
         const rows = this.dataSource.cloneWithRows(this.props.availableList);
-        if(this.state.expand){
-            return (
-                <View style={store_styles.container}>
-                    <View style={ store_styles.header }>
-                        <Button style={store_styles.button} onPress={ () => this.handleHardwareBackButton() }>
-                            <Image source={ require('../images/arrowback.png') } style={ { width: normalize(height*.07), height: normalize(height*.07) } } />
-                        </Button>
-                        <Text style={styles.header_text} >{this.props.title}
-                        </Text>
-                        <Button style={store_styles.button}>
-                            <Image source={ require('../images/noimage.png') } style={ { width: normalize(height*.07), height: normalize(height*.07) } } />
-                        </Button>
-                    </View>
-                    <View style={store_styles.listview_container}>
-                        <View style={[ store_styles.infoBox, {flex: 5} ]}>
-                            <View style={ store_styles.text_container }>
-                                <Text style={store_styles.info_text} >{this.state.infoText}</Text>
-                            </View>
-                            <View style={ store_styles.button_container }>
-                                <Button style={ store_styles.gotit_button } onPress={ () => this.toggleInfoBox(this.state.expand) }>
-                                        <Text style={[store_styles.button_text, {color: 'red'}]}> X   </Text>
-                                        <Text style={[store_styles.button_text, {color: '#ffffff'}]} > Got it!</Text>
-                                </Button>
-                            </View>
-                        </View>
-                        <View style={{flex: 8}}>
-                            <ListView  showsVerticalScrollIndicator ={false}
-                                    contentContainerStyle={ store_styles.listview }
-                                    enableEmptySections ={true}
-                                    dataSource={rows}
-                                    renderRow={(data) => <Row props= {data} navigator= {this.props.navigator} /> }
-                            />
-                        </View>
-                    </View>
+        if(this.state.isLoading == true){
+            return(
+                <View style={store_styles.loading}>
+                    <ActivityIndicator animating={true} size={'large'}/>
                 </View>
-            );
+            )
         }else{
-            return (
-                <View style={store_styles.container}>
-                    <View style={ store_styles.header }>
-                        <Button style={store_styles.button} onPress={ () => this.handleHardwareBackButton() }>
-                            <Image source={ require('../images/arrowback.png') } style={ { width: normalize(height*0.07), height: normalize(height*0.07) } } />
-                        </Button>
-                        <Text style={styles.header_text} >{this.props.title}</Text>
-                        <Button style={store_styles.button} onPress={ () => this.toggleInfoBox() }>
-                            <Image source={ require('../images/infoquestion.png') } style={ { width: normalize(height*0.07), height: normalize(height*0.07) } } />
-                        </Button>
-                    </View>
-                    <View style={store_styles.listview_container}>
-                        <View style={{flex: 12}}>
-                            <ListView  showsVerticalScrollIndicator ={false}
-                                    contentContainerStyle={ store_styles.listview }
-                                    enableEmptySections ={true}
-                                    dataSource={rows}
-                                    renderRow={(data) => <Row props= {data} navigator= {this.props.navigator} /> }
-                            />
+            if(this.state.expand){
+                return (
+                    <View style={store_styles.container}>
+                        <View style={ store_styles.header }>
+                            <Button style={[store_styles.button, {marginLeft: getArrowMargin()}]} onPress={ () => this.handleHardwareBackButton() }>
+                                <Image source={ require('../images/arrowback.png') } style={{ width: getArrowSize(), height: getArrowSize()}} />
+                            </Button>
+                            <Text style={styles.header_text} >{this.props.title}
+                            </Text>
+                            <Button style={[store_styles.button, {marginRight: getArrowMargin()}]}>
+                                <Image source={ require('../images/noimage.png') } style={{ width: getArrowSize(), height: getArrowSize()}} />
+                            </Button>
+                        </View>
+                        <View style={store_styles.listview_container}>
+                            <View style={[ store_styles.infoBox, {flex: 5} ]}>
+                                <View style={ store_styles.text_container }>
+                                    <Text style={store_styles.info_text} >{this.state.infoText}</Text>
+                                </View>
+                                <View style={ store_styles.button_container }>
+                                    <Button style={ store_styles.gotit_button } onPress={ () => this.toggleInfoBox(this.state.expand) }>
+                                            <Text style={[store_styles.button_text, {color: 'red'}]}> X   </Text>
+                                            <Text style={[store_styles.button_text, {color: '#ffffff'}]} > Got it!</Text>
+                                    </Button>
+                                </View>
+                            </View>
+                            <View style={{flex: 8}}>
+                                <ListView  showsVerticalScrollIndicator ={false}
+                                        contentContainerStyle={ store_styles.listview }
+                                        enableEmptySections ={true}
+                                        dataSource={rows}
+                                        renderRow={this.renderStoreRow}
+                                />
+                            </View>
                         </View>
                     </View>
-                </View>
-            );
+                );
+            }else{
+                return (
+                    <View style={store_styles.container}>
+                        <View style={ store_styles.header }>
+                            <Button style={[store_styles.button, {marginLeft: getArrowMargin()}]} onPress={ () => this.handleHardwareBackButton() }>
+                                <Image source={ require('../images/arrowback.png') } style={{ width: getArrowSize(), height: getArrowSize()}} />
+                            </Button>
+                            <Text style={styles.header_text} >{this.props.title}</Text>
+                            <Button style={[store_styles.button, {marginRight: getArrowMargin(), opacity: this.state.questionOpacity}]} onPress={ () => this.toggleInfoBox() }>
+                                <Image source={this.state.questionImage} style={{ width: getArrowSize(), height: getArrowSize()}} />
+                            </Button>
+                        </View>
+                        <View style={store_styles.listview_container}>
+                            <View style={{flex: 12}}>
+                                <ListView  showsVerticalScrollIndicator ={false}
+                                        contentContainerStyle={ store_styles.listview }
+                                        enableEmptySections ={true}
+                                        dataSource={rows}
+                                        renderRow={this.renderStoreRow}
+                                />
+                            </View>
+                        </View>
+                    </View>
+                );
+            }
         }
     }
 };
-
-const Row = ({props, navigator}) => (
-    <View style={ store_styles.purchase_row }>
-        <View style={[store_styles.purchase_text_container, {backgroundColor: props.color}]}>
-            <Text style={[store_styles.launcher_text, {color: this.invertColor(props.color, true)}]}>{props.name}</Text>
-            <Text style={[store_styles.launcher_text_small, {color: this.invertColor(props.color, true)}]}>{props.num_verses + ' Verse Puzzles'}</Text>
-        </View>
-        <View style={ store_styles.purchase_button_container } onStartShouldSetResponder={ ()=> {this.startPurchase(props.name, props.product_id, navigator)}}>
-            <View style={store_styles.buy_button} >
-                <Text style={store_styles.buy_text}>Purchase</Text>
-            </View>
-        </View>
-    </View>
-);
-
-startPurchase = (item_name, itemID, nav) => {
-    NetInfo.isConnected.fetch().then(isConnected => {
-        if (isConnected && Meteor.status().status == 'connected'){
-//            InAppBilling.open()
-//            .then(() => InAppBilling.purchase(itemID))
-//            .then((details) => {
-                setTimeout(()=> {
-                    nav.replace({
-                        id: 'splash',
-                        passProps: {
-                            motive: 'purchase',
-                            packName: item_name,
-                            productID: itemID
-                        }
-                    });
-                }, 500);
-                nav.pop({});
-//                console.log("You purchased: ", details)
-//                return InAppBilling.close()
-//            }).catch((err) => {
-//                console.log(err);
-//                return InAppBilling.close()
-//            });
-        }else{
-            Alert.alert('Not Connected', `Sorry, we can't reach our servers right now. Please try again later!`);
-        }
-    });
-              //{`${props.name}`}
-};
-
 
 const store_styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#cfe7c2',
+    },
+    loading: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#2B0B30'
     },
     header: {
         flex: 1,
@@ -317,8 +367,7 @@ const store_styles = StyleSheet.create({
     },
     text_small: {
         fontSize: normalizeFont(configs.LETTER_SIZE * .07),
-        marginLeft: height * .02,
-        marginRight: height * .02
+        marginHorizontal: height * .02
     },
     launcher_text: {
         fontSize: normalizeFont(configs.LETTER_SIZE * .11),
@@ -335,10 +384,7 @@ const store_styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         width: width*.95,
-        height: height*.16,
-        padding: 4,
-        margin: 4
-
+        paddingVertical: height*.002
     },
     purchase_button_container: {
         flex: 2,
@@ -346,22 +392,22 @@ const store_styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 4,
-        margin: 4
+
     },
     purchase_text_container: {
         flex: 3,
-        height: height*.16,
+//        height: height*.16,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: StyleSheet.hairlineWidth,
         borderColor: 'black',
         borderRadius: 3,
-        padding: 4,
-        margin: 4
-
+        padding: 20,
+        margin: 4,
     },
     buy_button: {
-        height: height/15,
+        height: height*.067,
+        width: height*.165,
         alignSelf: 'stretch',
         alignItems: 'center',
         justifyContent: 'center',
@@ -369,10 +415,20 @@ const store_styles = StyleSheet.create({
         borderRadius: 25,
         borderWidth: 1,
         borderColor: '#f9f003',
+        marginLeft: 6
     },
     buy_text: {
         fontSize: normalizeFont(configs.LETTER_SIZE*0.094),
         color: '#ffffff',
         fontWeight: 'bold',
+    },
+    divider: {
+        height: StyleSheet.hairlineWidth,
+        width: height * 0.1,
+        backgroundColor: '#dddddd',
+        marginVertical: height*.01,
+    },
+    spacer: {
+        height: height*.02
     }
 });

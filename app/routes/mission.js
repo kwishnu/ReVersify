@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, Image, Alert, BackHandler, Platform, AsyncStorage, Linking, AppState, NetInfo } from 'react-native';
 import Button from '../components/Button';
 import configs from '../config/configs';
-import { normalize, normalizeFont }  from '../config/pixelRatio';
+import { normalize, normalizeFont, getArrowSize, getArrowMargin }  from '../config/pixelRatio';
 import moment from 'moment';
 const styles = require('../styles/styles');
 const {width, height} = require('Dimensions').get('window');
@@ -83,12 +83,12 @@ module.exports = class Mission extends Component {
         return (
             <View style={about_styles.container}>
                 <View style={ about_styles.header }>
-                    <Button style={about_styles.button} onPress={ () => this.goSomewhere() }>
-                        <Image source={ require('../images/arrowback.png') } style={ { width: normalize(height*0.07), height: normalize(height*0.07) } } />
+                    <Button style={[about_styles.button, {marginLeft: getArrowMargin()}]} onPress={ () => this.goSomewhere() }>
+                        <Image source={ require('../images/arrowback.png') } style={{ width: getArrowSize(), height: getArrowSize()}} />
                     </Button>
                     <Text style={styles.header_text} >Our Mission</Text>
-                    <Button style={about_styles.button}>
-                        <Image source={ require('../images/noimage.png') } style={ { width: normalize(height*0.07), height: normalize(height*0.07) } } />
+                    <Button style={[about_styles.button, {marginRight: getArrowMargin()}]}>
+                        <Image source={ require('../images/noimage.png') } style={{ width: getArrowSize(), height: getArrowSize()}} />
                     </Button>
                 </View>
                 <View style={ about_styles.about_container }>

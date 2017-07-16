@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, Image, BackHandler, Linking } from 'react-native';
 import Button from '../components/Button';
 import configs from '../config/configs';
-import { normalize, normalizeFont }  from '../config/pixelRatio';
+import { normalize, normalizeFont, getArrowSize, getArrowMargin } from '../config/pixelRatio';
 const styles = require('../styles/styles');
 const {width, height} = require('Dimensions').get('window');
 
@@ -72,18 +72,18 @@ module.exports = class Social extends Component {
     render() {
         const imageSource = (this.props.which == 'FB')?require('../images/fblogo.png') : require('../images/twitterlogo.png');
         const text1 = (this.props.which == 'FB')?'\'Like\' us on Facebook so you can follow ':'Follow us on Twitter to keep up on ';
-        const text2 = 'reVersify News: learn of new reVersify verse collections and other games we release!';
+        const text2 = 'reVersify News: learn of new reVersify Verse Collections and other games we release!';
         const text = text1 + text2;
         return (
                 <View style={[social_styles.container, {borderColor: this.props.color}]}>
                     <View style={ [social_styles.header, {backgroundColor: this.props.color}] }>
-                        <Button style={social_styles.button} onPress={ () => this.handleHardwareBackButton() }>
-                            <Image source={ require('../images/arrowback.png') } style={ { width: normalize(height*.07), height: normalize(height*.07) } } />
+                        <Button style={[social_styles.button, {marginLeft: getArrowMargin()}]} onPress={ () => this.handleHardwareBackButton() }>
+                            <Image source={ require('../images/arrowback.png') } style={{ width: getArrowSize(), height: getArrowSize()}} />
                         </Button>
                         <Text style={styles.header_text} >{this.props.title}
                         </Text>
-                        <Button style={{right: height*.02}}>
-                            <Image source={ require('../images/noimage.png') } style={ { width: normalize(height*.07), height: normalize(height*.07) } } />
+                        <Button style={[social_styles.button, {marginRight: getArrowMargin()}]}>
+                            <Image source={ require('../images/noimage.png') } style={{ width: getArrowSize(), height: getArrowSize()}} />
                         </Button>
                     </View>
                     <View style={ social_styles.image_container }>

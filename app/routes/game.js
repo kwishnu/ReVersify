@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, BackHandler, AsyncStorage, Animated, ActivityIndicator, Alert, Platform, Linking, AppState } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, BackHandler, AsyncStorage, Animated, ActivityIndicator, Alert, Platform, Linking, AppState, NetInfo } from 'react-native';
 import moment from 'moment';
 import Button from '../components/Button';
 import Overlay from '../components/Overlay';
 import Tile from '../components/Tile';
 import DropdownMenu from '../components/DropdownMenu';
 import configs from '../config/configs';
-import { normalize, normalizeFont }  from '../config/pixelRatio';
+import { normalize, normalizeFont, getArrowSize, getArrowMargin }  from '../config/pixelRatio';
 const deepCopy = require('../config/deepCopy.js');
 const styles = require('../styles/styles');
 const {width, height} = require('Dimensions').get('window');
@@ -14,6 +14,7 @@ const KEY_Sound = 'soundKey';
 const KEY_Verses = 'versesKey';
 const KEY_solvedTP = 'solvedTP';
 const KEY_Solved = 'numSolvedKey';
+const KEY_ratedTheApp = 'ratedApp';
 const KEY_showFB = 'showFBKey';
 const KEY_showTwitter = 'showTwitterKey';
 const KEY_Favorites = 'numFavoritesKey';
@@ -172,6 +173,7 @@ class Game extends Component {
             isPremium: false,
             numHints: 0,
             numSolved: 0,
+            hasRated: false,
             hasPaidForHints: false,
             hintNumOpacity: 1,
             hasInfiniteHints: false,
@@ -354,6 +356,11 @@ class Game extends Component {
         }).then((solved) => {
             let ns = parseInt(solved, 10);
             this.setState({numSolved: ns});
+            return AsyncStorage.getItem(KEY_ratedTheApp);
+        }).then((rated) => {
+            let ratedBool = (rated == 'true')?true:false;
+            console.log(rated);
+            this.setState({hasRated: ratedBool});
             return AsyncStorage.getItem(KEY_showFB);
         }).then((fb) => {
             let showFB = (fb == 'true')?true:false;
@@ -838,6 +845,7 @@ class Game extends Component {
         }
     }
     endOfGame(){
+        var newNumSolved = '';
         if(this.state.useSounds == true){fanfare.play();}
         let onLastVerseInPack=(this.props.fromWhere == 'home' || parseInt(this.state.index, 10) + 1 == parseInt(this.props.homeData[this.props.dataElement].num_verses, 10))?true:false;
         if (onLastVerseInPack){
@@ -849,7 +857,7 @@ class Game extends Component {
         this.setState({doneWithVerse: true, showHintButton: false, showNextArrow: true});
         this.showButtonPanel();
         if(this.props.fromWhere == 'collection' || this.props.fromWhere == 'book'){
-            let newNumSolved = (parseInt(homeData[this.props.dataElement].num_solved, 10) + 1).toString();
+            newNumSolved = (parseInt(homeData[this.props.dataElement].num_solved, 10) + 1).toString();
             if(!this.state.openedAll)homeData[this.props.dataElement].num_solved = newNumSolved;
             homeData[this.props.dataElement].solved[this.state.index] = 1;
             let onLastVerse=(parseInt(this.state.index, 10) + 1 == parseInt(homeData[this.props.dataElement].num_verses, 10))?true:false;
@@ -865,9 +873,11 @@ class Game extends Component {
             dsArray[this.state.index + 1] = '1';
             this.setState({daily_solvedArray: dsArray});
         }
+        let numSolved = this.state.numSolved + 1;
+        let strNumSolved = String(numSolved);
         try {
             AsyncStorage.setItem(KEY_daily_solved_array, JSON.stringify(dsArray));
-            AsyncStorage.setItem(KEY_Solved, String(this.state.numSolved + 1));
+            AsyncStorage.setItem(KEY_Solved, strNumSolved);
         } catch (error) {
             window.alert('AsyncStorage error: ' + error.message);
         }
@@ -878,6 +888,36 @@ class Game extends Component {
                 window.alert('AsyncStorage error: ' + error.message);
             }
         }
+        if (numSolved % 15 == 0 && numSolved < 50 && !this.state.hasRated){
+            let dismissText = (numSolved < 46)?'Maybe later...':'Never';
+            Alert.alert( 'Enjoying reVersify?',  `It seems you're enjoying the app, which makes us very happy! Would you care to take a moment to rate us in the App Store?'`,
+                [
+                    {text: 'Give Rating', onPress: () => this.rateApp()},
+                    {text: dismissText, style: 'cancel'},
+                ]
+            )
+        }
+    }
+    rateApp(){
+        NetInfo.isConnected.fetch().then(isConnected => {
+            if (isConnected){
+                let storeUrl = Platform.OS === 'ios' ?
+                    'http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?id=' + configs.appStoreID + '&pageNumber=0&sortOrdering=2&type=Purple+Software&mt=8' :
+                    'market://details?id=' + configs.appStoreID;
+                try {
+                    AsyncStorage.setItem(KEY_ratedTheApp, 'true')
+                    .then(()=>{
+                        return AsyncStorage.setItem(KEY_PlayFirst, 'true');
+                    }).then(()=>{
+                        Linking.openURL(storeUrl);
+                    })
+                } catch (error) {
+                    window.alert('AsyncStorage error: ' + error.message);
+                }
+            }else{
+                Alert.alert('No Connection', 'Sorry, no internet available right now. Please try again later!');
+            }
+        });
     }
     playDropSound(){
         if(!this.state.doneWithVerse && this.state.useSounds == true){plink1.play();}
@@ -1090,7 +1130,6 @@ class Game extends Component {
                 this.e.showNextTile(frag);
                 this.f.showNextTile(frag);
         }
-
     }
     goToHintStore(){
         try {
@@ -1266,6 +1305,7 @@ class Game extends Component {
     }
     dismissOverlay(){
        this.setState({shouldShowOverlay: false});
+
     }
 
 
@@ -1294,12 +1334,12 @@ class Game extends Component {
                 <View style={{flex: 1}}>
                     <View style={[game_styles.container, {backgroundColor: this.state.bgColor}]}>
                         <View style={[game_styles.header, this.headerBorder(this.state.bgColor), this.headerFooterColor(this.state.bgColor)]}>
-                            <Button style={game_styles.button} onPress={() => this.closeGame(this.props.fromWhere)}>
-                                <Image source={ require('../images/close.png') } style={{ width: normalize(height*0.07), height: normalize(height*0.07) }} />
+                            <Button style={[game_styles.button, {marginLeft: getArrowMargin()}]} onPress={() => this.closeGame(this.props.fromWhere)}>
+                                <Image source={ require('../images/close.png') } style={{ width: getArrowSize(), height: getArrowSize()}} />
                             </Button>
                             <Text style={styles.header_text} >{ this.state.title }</Text>
-                            <Button style={game_styles.button} onPress={ () => this.showDropdown()}>
-                                <Image source={ require('../images/dropdown.png') } style={{ width: normalize(height*0.07), height: normalize(height*0.07) }} />
+                            <Button style={[game_styles.button, {marginRight: getArrowMargin()}]} onPress={ () => this.showDropdown()}>
+                                <Image source={ require('../images/dropdown.png') } style={{ width: getArrowSize(), height: getArrowSize()}} />
                             </Button>
                         </View>
                         <View style={game_styles.tablet}>
