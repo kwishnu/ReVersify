@@ -108,8 +108,8 @@ class SwipeNavigator extends Component {
                     showsPagination={true}
                     index={0}
                     onMomentumScrollEnd= {(e, state, context) => this.onScroll(state.index)}
-                    dotStyle={{marginBottom: height*.066}}
-                    activeDotStyle={{marginBottom: height*.066}}
+                    dotStyle={{marginBottom: height*.07}}
+                    activeDotStyle={{marginBottom: height*.07}}
                     dotColor= '#999999'
                 >
                     <Intro  ref={(intro0) => { this.intro0 = intro0 }}
