@@ -4,12 +4,11 @@ import Meteor from 'react-native-meteor';
 import Button from '../components/Button';
 import configs from '../config/configs';
 import { normalize, normalizeFont }  from '../config/pixelRatio';
-import moment from 'moment';
+const InAppBilling = require('react-native-billing');
 const styles = require('../styles/styles');
 const {width, height} = require('Dimensions').get('window');
 const KEY_MyHints = 'myHintsKey';
 const KEY_Premium = 'premiumOrNot';
-let year = moment().year();
 
 module.exports = class HintStore extends Component {
     constructor(props) {
@@ -46,46 +45,59 @@ module.exports = class HintStore extends Component {
         NetInfo.isConnected.fetch().then(isConnected => {
             if (isConnected && Meteor.status().status == 'connected'){
 //rv.hint.package.100, 500, 1000
-//rv.hint.package.0 == unlimited
-//            InAppBilling.open()
-//            .then(() => InAppBilling.purchase(itemID))
-//            .then((details) => {
-                let packArray = hintPackage.split('.');
-                let strHowMany = '';
-                if (packArray[3] == '0'){
-                    strHowMany = 'infinite';
-                }else{
-                    let numBuying = parseInt(packArray[3], 10);
-                    let numOwned = (this.state.currentHints == '-1')?0:parseInt(this.state.currentHints, 10);
-                    let total = numBuying + numOwned;
-                    strHowMany = String(total);
-                }
-                try {
-                    AsyncStorage.setItem(KEY_Premium, 'true');
-                    AsyncStorage.setItem(KEY_MyHints, strHowMany);
-                } catch (error) {
-                    window.alert('AsyncStorage error: ' + error.message);
-                }
-                try {
-                    this.props.navigator.pop({});
-                    this.props.navigator.replace({
-                        id: 'home',
-                        passProps: {
-                            destination: this.props.fromWhere,
-                            homeData: this.props.homeData,
-                            isPremium: 'true'
+// == unlimited
+                InAppBilling.close()//docs recommend making sure IAB is closed first
+                .then(() => InAppBilling.open())
+                .then(() => InAppBilling.purchase(hintPackage))
+                .then((details) => {
+                    if (details.purchaseState == 'PurchasedSuccessfully'){
+                        let packArray = hintPackage.split('.');
+                        let strHowMany = '';
+                        if (packArray[3] == '0'){
+                            strHowMany = 'infinite';
+                        }else{
+                            let numBuying = parseInt(packArray[3], 10);
+                            let numOwned = (this.state.currentHints == '-1')?0:parseInt(this.state.currentHints, 10);
+                            let total = numBuying + numOwned;
+                            strHowMany = String(total);
                         }
-                    });
-                } catch(err)  {
-                    window.alert(err.message)
-                    return true;
-                }
-//                console.log("You purchased: ", details)
-//                return InAppBilling.close()
-//            }).catch((err) => {
-//                console.log(err);
-//                return InAppBilling.close()
-//            });
+                        try {
+                            AsyncStorage.setItem(KEY_Premium, 'true');
+                            AsyncStorage.setItem(KEY_MyHints, strHowMany);
+                        } catch (error) {
+                            window.alert('AsyncStorage error: ' + error.message);
+                        }
+                        try {
+                            this.props.navigator.pop({});
+                            this.props.navigator.replace({
+                                id: 'home',
+                                passProps: {
+                                    destination: this.props.fromWhere,
+                                    homeData: this.props.homeData,
+                                    isPremium: 'true'
+                                }
+                            });
+                        } catch(err)  {
+                            window.alert(err.message)
+                            return true;
+                        }
+                        console.log("You purchased: ", details);
+                    }else{
+                        console.log('Purchase Error: ', details)
+                        Alert.alert('Purchase Error', 'Sorry, your purchase did not succeed, please try again later!');
+                    }
+                    if (hintPackage != 'rv.hint.package.0'){
+                        InAppBilling.consumePurchase(hintPackage).then((consumed)=>{
+                            console.log("Purchase consumed: ", consumed);
+                            return InAppBilling.close();
+                        });
+                    }else{
+                        return InAppBilling.close();
+                    }
+                }).catch((err) => {
+                    console.log(err);
+                    return InAppBilling.close()
+                });
             }else{
                 Alert.alert('Not Connected', `Sorry, we can't reach our servers right now. Please try again later!`);
             }
