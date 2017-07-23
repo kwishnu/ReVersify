@@ -535,6 +535,7 @@ class Home extends Component{
                     dataIndex: theIndex,
                     title: theTitle,
                     availableList: keepInList,
+                    showInfoBox: true,
                     homeData: this.state.homeData,
                 }
             });
