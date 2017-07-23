@@ -62,13 +62,6 @@ module.exports = class About extends Component {
         return true;
     }
     rateApp(){
-                        try {
-                            AsyncStorage.setItem(KEY_ratedTheApp, 'false');
-                            AsyncStorage.setItem(KEY_Solved, '14');
-                        } catch (error) {
-                            window.alert('AsyncStorage error: ' + error.message);
-                        }
-return;
         NetInfo.isConnected.fetch().then(isConnected => {
             if (isConnected){
                 let storeUrl = Platform.OS === 'ios' ?
