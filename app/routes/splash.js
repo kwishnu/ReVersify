@@ -465,12 +465,13 @@ class SplashScreen extends Component {
                             }
                         }
                     }else{//bonus pack for score level
-                        strName = name.toString();
+                        strName = name.toString();//e.g. '10'
                         for(var bb=0; bb<bonuses.length; bb++){
                             if (bonuses[bb][0] == strName){
                                 title = bonuses[bb][1];
                                 num_verses = bonuses[bb][2];
                                 bg_color = bonuses[bb][3];
+                                strName = bonuses[bb][1];//e.g. 'Welcome +10'
                                 continue;
                             }
                         }
