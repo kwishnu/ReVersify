@@ -39,7 +39,6 @@ module.exports = class Reader extends Component {
         let s2 = '';
         let s3 = '';
         if (this.props.fromWhere == 'game'){
-        console.log(chapterText);
             let startIndex = (this.props.startPoint == '1')?0:chapterText.indexOf(this.props.startPoint + ' ');
             let endIndex = (chapterText.indexOf(this.props.endPoint) > -1)?chapterText.indexOf(this.props.endPoint, startIndex + 1):chapterText.length;
             if (startIndex > -1 && endIndex > -1){
@@ -54,15 +53,15 @@ module.exports = class Reader extends Component {
         }
         let title = this.props.homeData[this.props.dataElement].title;
         let bg = this.props.homeData[this.props.dataElement].bg_color;
-        let chapNum = s1.substr(0, s1.indexOf(' '));
-        s1 = s1.substring(s1.indexOf(' ', -1) + 2);
-        let initialLetter = s1.substr(0, 1);
-        s1 = s1.substring(1);
+        let chapNum = s1.substr(0, s1.indexOf('\n'));
+        s1 = s1.substring(s1.indexOf('\n') + 1);
+//        let initialLetter = s1.substr(0, 1);
+//        s1 = s1.substring(1);
         let backOpac = (this.props.chapterIndex > 0)?1:0;
         let forwardOpac = (this.props.chapterIndex < this.props.homeData[this.props.dataElement].chapters.length - 1)?1:0;
         this.setState({ title: title,
                         chapterNumber: chapNum,
-                        initial: initialLetter,
+//                        initial: initialLetter,
                         section1: s1,
                         section2: s2,
                         section3: s3,
@@ -157,12 +156,13 @@ module.exports = class Reader extends Component {
                     </View>
                     <View style={[reader_styles.reader_container, {backgroundColor: this.state.bgColor}]}>
                         <ScrollView contentContainerStyle={reader_styles.scrollview}>
-                            <Text style={reader_styles.text}>{this.state.chapterNumber + '\r\n'}
-                            <Text style={reader_styles.initial_text}>{this.state.initial}
-                            <Text style={reader_styles.text}>{this.state.section1}
+                            <Text style={reader_styles.bold_text}>{'\r\n'}</Text>
+                            <Text style={reader_styles.initial_text}>{this.state.chapterNumber + '\r\n'}</Text>
+                            <Text style={reader_styles.text}>
+                                {this.state.section1}
                                 <Text style={reader_styles.bold_text}> {this.state.section2} </Text>
                                 {this.state.section3}
-                            </Text></Text></Text>
+                            </Text>
                         </ScrollView>
                     </View>
                 </View>
@@ -224,7 +224,7 @@ const reader_styles = StyleSheet.create({
         fontWeight: 'bold'
     },
     initial_text: {
-        fontSize: normalizeFont(configs.LETTER_SIZE*0.2),
+        fontSize: normalizeFont(configs.LETTER_SIZE*0.14),
         color: '#000000',
         fontFamily: 'Book Antiqua',
     },
