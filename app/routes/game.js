@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+
 import { StyleSheet, Text, View, Image, TouchableOpacity, BackHandler, AsyncStorage, Animated, ActivityIndicator, Alert, Platform, Linking, AppState, NetInfo } from 'react-native';
 import moment from 'moment';
 import Button from '../components/Button';
@@ -359,7 +360,6 @@ class Game extends Component {
             return AsyncStorage.getItem(KEY_ratedTheApp);
         }).then((rated) => {
             let ratedBool = (rated == 'true')?true:false;
-            console.log(rated);
             this.setState({hasRated: ratedBool});
             return AsyncStorage.getItem(KEY_showFB);
         }).then((fb) => {
@@ -430,6 +430,8 @@ class Game extends Component {
     }
     assignWordsToRows(verse){
         let layout = [[], [], [], [], [], [], [], []];
+        let leadingSpace = (verse.substring(0, 1) == ' ')?true:false;
+        if (leadingSpace)verse = verse.substring(1);
         let verseArray = verse.split(' ');
         let whichRow = 0;
         let letterTotal = 0;
@@ -832,7 +834,7 @@ class Game extends Component {
         let increment = this.state.onThisFragment;
         increment += 1;
         let nextStr = this.state.fragmentOrder[increment]
-        this.setState({nextFrag: nextStr,
+        this.setState({ nextFrag: nextStr,
                         onThisFragment: increment, addSpace: addSpace,
                         wordArrayPosition: [onLine, onWord, onLetter], line0Text: line0String,
                         line1Text: line1String, line2Text: line2String, line3Text: line3String,
@@ -1476,7 +1478,7 @@ class Game extends Component {
                     <DropdownMenu onPress={(num)=>{ this.onDropdownSelect(num); }} item1={this.state.soundString} item2={'Reset Verse'} item3={'How to Play'}/>
                     }
                     {this.state.shouldShowOverlay &&
-                            <Overlay onPress={()=>{ this.dismissOverlay(); }} text={`Mute game sounds and reset the Verse with this menu`} />
+                            <Overlay onPress={()=>{ this.dismissOverlay(); }} margin={0.16} text={`Mute game sounds and reset the Verse with this menu`} />
                     }
                 </View>
             );
