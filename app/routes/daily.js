@@ -372,7 +372,7 @@ const daily_styles = StyleSheet.create({
         top: height/2,
     },
     gripe_text: {
-        color: '#cfe7c2',
+        color: '#333333',
         fontSize: normalizeFont(configs.LETTER_SIZE * 0.09),
         textAlign: 'center',
     },
