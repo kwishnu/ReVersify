@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Image, TouchableHighlight, ListView, BackHandler, AsyncStorage, NetInfo, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableHighlight, ListView, BackHandler, AsyncStorage, NetInfo, ActivityIndicator, Alert } from 'react-native';
 import Meteor from 'react-native-meteor';
 import Button from '../components/Button';
 import configs from '../config/configs';
 import { normalize, normalizeFont, getArrowSize, getArrowMargin }  from '../config/pixelRatio';
-//var InAppBilling = require("react-native-billing");
+const InAppBilling = require('react-native-billing');
 const styles = require('../styles/styles');
 const { width, height } = require('Dimensions').get('window');
 const CELL_WIDTH = width;
@@ -14,6 +14,7 @@ const TILE_WIDTH = (CELL_WIDTH - CELL_PADDING * 2);
 const TILE_HEIGHT = CELL_HEIGHT - CELL_PADDING * 2;
 const BORDER_RADIUS = CELL_PADDING * .3;
 const KEY_expandInfo = 'expandInfoKey';
+const KEY_MyHints = 'myHintsKey';
 invertColor=(hex, bw)=> {
     if (hex.indexOf('#') === 0) {
         hex = hex.slice(1);
@@ -56,6 +57,7 @@ module.exports = class Store extends Component {
         this.state = {
             id: 'store',
             dataSource: this.props.availableList,
+            currentHints: '',
             expand: true,
             isLoading: true,
             questionOpacity: 1,
@@ -65,16 +67,9 @@ module.exports = class Store extends Component {
         this.handleHardwareBackButton = this.handleHardwareBackButton.bind(this);
     }
     componentDidMount(){
-        setTimeout(()=>{this.setState({isLoading: false})}, 700);
         BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
-        if (!this.props.showInfoBox){
-            this.setState({expand: false, questionOpacity: 0, questionImage: require('../images/noimage.png')})
-            return;
-        }
-        if (this.props.dataIndex == 5){
-            this.setState({ infoText: `All Verse Collections contain 50 Verse Puzzles and are priced $0.99USD. A portion of the proceeds raised by the app will be donated to the WEB project of World Outreach Ministries.` });
-        }
         AsyncStorage.getItem(KEY_expandInfo).then((strExpand) => {
+                 console.log(strExpand);
             if(strExpand){
                 let expandArr = strExpand.split('.');
                 let tf = false;
@@ -89,7 +84,19 @@ module.exports = class Store extends Component {
                         break;
                 }
             }
+            return AsyncStorage.getItem(KEY_MyHints);
+        }).then((hintStr) => {
+
+            this.setState({currentHints: hintStr});
         });
+        setTimeout(()=>{this.setState({isLoading: false})}, 700);
+        if (!this.props.showInfoBox){
+            this.setState({expand: false, questionOpacity: 0, questionImage: require('../images/noimage.png')})
+            return;
+        }
+        if (this.props.dataIndex == 5){
+            this.setState({ infoText: `All Verse Collections contain 50 Verse Puzzles and are priced $0.99USD. A portion of the proceeds raised by the app will be donated to the WEB project of World Outreach Ministries.` });
+        }
     }
     componentWillUnmount () {
         BackHandler.removeEventListener('hardwareBackPress', this.handleHardwareBackButton);
@@ -180,26 +187,46 @@ module.exports = class Store extends Component {
     startPurchase(item_name, itemID){
         NetInfo.isConnected.fetch().then(isConnected => {
             if (isConnected && Meteor.status().status == 'connected'){
-    //            InAppBilling.open()
-    //            .then(() => InAppBilling.purchase(itemID))
-    //            .then((details) => {
-                    setTimeout(()=> {
-                        this.props.navigator.replace({
-                            id: 'splash',
-                            passProps: {
-                                motive: 'purchase',
-                                packName: item_name,
-                                productID: itemID
+                InAppBilling.open()
+                .then(() => InAppBilling.purchase(itemID))
+                .then((details) => {
+                    if (details.purchaseState == 'PurchasedSuccessfully'){
+                        console.log('You purchased: ', details)
+                        if (Array.isArray(item_name)){//combo pack
+                            if (item_name[item_name.length - 1].indexOf('100') > -1 || item_name[item_name.length - 1].indexOf('500') > -1){//last item is a hint package
+                                let strArrayWithNumber = item_name[item_name.length - 1].split(' ')
+                                let numBuying = parseInt(strArrayWithNumber[0], 10);
+                                let numOwned = (this.state.currentHints == '-1')?0:parseInt(this.state.currentHints, 10);
+                                let total = numBuying + numOwned;
+                                strHowMany = String(total);
+                                item_name.splice(-1,1);//remove last (hint) element
+                                try {
+                                    AsyncStorage.setItem(KEY_MyHints, strHowMany);
+                                } catch (error) {
+                                    window.alert('AsyncStorage error: ' + error.message);
+                                }
                             }
-                        });
-                    }, 500);
-                    this.props.navigator.pop({});
-    //                console.log("You purchased: ", details)
-    //                return InAppBilling.close()
-    //            }).catch((err) => {
-    //                console.log(err);
-    //                return InAppBilling.close()
-    //            });
+                        }
+                        setTimeout(()=> {
+                            this.props.navigator.replace({
+                                id: 'splash',
+                                passProps: {
+                                    motive: 'purchase',
+                                    packName: item_name,
+                                    productID: itemID
+                                }
+                            });
+                        }, 500);
+                        this.props.navigator.pop({});
+                    }else{
+                        console.log('Purchase Error: ', details)
+                        Alert.alert('Purchase Error', 'Sorry, your purchase did not succeed, please try again later!');
+                    }
+                    return InAppBilling.close();
+                }).catch((err) => {
+                    console.log(err);
+                    return InAppBilling.close()
+                });
             }else{
                 Alert.alert('Not Connected', `Sorry, we can't reach our servers right now. Please try again later!`);
             }
