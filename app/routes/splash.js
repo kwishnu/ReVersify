@@ -12,11 +12,12 @@ function shuffleArray(array) {
     }
     return array;
 }
-//var InAppBilling = require('react-native-billing');
-var seedData = require('../config/data');
-var nowISO = 0;
-var tonightMidnight = 0;
+const InAppBilling = require('react-native-billing');
+const seedData = require('../config/data');
+const nowISO = 0;
+const tonightMidnight = 0;
 const bonuses = [['10', 'Welcome +10', '5', '#620887'], ['50', 'Dedicated +50', '10', '#f4ce57'], ['100', 'Talented +100', '10', '#f2404c'], ['250', 'Skilled +250', '10', '#0817a2'], ['500', 'Seasoned +500', '20', '#6e097d'], ['1000', 'Expert +1000', '25', '#f5eaf6'], ['100000000000', 'TooMuch', '1', '#000000']];
+const KEY_MyHints = 'myHintsKey';
 const KEY_Premium = 'premiumOrNot';
 const KEY_PlayFirst = 'playFirstKey';
 const KEY_Verses = 'versesKey';
@@ -61,8 +62,24 @@ class SplashScreen extends Component {
             var ownedPacks = [];
             var getPurchasedBool = true;
             var premiumBool = false;
-
-            AsyncStorage.getItem(KEY_Verses).then((verses) => {
+            InAppBilling.close()//docs recommend making sure IAB is closed first
+            .then(() => InAppBilling.open())
+            .then(() => InAppBilling.listOwnedProducts())//get array of purchased items from the store
+            .then((details) => {
+                ownedPacks = details;
+                for (let check=0; check<ownedPacks.length; check++){
+                    if (ownedPacks[check] == 'rv.hint.package.0'){
+                        try {
+                            AsyncStorage.setItem(KEY_MyHints, 'infinite');
+                        } catch (error) {
+                            window.alert('AsyncStorage error: ' + error.message);
+                        }
+                    }
+                }
+                return InAppBilling.close();
+            }).then(()=> {
+                return AsyncStorage.getItem(KEY_Verses);
+            }).then((verses)=> {
                 if (verses !== null) {//get current data:
                     homeData = JSON.parse(verses);
                 }else{//store seed data, as this is the first time using the app:
@@ -127,7 +144,7 @@ class SplashScreen extends Component {
                             }
                         }
                     }
-                    return false;// this.getCollection(bonusScore, bID, this.state.pData);*************************************bonuses****************************************************************
+                    return this.getCollection(bonusScore, bID, this.state.pData);//*************************************bonuses****************************************************************
                 }else{
                     return false;
                 }
@@ -321,13 +338,26 @@ class SplashScreen extends Component {
                     var title = [];
                     var index = [];
                     var num_verses = [];
-                    var solved = [[],[],[]];
+                    var num_chapters = [];
+                    var on_chapter = [];
+                    var solved = [];
+                    var verses = [];
+                    var chapters = [];
+                    for (let pushArrays1=0; pushArrays1<name.length; pushArrays1++){
+                        solved.push([]);
+                        verses.push([]);
+                        chapters.push([]);
+                        on_chapter.push('0');
+                    }
                     var product_id = '';
                     var bg_color = [];
-                    var verses = [[],[],[]];
-                    var combinedName = name[0] + ' ' + name[1] + ' ' + name[2];
-                    for (var k = 0; k < 3; k++){
-                        for (var b = 0; b < theData.length; b++){
+                    var combinedName = '';
+                    for (let makeName=0; makeName<name.length; makeName++){
+                        combinedName += name[makeName] + ' ';
+                    }
+                    var stringName = combinedName.trim();
+                    for (var k = 0; k < name.length; k++){
+                        for (var b = 0; b < theData.length; b++){//theData is the homeData array/object
                             var obj = theData[b];
                             for (var el in obj) {
                                 if (el == 'data'){
@@ -336,6 +366,7 @@ class SplashScreen extends Component {
                                             title[k] = theData[b].data[j].name;
                                             index[k] = (theData.length + k).toString();
                                             num_verses[k] = theData[b].data[j].num_verses;
+                                            num_chapters[k] = theData[b].data[j].num_chapters;
                                             bg_color[k] = theData[b].data[j].color;
                                             continue;
                                         }
@@ -344,41 +375,60 @@ class SplashScreen extends Component {
                             }
                         }
                     }
-                    for (var sol=0; sol<3; sol++){
+                    for (var sol=0; sol<name.length; sol++){
                         var arr = new Array(parseInt(num_verses[sol])).fill(0);
                         solved[sol] = arr;
                     }
 
                     const subs = Meteor.subscribe('AllData', {
                         onReady: function () {
-                                const d_verses = Meteor.collection('dataB').find({pack: combinedName});
+                                const d_verses = Meteor.collection('dataB').find({pack: stringName});
+                                var whichOfThem = 0;
                                 var verseCount = 0;
-                                var whichOfThe3 = 0;
                                 for (var key in d_verses) {
                                     var obj = d_verses[key];
                                     for (var prop in obj) {
                                         if(prop=='vs'){
-                                            verses[whichOfThe3].push(obj[prop]);
+                                            console.log(obj[prop]);
+                                            verses[whichOfThem].push(obj[prop]);
                                             verseCount++;
                                         }
-                                        if (verseCount == num_verses[whichOfThe3]){
-                                            whichOfThe3++;
+                                        if (verseCount == num_verses[whichOfThem]){
+                                            whichOfThem++;
                                             verseCount = 0;
                                         }
                                     }
                                 }
-                                for (var push = 0; push < 3; push++){
+                                var whichOfThem2 = 0;
+                                var chapterCount = 0;
+                                for (var key2 in d_verses) {
+                                    var obj2 = d_verses[key2];
+                                    for (var prop2 in obj2) {
+                                        if(prop2=='chapter'){
+                                            chapters[whichOfThem2].push(obj2[prop2]);
+                                            chapterCount++;
+                                        }
+                                        if (chapterCount == num_chapters[whichOfThem2]){
+                                            whichOfThem2++;
+                                            chapterCount = 0;
+                                        }
+                                    }
+                                }
+                                for (var push = 0; push < name.length; push++){
                                     theData.push({
                                         title: title[push],
                                         index: index[push],
                                         type: 'mypack',
                                         show: 'true',
                                         num_verses: num_verses[push],
+                                        num_chapters: num_chapters[push],
                                         num_solved: '0',
                                         solved: solved[push],
                                         product_id: ID,
                                         bg_color: bg_color[push],
-                                        verses: verses[push]
+                                        verses: verses[push],
+                                        chapters: chapters[push],
+                                        on_chapter: on_chapter[push]
                                     });
                                 }
                                 resolve(theData);
