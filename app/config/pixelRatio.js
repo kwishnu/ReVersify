@@ -53,3 +53,10 @@ export const getArrowMargin = () => {
     return 0
 }
 
+export const getOverlayMargin = (margin) => {
+    if (pixelRatio < 1.4){
+        return height*margin//0.18
+    }
+    return 0
+}
+
