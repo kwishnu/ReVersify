@@ -462,7 +462,7 @@ class Book extends Component{
                              />
                         </View>
                         {this.state.shouldShowOverlay &&
-                        <Overlay onPress={()=>{ this.dismissOverlay(); }} text={`Read the actual text of this Book of the Bible by tapping the icon in the upper right`} />
+                        <Overlay onPress={()=>{ this.dismissOverlay(); }} margin={0.12} text={`Read the actual text of this Book of the Bible by tapping the icon in the upper right`} />
                         }
                      </View>
                 </SideMenu>
