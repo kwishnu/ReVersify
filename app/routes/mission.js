@@ -17,14 +17,14 @@ module.exports = class Mission extends Component {
         this.state = {
             id: 'mission',
             ratedApp: false,
-            ratingText: `Ratings are important! They not only give us valuable feedback about our app, they promote awareness of the app to the wider world as well...please help us by rating us in the app store via the button below, and we'll thank you with a special Game setting!`
+            ratingText: `Ratings are important - they not only give us valuable feedback about our app, they promote awareness of the app to the wider world as well...please help us by rating us in the app store via the button below, and we'll thank you with a special Game setting!`
         };
         this.goSomewhere = this.goSomewhere.bind(this);
     }
     componentDidMount(){
         AsyncStorage.getItem(KEY_Premium).then((premium) => {
             if (premium == 'true'){
-                this.setState({ratingText: `Ratings are important! They not only give us valuable feedback about our app, they promote awareness of the app to the wider world as well...please help us by rating us in the app store via the button below. Thanks!`});
+                this.setState({ratingText: `Ratings are important - they not only give us valuable feedback about our app, they promote awareness of the app to the wider world as well...please help us by rating us in the app store via the button below. Thanks!`});
             }
         });
         BackHandler.addEventListener('hardwareBackPress', this.goSomewhere);
