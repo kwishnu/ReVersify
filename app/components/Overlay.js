@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { View, Image, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import configs from '../config/configs';
-import {normalize, normalizeFont} from '../config/pixelRatio';
+import {normalize, normalizeFont, getOverlayMargin} from '../config/pixelRatio';
 var {width, height} = require('Dimensions').get('window');
 
 
@@ -18,8 +18,8 @@ class Overlay extends Component {
                     onPress={ this.handlePress.bind(this) }
                     style={ styles.container } >
                     <View>
-                        <Image style={ styles.image } source={require('../images/overlaygraphic.png')} />
-                        <View style={styles.text_container}>
+                        <Image style={[ styles.image, {marginLeft: getOverlayMargin(this.props.margin)}]} source={require('../images/overlaygraphic.png')} />
+                        <View style={[styles.text_container, {marginLeft: getOverlayMargin(this.props.margin)}]}>
                             <Text style={ styles.text }>{ this.props.text }</Text>
                         </View>
                     </View>
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         alignItems: 'center',
         justifyContent: 'center',
-        top: normalize(height*.057),
+        top: normalize(height*.06),
         right: 10,
         width: width,
         height: normalize(height*.3),
@@ -64,14 +64,14 @@ const styles = StyleSheet.create({
         position: 'absolute',
         alignItems: 'center',
         justifyContent: 'flex-start',
-        top: normalize(height*.098),
+        top: normalize(height*.11),
         left: normalize(height*.03),
         width: normalize(height*.3),
         height: normalize(height*.12),
         marginRight: 20
     },
     text: {
-        fontSize: normalizeFont(configs.LETTER_SIZE * 0.1),
+        fontSize: normalizeFont(configs.LETTER_SIZE * 0.08),
         color: '#000000',
         lineHeight: 30
     }
