@@ -1,6 +1,8 @@
 rootProject.name = 'reVersify'
 
 include ':app'
+include ':react-native-fabric-twitterkit'
+project(':react-native-fabric-twitterkit').projectDir = file('../node_modules/react-native-fabric-twitterkit/android')
 include ':react-native-push-notification'
 project(':react-native-push-notification').projectDir = file('../node_modules/react-native-push-notification/android')
 include ':react-native-orientation'
