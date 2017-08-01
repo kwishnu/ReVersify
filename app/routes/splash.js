@@ -55,8 +55,8 @@ class SplashScreen extends Component {
         var homeData = [];
         nowISO = moment().valueOf();//determine offset # of days for daily verses...
         tonightMidnight = moment().endOf('day').valueOf();
-        var launchDay = moment('2017 05', 'YYYY-MM');//May 1, 2017
-        var dayDiff = -launchDay.diff(nowISO, 'days');//# of days since 5/1/2017
+        var launchDay = moment('2017 06', 'YYYY-MM');//June 1, 2017
+        var dayDiff = -launchDay.diff(nowISO, 'days');//# of days since 6/1/2017
         var startNum = dayDiff - 28;
         if(this.props.motive == 'initialize'){
             var ownedPacks = [];
