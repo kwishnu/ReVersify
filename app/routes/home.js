@@ -763,14 +763,14 @@ class Home extends Component{
 
 const container_styles = StyleSheet.create({
     container: {
-        flex: 1,
+        flex: 1
     },
     spinner: {
         position: 'absolute',
         top: 0,
         bottom: 0,
         left: 0,
-        right: 0,
+        right: 0
     },
     loading: {
         flex: 1,
@@ -791,7 +791,7 @@ const container_styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         width: window.width,
-        backgroundColor: '#000000',
+        backgroundColor: '#000000'
     },
     button: {
         alignItems: 'center',
@@ -816,7 +816,7 @@ const container_styles = StyleSheet.create({
         flex: 48,
         backgroundColor: '#cfe7c2',
         justifyContent: 'center',
-        alignItems: 'center',
+        alignItems: 'center'
     },
     launcher: {
         width: TILE_WIDTH,
@@ -825,10 +825,10 @@ const container_styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 4,
-        marginBottom: 1,
+        marginBottom: 1
     },
     launcher_text: {
-        fontSize: normalizeFont(configs.LETTER_SIZE * 0.1),
+        fontSize: normalizeFont(configs.LETTER_SIZE * 0.1)
     }
 });
 
