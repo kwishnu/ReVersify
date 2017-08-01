@@ -266,10 +266,10 @@ class Intro2 extends Component {
             <View style={{flex: 1}}>
                 <View style={[intro_styles.container, {backgroundColor: this.state.bgColor}]}>
                     <View style={[intro_styles.header, this.headerBorder(this.state.bgColor), this.headerFooterColor(this.state.bgColor)]}>
-                        <Button style={[intro_styles.button, {marginLeft: getArrowMargin()}]} onPress={() => this.closeGame(this.props.fromWhere)}>
+                        <Button style={[intro_styles.button, {marginLeft: getArrowMargin()}]}>
                             <Image source={ require('../images/close.png') } style={{ width: getArrowSize(), height: getArrowSize()}} />
                         </Button>
-                        <Button style={[intro_styles.button, {marginRight: getArrowMargin()}]} onPress={ () => this.showDropdown()}>
+                        <Button style={[intro_styles.button, {marginRight: getArrowMargin()}]}>
                             <Image source={ require('../images/dropdown.png') } style={{ width: getArrowSize(), height: getArrowSize()}} />
                         </Button>
                     </View>
