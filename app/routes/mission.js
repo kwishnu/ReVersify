@@ -153,25 +153,21 @@ const about_styles = StyleSheet.create({
     },
     text: {
         color: 'white',
-        fontSize: normalizeFont(configs.LETTER_SIZE * 0.45/6),
+        fontSize: normalizeFont(configs.LETTER_SIZE * 0.073),
         marginBottom: 10
     },
     mediumPrint: {
         color: '#bbbbbb',
-        fontSize: normalizeFont(configs.LETTER_SIZE * 0.5/6),
+        fontSize: normalizeFont(configs.LETTER_SIZE * 0.08),
         marginLeft: 32,
         marginRight: 32,
         marginTop: 6,
         marginBottom:6,
         textAlign: 'center',
     },
-    finePrint: {
-        color: '#999999',
-        fontSize: normalizeFont(configs.LETTER_SIZE * 0.35/6),
-    },
     sure: {
         color: '#111111',
-        fontSize: normalizeFont(configs.LETTER_SIZE * 0.5/6),
+        fontSize: normalizeFont(configs.LETTER_SIZE * 0.08),
     },
     divider: {
         height: StyleSheet.hairlineWidth,
@@ -180,8 +176,8 @@ const about_styles = StyleSheet.create({
         margin: 20,
     },
     rate_button: {
-        height: 40,
-        width: height * 0.2,
+        height: height*.08,
+        width: height * 0.18,
         backgroundColor: '#4aeeb2',
         justifyContent: 'center',
         alignItems: 'center',
