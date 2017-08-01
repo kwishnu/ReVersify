@@ -1,6 +1,8 @@
 rootProject.name = 'reVersify'
 
 include ':app'
+include ':react-native-fbsdk'
+project(':react-native-fbsdk').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-fbsdk/android')
 include ':react-native-fabric-twitterkit'
 project(':react-native-fabric-twitterkit').projectDir = file('../node_modules/react-native-fabric-twitterkit/android')
 include ':react-native-push-notification'
