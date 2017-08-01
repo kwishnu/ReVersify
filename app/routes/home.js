@@ -402,7 +402,7 @@ class Home extends Component{
                     this.props.navigator.push({
                         id: 'store',
                         passProps: {
-                            dataIndex: index,
+                            dataIndex: String(index),
                             title: item.title,
                             availableList: keepInList,
                             showInfoBox: showInfoBox,
