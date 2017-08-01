@@ -69,16 +69,15 @@ module.exports = class Store extends Component {
     componentDidMount(){
         BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
         AsyncStorage.getItem(KEY_expandInfo).then((strExpand) => {
-                 console.log(strExpand);
             if(strExpand){
                 let expandArr = strExpand.split('.');
                 let tf = false;
                 switch(this.props.dataIndex){
-                    case 5://Verse Collections
+                    case '5'://Verse Collections
                         tf = (expandArr[0] == '1')?true:false;
                         this.setState({expand: tf});
                         break;
-                    case 6: case 7://Old and New Testaments
+                    case '6': case '7'://Old and New Testaments
                         tf = (expandArr[1] == '1')?true:false;
                         this.setState({expand: tf});
                         break;
@@ -122,10 +121,10 @@ module.exports = class Store extends Component {
             let expArr = strExpand.split('.');
             let ind = 0;
             switch(this.props.dataIndex){
-                case 5:
+                case '5':
                     ind = 0;
                     break;
-                case 6: case 7:
+                case '6': case '7':
                     ind = 1;
                     break;
             }
