@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-
 import { StyleSheet, Text, View, Image, TouchableOpacity, BackHandler, AsyncStorage, Animated, ActivityIndicator, Alert, Platform, Linking, AppState, NetInfo } from 'react-native';
 import moment from 'moment';
+import FabricTwitterKit from 'react-native-fabric-twitterkit';
 import Button from '../components/Button';
 import Overlay from '../components/Overlay';
 import Tile from '../components/Tile';
@@ -855,7 +855,7 @@ class Game extends Component {
         }else{
             this.setState({ arrowImage: require('../images/arrowforward.png') });
         }
-        if (this.props.fromWhere != 'book')this.flipPanel(false);
+        if (this.props.fromWhere != 'book' && !this.state.showingVerse)this.flipPanel(false);
         this.setState({doneWithVerse: true, showHintButton: false, showNextArrow: true});
         this.showButtonPanel();
         if(this.props.fromWhere == 'collection' || this.props.fromWhere == 'book'){
@@ -1305,6 +1305,15 @@ class Game extends Component {
             });
         }
     }
+    sendTweet(chapterVerse, verse){
+        let bodyStr = 'Just solved ' + chapterVerse + ' in the reVersify app: \"' + verse + '\"';
+        bodyStr = bodyStr.substr(0, 139);
+        FabricTwitterKit.composeTweet({
+            body: bodyStr
+        }, (completed, cancelled, error) => {
+            console.log('completed: ' + completed + ' cancelled: ' + cancelled + ' error: ' + error);
+        });
+    }
     dismissOverlay(){
        this.setState({shouldShowOverlay: false});
 
@@ -1458,7 +1467,7 @@ class Game extends Component {
                             <Animated.Image style={[ game_styles.button_image, buttonsStyle ]} source={require('../images/buttonfb.png')} onStartShouldSetResponder={() => { this.linkToUrl('FB') }}/>
                             }
                             { this.state.showTwitter &&
-                            <Animated.Image style={[ game_styles.button_image, buttonsStyle ]} source={require('../images/buttontwitter.png')} onStartShouldSetResponder={() => { this.linkToUrl('Twitter') }}/>
+                            <Animated.Image style={[ game_styles.button_image, buttonsStyle ]} source={require('../images/buttontwitter.png')} onStartShouldSetResponder={() => { this.sendTweet(this.state.chapterVerse, this.state.entireVerse) }}/>
                             }
                             { this.state.showFavorites &&
                             <Animated.Image style={[ {width: 65, height: 65, margin: 1}, buttonsStyle ]} source={require('../images/favorites.png')} onStartShouldSetResponder={() => { this.addToFavorites() }}/>
@@ -1551,7 +1560,7 @@ const game_styles = StyleSheet.create({
         flex: 1,
     },
     verse_text: {
-        fontSize: normalizeFont(configs.LETTER_SIZE*0.09),
+        fontSize: normalizeFont(configs.LETTER_SIZE*0.085),
         color: '#000000',
         fontFamily: 'Book Antiqua',
     },
