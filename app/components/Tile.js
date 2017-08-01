@@ -47,7 +47,7 @@ class Tile extends Component {
                   }
             ).start();
         }
-      }, 400),
+      }, 200),
       onPanResponderGrant: (e, gestureState) => {
         this.setState({zIndex: 1});
         this.state.pan.setOffset({x: this.state.pan.x._value, y: this.state.pan.y._value});
