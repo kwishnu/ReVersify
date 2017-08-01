@@ -3,6 +3,14 @@ import { StyleSheet, Text, View, Image, BackHandler, Linking } from 'react-nativ
 import Button from '../components/Button';
 import configs from '../config/configs';
 import { normalize, normalizeFont, getArrowSize, getArrowMargin } from '../config/pixelRatio';
+import FabricTwitterKit from 'react-native-fabric-twitterkit';
+//import com.facebook.FacebookSdk;
+const FBSDK = require('react-native-fbsdk');
+const { ShareDialog } = FBSDK;
+const shareLinkContent = {
+  contentType: 'link',
+  contentUrl: 'https://www.facebook.com/ReVersify-1729363820699544/',
+};
 const styles = require('../styles/styles');
 const {width, height} = require('Dimensions').get('window');
 
@@ -11,6 +19,7 @@ module.exports = class Social extends Component {
         super(props);
         this.state = {
             id: 'social',
+            shareLinkContent: shareLinkContent
         };
         this.handleHardwareBackButton = this.handleHardwareBackButton.bind(this);
     }
@@ -34,11 +43,12 @@ module.exports = class Social extends Component {
         return true;
     }
     linkToUrl(which){
-        if (this.props.which == 'FB'){
-            Linking.canOpenURL(configs.FB_URL_APP)
-            .then(supported => {
+        if (which == 'FB'){
+            Linking.canOpenURL(configs.FB_PAGE_ID)
+            .then((supported) => {
+              console.log(supported)
                 if (supported) {
-                    Linking.openURL(configs.FB_URL_APP);
+                    Linking.openURL(configs.FB_PAGE_ID)//FB_URL_APP);
                 } else {
                     Linking.canOpenURL(configs.FB_URL_BROWSER)
                     .then(isSupported => {
@@ -52,7 +62,7 @@ module.exports = class Social extends Component {
             });
         }else{
             Linking.canOpenURL(configs.TWITTER_URL_APP)
-            .then(supported => {
+            .then((supported) => {
                 if (supported) {
                     Linking.openURL(configs.TWITTER_URL_APP);
                 } else {
@@ -68,10 +78,38 @@ module.exports = class Social extends Component {
             });
         }
     }
-
+    share(which){
+      if (which == 'FB'){
+        ShareDialog.canShow(this.state.shareLinkContent).then((canShow) => {
+          console.log(canShow);
+          if (canShow) {
+              return ShareDialog.show(this.state.shareLinkContent);
+            }
+          }
+        ).then((result) => {
+            if (result.isCancelled) {
+              console.log('Share cancelled');
+            } else {
+              console.log('Share success with postId: ' + result.postId);
+            }
+          }
+        );
+      }else{
+        FabricTwitterKit.composeTweet({
+            body: 'All should check out \'reVersify\' in the App Store or Google Play...I\'m really enjoying it!'
+        }, (completed, cancelled, error) => {
+            console.log('completed: ' + completed + ' cancelled: ' + cancelled + ' error: ' + error);
+        });
+      }
+    }
     render() {
         const imageSource = (this.props.which == 'FB')?require('../images/fblogo.png') : require('../images/twitterlogo.png');
-        const text1 = (this.props.which == 'FB')?'\'Like\' us on Facebook so you can follow ':'Follow us on Twitter to keep up on ';
+        const likeImage = (this.props.which == 'FB')?require('../images/fblike.png') : require('../images/twitterheart.png');
+        const shareImage = (this.props.which == 'FB')?require('../images/fblogo.png') : require('../images/twitterlogo.png');
+        const bg = (this.props.which == 'FB')?this.props.color:'#ffffff';
+        const likeText = (this.props.which == 'FB')?'Like us on Facebook':'Follow us on Twitter';
+        const shareText = (this.props.which == 'FB')?'Share something about us on Facebook...':'Tweet something about us...';
+        const text1 = (this.props.which == 'FB')?'Like us on Facebook so you can follow ':'Follow us on Twitter to keep up on ';
         const text2 = 'reVersify News: learn of new reVersify Verse Collections and other games we release!';
         const text = text1 + text2;
         return (
@@ -87,15 +125,22 @@ module.exports = class Social extends Component {
                         </Button>
                     </View>
                     <View style={ social_styles.image_container }>
-                        <Image source={ imageSource } style={ { width: height*.3, height: height*.3 } } />
+                        <Image source={ imageSource } style={ { width: height*.14, height: height*.14 } } />
                     </View>
-                    <View style={ social_styles.body_container }>
+                    <View style={ social_styles.outerview }>
+                      <View style={ [social_styles.buttons_container, {borderColor: this.props.color}] }>
                         <Text style={social_styles.body_text}>{text}</Text>
-                    </View>
-                    <View style={ social_styles.button_container }>
-                        <Button style={[social_styles.ok_button, {backgroundColor: this.props.color}]} onPress={()=>{this.linkToUrl()}}>
-                            <Text style={social_styles.button_text}>OK</Text>
+                        <Button style={[social_styles.ok_button, {backgroundColor: bg, borderColor: this.props.color}]} onPress={()=>{this.linkToUrl(this.props.which)}}>
+                          <Image source={ likeImage } style={ { width: height*.05, height: height*.05 } } />
                         </Button>
+                        <Text style={social_styles.small_text}>{likeText}</Text>
+                        <Button style={[social_styles.ok_button, {backgroundColor: this.props.color, borderColor: this.props.color}]} onPress={()=>{this.share(this.props.which)}}>
+                          <Image source={ shareImage } style={ {  width: getArrowSize(), height: getArrowSize() } } />
+                        </Button>
+                        <View style={{width: height*.2}}>
+                        <Text style={social_styles.small_text}>{shareText}</Text>
+                        </View>
+                      </View>
                     </View>
                 </View>
         );
@@ -110,7 +155,7 @@ const social_styles = StyleSheet.create({
         borderWidth: 5,
     },
     header: {
-        flex: 3,
+        flex: 2,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -123,21 +168,26 @@ const social_styles = StyleSheet.create({
         height: normalize(height*0.077)
     },
     image_container: {
-        flex: 24,
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-    },
-    body_container: {
-        flex: 8,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingLeft: 30,
-        paddingRight: 30,
-    },
-    button_container: {
         flex: 8,
         justifyContent: 'flex-start',
         alignItems: 'center',
+        padding: height*.01
+    },
+    outerview: {
+        flex: 18,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: height*.01,
+        marginBottom: height*.04
+    },
+    buttons_container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: height*.08,
+        paddingVertical: height*.03,
+        borderWidth: 2,
+        borderRadius: height*.04
     },
     button_text: {
         fontSize: normalizeFont(configs.LETTER_SIZE * .12),
@@ -145,19 +195,27 @@ const social_styles = StyleSheet.create({
     },
     body_text: {
         fontSize: normalizeFont(configs.LETTER_SIZE * .085),
-        fontWeight: 'bold',
-        color: '#000000',
+//        fontWeight: 'bold',
+        color: '#222222',
         textAlign: 'center',
-        lineHeight: configs.LINE_HEIGHT,
+        lineHeight: Math.round(height*.03),
+    },
+    small_text: {
+      fontSize: normalizeFont(configs.LETTER_SIZE * .068),
+      fontWeight: 'bold',
+      color: '#000000',
+      textAlign: 'center',
+      lineHeight: Math.round(height*.02)
     },
     ok_button: {
         height: height * 0.08,
-        width: height * 0.25,
+        width: height * 0.2,
         justifyContent: 'center',
         alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#000000',
-        borderRadius: 2,
+        borderWidth: 3,
+        borderRadius: 4,
+        marginTop: height*.05,
+        marginBottom: height*.012,
+        paddingTop: 6
     }
 });
-
