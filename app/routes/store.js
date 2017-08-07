@@ -191,19 +191,18 @@ module.exports = class Store extends Component {
                 .then((details) => {
                     if (details.purchaseState == 'PurchasedSuccessfully'){
                         console.log('You purchased: ', details)
-                        if (Array.isArray(item_name)){//combo pack
-                            if (item_name[item_name.length - 1].indexOf('100') > -1 || item_name[item_name.length - 1].indexOf('500') > -1){//last item is a hint package
-                                let strArrayWithNumber = item_name[item_name.length - 1].split(' ')
-                                let numBuying = parseInt(strArrayWithNumber[0], 10);
-                                let numOwned = (this.state.currentHints == '-1')?0:parseInt(this.state.currentHints, 10);
-                                let total = numBuying + numOwned;
-                                strHowMany = String(total);
-                                item_name.splice(-1,1);//remove last (hint) element
-                                try {
-                                    AsyncStorage.setItem(KEY_MyHints, strHowMany);
-                                } catch (error) {
-                                    window.alert('AsyncStorage error: ' + error.message);
-                                }
+
+                        let idArray = itemID.split('.');
+                        let lastItem = idArray[idArray.length - 1];
+                        if (lastItem == '100' || lastItem == '500' || lastItem == '1000'){//hints
+                            let numBuying = parseInt(lastItem, 10);
+                            let numOwned = (this.state.currentHints == '-1')?0:parseInt(this.state.currentHints, 10);
+                            let total = numBuying + numOwned;
+                            strHowMany = String(total);
+                            try {
+                                AsyncStorage.setItem(KEY_MyHints, strHowMany);
+                            } catch (error) {
+                                window.alert('AsyncStorage error: ' + error.message);
                             }
                         }
                         setTimeout(()=> {
@@ -215,7 +214,7 @@ module.exports = class Store extends Component {
                                     productID: itemID
                                 }
                             });
-                        }, 500);
+                        }, 800);
                         this.props.navigator.pop({});
                     }else{
                         console.log('Purchase Error: ', details)
@@ -385,12 +384,6 @@ const store_styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    row_view: {
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
     text_small: {
         fontSize: normalizeFont(configs.LETTER_SIZE * .07),
         marginHorizontal: height * .02
@@ -409,8 +402,8 @@ const store_styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        width: width*.95,
-        paddingVertical: height*.002
+        width: width*.85,
+        height: height*.13
     },
     purchase_button_container: {
         flex: 2,
@@ -427,7 +420,7 @@ const store_styles = StyleSheet.create({
         alignItems: 'center',
         borderWidth: StyleSheet.hairlineWidth,
         borderColor: 'black',
-        borderRadius: 3,
+        borderRadius: height*.009,
         padding: 20,
         margin: 4,
     },
@@ -438,10 +431,10 @@ const store_styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#058805',
-        borderRadius: 25,
+        borderRadius: height*.2,
         borderWidth: 1,
         borderColor: '#f9f003',
-        marginLeft: 6
+        marginLeft: height*.03
     },
     buy_text: {
         fontSize: normalizeFont(configs.LETTER_SIZE*0.094),
