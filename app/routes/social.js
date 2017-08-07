@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, Image, BackHandler, Linking } from 'react-native';
 import Button from '../components/Button';
 import configs from '../config/configs';
-import { normalize, normalizeFont, getArrowSize, getArrowMargin } from '../config/pixelRatio';
+import { normalize, normalizeFont, getLikeImageSize, getArrowSize, getArrowMargin } from '../config/pixelRatio';
 import FabricTwitterKit from 'react-native-fabric-twitterkit';
 //import com.facebook.FacebookSdk;
 const FBSDK = require('react-native-fbsdk');
@@ -125,17 +125,17 @@ module.exports = class Social extends Component {
                         </Button>
                     </View>
                     <View style={ social_styles.image_container }>
-                        <Image source={ imageSource } style={ { width: height*.14, height: height*.14 } } />
+                        <Image source={ imageSource } style={{ width: height*.14, height: height*.14 }} />
                     </View>
                     <View style={ social_styles.outerview }>
-                      <View style={ [social_styles.buttons_container, {borderColor: this.props.color}] }>
+                      <View style={ [social_styles.buttons_container,{borderColor: this.props.color}] }>
                         <Text style={social_styles.body_text}>{text}</Text>
-                        <Button style={[social_styles.ok_button, {backgroundColor: bg, borderColor: this.props.color}]} onPress={()=>{this.linkToUrl(this.props.which)}}>
-                          <Image source={ likeImage } style={ { width: height*.05, height: height*.05 } } />
+                        <Button style={[social_styles.ok_button,{backgroundColor: bg, borderColor: this.props.color}]} onPress={()=>{this.linkToUrl(this.props.which)}}>
+                          <Image source={ likeImage } style={{ width: getLikeImageSize(), height: getLikeImageSize() }} />
                         </Button>
                         <Text style={social_styles.small_text}>{likeText}</Text>
-                        <Button style={[social_styles.ok_button, {backgroundColor: this.props.color, borderColor: this.props.color}]} onPress={()=>{this.share(this.props.which)}}>
-                          <Image source={ shareImage } style={ {  width: getArrowSize(), height: getArrowSize() } } />
+                        <Button style={[social_styles.ok_button,{backgroundColor: this.props.color, borderColor: this.props.color}]} onPress={()=>{this.share(this.props.which)}}>
+                          <Image source={ shareImage } style={{ width: getLikeImageSize(), height: getLikeImageSize() }} />
                         </Button>
                         <View style={{width: height*.2}}>
                         <Text style={social_styles.small_text}>{shareText}</Text>
@@ -216,6 +216,6 @@ const social_styles = StyleSheet.create({
         borderRadius: 4,
         marginTop: height*.05,
         marginBottom: height*.012,
-        paddingTop: 6
+        paddingTop: 3
     }
 });
