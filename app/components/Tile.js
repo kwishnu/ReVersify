@@ -47,7 +47,7 @@ class Tile extends Component {
                   }
             ).start();
         }
-      }, 200),
+      }, 280),
       onPanResponderGrant: (e, gestureState) => {
         this.setState({zIndex: 1});
         this.state.pan.setOffset({x: this.state.pan.x._value, y: this.state.pan.y._value});
@@ -150,7 +150,7 @@ const tile_styles = StyleSheet.create({
     marginBottom: 2,
     height: height/20,
     width: height/6,
-    borderRadius: 3,
+    borderRadius: height*.005,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#ffffff',
