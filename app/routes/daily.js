@@ -380,7 +380,7 @@ const daily_styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         alignItems: 'center',
-        justifyContent: 'space-around',
+        justifyContent: 'center',
     },
     tiles_container: {
         flex: 11,
@@ -389,7 +389,7 @@ const daily_styles = StyleSheet.create({
         paddingTop: 15,
     },
     launcher: {
-        width: TILE_WIDTH,
+        width: height*.155,
         borderRadius: BORDER_RADIUS,
         borderWidth: 1,
         margin: CELL_PADDING * 1/2,
