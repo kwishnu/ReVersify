@@ -142,7 +142,7 @@ module.exports = class Store extends Component {
     }
     renderStoreRow = (data) => {
         let productIDArray = data.product_id.split('.');
-        if (productIDArray[1] != 'combo'){
+        if (productIDArray[0] == 'rv'){
             return (//single Collection or Book
                 <View style={ store_styles.purchase_row }>
                     <View style={[store_styles.purchase_text_container, {backgroundColor: data.color}]}>
@@ -402,8 +402,7 @@ const store_styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        width: width*.85,
-        height: height*.13
+        width: width*.95
     },
     purchase_button_container: {
         flex: 2,
@@ -415,13 +414,13 @@ const store_styles = StyleSheet.create({
     },
     purchase_text_container: {
         flex: 3,
-//        height: height*.16,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: StyleSheet.hairlineWidth,
         borderColor: 'black',
         borderRadius: height*.009,
-        padding: 20,
+        paddingVertical: height*.02,
+        paddingHorizontal: height*.01,
         margin: 4,
     },
     buy_button: {
@@ -434,7 +433,7 @@ const store_styles = StyleSheet.create({
         borderRadius: height*.2,
         borderWidth: 1,
         borderColor: '#f9f003',
-        marginLeft: height*.03
+        marginLeft: height*.015
     },
     buy_text: {
         fontSize: normalizeFont(configs.LETTER_SIZE*0.094),
