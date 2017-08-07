@@ -25,14 +25,12 @@ export const normalizeFont = (size) => {
   }
   return Math.sqrt((height*height)+(width*width))*(size*.01);
 }
-
 export const getImageSize = () => {
     if (pixelRatio < 1.4){
         return height*0.06
     }
         return height*0.14
 }
-
 export const getMargin = () => {
     if (pixelRatio < 1.4){
         return height*0.06
@@ -45,14 +43,18 @@ export const getArrowSize = () => {
     }
         return height*0.08
 }
-
+export const getLikeImageSize = () => {
+    if (pixelRatio < 1.4){
+        return height*0.06
+    }
+        return height*0.12
+}
 export const getArrowMargin = () => {
     if (pixelRatio < 1.4){
         return height*0.01
     }
     return 0
 }
-
 export const getOverlayMargin = (margin) => {
     if (pixelRatio < 1.4){
         return height*margin//0.18
