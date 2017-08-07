@@ -20,9 +20,10 @@ module.exports = class HintStore extends Component {
         this.goSomewhere = this.goSomewhere.bind(this);
     }
     componentDidMount(){
+        Meteor.reconnect();
         AsyncStorage.getItem(KEY_MyHints).then((hintStr) => {
             this.setState({currentHints: hintStr});
-        })
+        });
         BackHandler.addEventListener('hardwareBackPress', this.goSomewhere);
     }
     componentWillUnmount () {
@@ -229,9 +230,10 @@ const hints_styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#058805',
-        borderRadius: 25,
+        borderRadius: height*.2,
         borderWidth: 1,
         borderColor: '#f9f003',
+        marginLeft: height*.03
     },
     buy_text: {
         fontSize: normalizeFont(configs.LETTER_SIZE*0.094),
