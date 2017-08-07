@@ -55,8 +55,8 @@ class SplashScreen extends Component {
         var homeData = [];
         nowISO = moment().valueOf();//determine offset # of days for daily verses...
         tonightMidnight = moment().endOf('day').valueOf();
-        var launchDay = moment('2017 06', 'YYYY-MM');//June 1, 2017
-        var dayDiff = -launchDay.diff(nowISO, 'days');//# of days since 6/1/2017
+        var launchDay = moment('2017 07', 'YYYY-MM');//July 1, 2017
+        var dayDiff = -launchDay.diff(nowISO, 'days');//# of days since 7/1/2017
         var startNum = dayDiff - 28;
         if(this.props.motive == 'initialize'){
             var ownedPacks = [];
@@ -65,16 +65,21 @@ class SplashScreen extends Component {
             InAppBilling.close()//docs recommend making sure IAB is closed first
             .then(() => InAppBilling.open())
             .then(() => InAppBilling.listOwnedProducts())//get array of purchased items from the store
-            .then((details) => {
-                ownedPacks = details;
-                for (let check=0; check<ownedPacks.length; check++){
-                    if (ownedPacks[check] == 'rv.hint.package.0'){
+            .then((owned) => {
+                for (let check=0; check<owned.length; check++){
+                    if (owned[check] == 'rv.hint.package.0'){
                         try {
                             AsyncStorage.setItem(KEY_MyHints, 'infinite');
                         } catch (error) {
                             window.alert('AsyncStorage error: ' + error.message);
                         }
+                        continue;
                     }
+                }
+                for (let checkForHints=0; checkForHints<owned.length; checkForHints++){
+                  if (owned[checkForHints].indexOf('.hint.') < 0){
+                    ownedPacks.push(owned[checkForHints]);
+                  }
                 }
                 return InAppBilling.close();
             }).then(()=> {
@@ -92,7 +97,7 @@ class SplashScreen extends Component {
                 }
                 if (homeData.length > 22){//screen for bonus packs vs. purchased packs
                     for (let chk=22; chk<homeData.length; chk++){
-                        if (homeData[chk].product_id.indexOf('bonus') < 0){
+                        if (typeof homeData[chk].product_id != 'undefined' && homeData[chk].product_id.indexOf('bonus') < 0){
                             homeData[14].show = 'false';//purchased something, gets access to last 30 daily verses rather than last 3 days
                             homeData[15].show = 'true';
                             premiumBool = true;
@@ -149,7 +154,14 @@ class SplashScreen extends Component {
                     return false;
                 }
             }).then((pArray) => {
-                if (pArray)this.setState({pData: pArray});
+                if (pArray){
+                  var appArray = this.state.pData;
+                  var iNum = this.state.pData.length;
+                  iNum++;
+                  pArray[0].index = String(iNum);
+                  appArray.push(pArray[0]);
+                  this.setState({pData: appArray});
+                }
                 return AsyncStorage.getItem(KEY_Notifs);
             }).then((notifHour) => {//notification hour, zero if no notifications (from Settings)
                 if (notifHour !== null) {
@@ -196,6 +208,7 @@ class SplashScreen extends Component {
                 if(verseArray){
                     verseArray[16].num_solved = homeData[16].num_solved;//set 'In The Beginning...' to its current state
                     verseArray[16].type = homeData[16].type;
+                    verseArray[16].solved = homeData[16].solved;
                     verseArray[16].show = homeData[16].show;
                     this.setState({ pData: verseArray });
                     return true;
@@ -217,57 +230,68 @@ class SplashScreen extends Component {
                     for (var goThroughOwned=0; goThroughOwned<ownedPacks.length; goThroughOwned++){
                         if (packsOnDevice.indexOf(ownedPacks[goThroughOwned]) < 0){
                             var idArray = ownedPacks[goThroughOwned].split('.');
+                            var packTitle = '';
                             if (idArray && idArray.length < 4){//e.g. android.test.purchased
                                 continue;
                             }else if (idArray && idArray.length == 4){//single pack
-                                var packTitle = '';
-                                var packNameArray = idArray[2].split('_');
-                                switch (packNameArray.length){
-                                    case 1:
-                                        packTitle = packNameArray[0].charAt(0).toUpperCase() + packNameArray[0].slice(1);
-                                        break;
-                                    case 2:
-                                        packTitle = packNameArray[0].charAt(0).toUpperCase() + packNameArray[0].slice(1) + ' ' + packNameArray[1].charAt(0).toUpperCase() + packNameArray[1].slice(1);
-                                        break;
-                                    case 3://_and_ in product ID, ' & ' in title
-                                        packTitle = packNameArray[0].charAt(0).toUpperCase() + packNameArray[0].slice(1) + ' & ' + packNameArray[2].charAt(0).toUpperCase() + packNameArray[2].slice(1);
-                                        break;
-                                    default:
-                                }
+                                packTitle = this.makeTitle(idArray[3]);
                                 promises.push(this.getCollection(packTitle, ownedPacks[goThroughOwned], this.state.pData));
-                            }else if (idArray && idArray.length == 5){//combo pack
-                                var packTitleArray = [];
-                                for (var m=0; m<3; m++){
-                                    var idTitle = idArray[m + 2];
-                                    var packTitle = '';
-                                    var packNameArray = idTitle.split('_');
-                                    switch (packNameArray.length){
-                                        case 1:
-                                            packTitle = packNameArray[0].charAt(0).toUpperCase() + packNameArray[0].slice(1);
+                            }else if (idArray && idArray.length > 4){//combo pack
+                                var packTitleArray = idArray.split('.');
+                                var assembledID = '';
+                                var keepGoing = true;
+                                for (var goThroughTitles=0; goThroughTitles<packTitleArray.length; goThroughTitles++){//b = Book, c = Collection, h = Hints
+                                    packTitle = this.makeTitle(packTitleArray(goThroughTitles + 1));
+                                    switch (packTitleArray(goThroughTitles)){
+                                        case 'b':
+                                            assembledID = 'rv.verse.book.' + packTitleArray(goThroughTitles + 1);
                                             break;
-                                        case 2:
-                                            packTitle = packNameArray[0].charAt(0).toUpperCase() + packNameArray[0].slice(1) + ' ' + packNameArray[1].charAt(0).toUpperCase() + packNameArray[1].slice(1);
+                                        case 'c':
+                                            assembledID = 'rv.verse.collection.' + packTitleArray(goThroughTitles + 1);
                                             break;
-                                        case 3://_and_ in product ID, ' & ' in title
-                                            packTitle = packNameArray[0].charAt(0).toUpperCase() + packNameArray[0].slice(1) + ' & ' + packNameArray[2].charAt(0).toUpperCase() + packNameArray[2].slice(1);
+                                        case 'h':
+                                            keepGoing = false;
                                             break;
                                         default:
+                                            if (goThroughTitles == packTitleArray.length - 1)keepGoing = false;
                                     }
-                                    packTitleArray.push(packTitle)
+                                    if (!keepGoing) break;
                                 }
-                                promises.push(this.getCollection(packTitleArray, ownedPacks[goThroughOwned], this.state.pData));
+                                promises.push(this.getCollection(packTitle, assembledID, this.state.pData));
                             }else{
                                 console.log('Unknown Product: ', ownedPacks[goThroughOwned]);
                             }
                         }
                     }
+                    return Promise.all(promises);
+                }else{
+                  return false;
                 }
-                return Promise.all(promises);
+            }).catch((error) => {
+              console.log('line 140: ' + JSON.stringify(error))
+              return false;
+            }).then((collectionArray) => {
+                if (collectionArray){
+                    var appDataArray = this.state.pData;
+                    var indexNum = this.state.pData.length;
+                    for (var packIndex = 0; packIndex < collectionArray.length; packIndex++){
+                        collectionArray[packIndex].index = String(indexNum);
+                        appDataArray.push(collectionArray[packIndex]);
+                        indexNum++;
+                    }
+                    this.setState({pData: appDataArray});
+                }
+              return true;
+            }).catch((error) => {
+              console.log('line 154: ' + JSON.stringify(error))
+              return false;
             }).then(() => {
-                var whereToGo = (this.state.seenStart == 'true')?'home':'swiper';
-                setTimeout(() => {this.gotoScene(whereToGo, this.state.pData)}, 500);//Hate to do this, but avoids warning of setting state on mounted component
-            }).catch(function(error) {
-                window.alert('splash 256: ' + error.message);
+              let whereToGo = (this.state.seenStart == 'true')?'home':'swiper';
+              setTimeout(() => {this.gotoScene(whereToGo, this.state.pData)}, 500);//Hate to do this, but avoids warning of setting state on mounted component
+            }).catch((error) => {
+              let whereToGo = (this.state.seenStart == 'true')?'home':'swiper';
+              console.log('line 159: ' + JSON.stringify(error))
+              setTimeout(() => {this.gotoScene(whereToGo, this.state.pData)}, 500);
             });
         }else{//purchased verse pack...
             this.setState({isPremium: true});
@@ -284,10 +308,29 @@ class SplashScreen extends Component {
                 return homeData;
             }).then((theData) => {
                 return this.getCollection(this.props.packName, this.props.productID, theData);
-            }).then((data) => {
-                this.gotoScene('home', data);
+            }).then((collectionArray) => {
+                if (collectionArray){
+                  var appDataArray = this.state.pData;
+                  var indexNum = this.state.pData.length;
+                  for (let arrayOfPacks of collectionArray){
+                    for (let pack of arrayOfPacks){
+                      indexNum++;
+                      pack.index = String(indexNum);
+                      appDataArray.push(pack);
+                    }
+                  }
+                  this.setState({pData: appDataArray});
+                  return true;
+                }else{
+                  return false;
+                }
+            }).catch((error) => {
+                console.log('line 334: ' + JSON.stringify(error))
+                return false;
+            }).then(() => {
+              this.gotoScene('home', this.state.pData);
             }).catch(function(error) {
-                window.alert('275: ' + error.message);
+                window.alert('339: ' + error.message);
             });
         }
 	}
@@ -334,6 +377,7 @@ class SplashScreen extends Component {
     getCollection(name, ID, theData){//retrieve from server set(s) of verses...combo pack if name is string array, single if string, bonus if number
         return new Promise(
             function (resolve, reject) {
+                var returnArray = [];
                 if (Array.isArray(name)){//combo pack
                     var title = [];
                     var index = [];
@@ -415,7 +459,7 @@ class SplashScreen extends Component {
                                     }
                                 }
                                 for (var push = 0; push < name.length; push++){
-                                    theData.push({
+                                    returnArray.push({
                                         title: title[push],
                                         index: index[push],
                                         type: 'mypack',
@@ -431,11 +475,11 @@ class SplashScreen extends Component {
                                         on_chapter: on_chapter[push]
                                     });
                                 }
-                                resolve(theData);
+                                resolve(returnArray);
                             },
                         onStop: function () {
                             window.alert('Sorry, can\'t connect to our server right now');
-                            reject(error.reason);
+                            reject(false);
                         }
                     });
                 }else{
@@ -491,7 +535,7 @@ class SplashScreen extends Component {
                                     }
                                 }
                             }
-                            theData.push({
+                            returnArray.push({
                                 title: title,
                                 index: theData.length.toString(),
                                 type: 'mypack',
@@ -505,11 +549,11 @@ class SplashScreen extends Component {
                                 chapters: chapters,
                                 on_chapter: '0'
                             });
-                            resolve(theData);
+                            resolve(returnArray);
                         },
                         onStop: function () {
                             window.alert('Sorry, can\'t connect to our server right now');
-                            reject(error.reason);
+                            reject(false);
                         }
                     });
                 }
@@ -574,7 +618,21 @@ class SplashScreen extends Component {
             id: '777',
         });
     }
-
+    makeTitle(sentName){
+        var pTitle = '';
+        var packNameArray = sentName.split('_');
+        switch (packNameArray.length){
+            case 1:
+                pTitle = packNameArray[0].charAt(0).toUpperCase() + packNameArray[0].slice(1);
+                break;
+            case 2://e.g. 1_corinthians
+                pTitle = packNameArray[0] + ' ' + packNameArray[1].charAt(0).toUpperCase() + packNameArray[1].slice(1);
+                break;
+            case 3://_and_ in product ID, ' & ' in title
+                pTitle = packNameArray[0].charAt(0).toUpperCase() + packNameArray[0].slice(1) + ' & ' + packNameArray[2].charAt(0).toUpperCase() + packNameArray[2].slice(1);
+        }
+        return pTitle;
+    }
 
     render() {
 		return(
