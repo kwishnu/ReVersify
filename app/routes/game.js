@@ -9,12 +9,14 @@ import DropdownMenu from '../components/DropdownMenu';
 import configs from '../config/configs';
 import { normalize, normalizeFont, getArrowSize, getArrowMargin }  from '../config/pixelRatio';
 const deepCopy = require('../config/deepCopy.js');
+const bonuses = require('../config/bonuses.js');
 const styles = require('../styles/styles');
 const {width, height} = require('Dimensions').get('window');
 const KEY_Sound = 'soundKey';
 const KEY_Verses = 'versesKey';
 const KEY_solvedTP = 'solvedTP';
 const KEY_Solved = 'numSolvedKey';
+const KEY_NextBonus = 'bonusKey';
 const KEY_ratedTheApp = 'ratedApp';
 const KEY_showFB = 'showFBKey';
 const KEY_showTwitter = 'showTwitterKey';
@@ -59,6 +61,10 @@ const fanfare = new Sound('aah.mp3', Sound.MAIN_BUNDLE, (error) => {
     window.alert('Sound file not found');
   }
 });
+hasAZero = (element, index, array) => {
+  return element < 1;
+
+}
 cleanup = (sentence) => {
    return sentence.toLowerCase().replace(/[^a-zA-Z]+/g, "");
 
@@ -174,6 +180,7 @@ class Game extends Component {
             isPremium: false,
             numHints: 0,
             numSolved: 0,
+            nextBonus: 0,
             hasRated: false,
             hasPaidForHints: false,
             hintNumOpacity: 1,
@@ -353,6 +360,18 @@ class Game extends Component {
                     this.setState({hasPaidForHints: false, hintNumOpacity: 0});
                 }
             }
+                return AsyncStorage.getItem(KEY_NextBonus);
+            }).then((nb) => {
+                if (nb !== null){
+                    this.setState({nextBonus: parseInt(nb, 10)});
+                }else{
+                    this.setState({nextBonus: '10'});
+                    try {
+                        AsyncStorage.setItem(KEY_NextBonus, '10');
+                    } catch (error) {
+                        window.alert('AsyncStorage error: ' + error.message);
+                    }
+                }
             return AsyncStorage.getItem(KEY_Solved);
         }).then((solved) => {
             let ns = parseInt(solved, 10);
@@ -644,6 +663,10 @@ class Game extends Component {
         });
     }
     nextVerse(){
+        if(this.props.fromWhere == 'favorites'){
+            this.closeGame('favorites');
+            return;
+        }
         let newIndex = String(parseInt(this.state.index, 10) + 1);
         let onLastVerse = (this.props.fromWhere == 'home' || newIndex == parseInt(this.props.homeData[this.props.dataElement].num_verses, 10))?true:false;
         if(this.props.fromWhere == 'home' || onLastVerse){
@@ -863,7 +886,8 @@ class Game extends Component {
             if(!this.state.openedAll)homeData[this.props.dataElement].num_solved = newNumSolved;
             homeData[this.props.dataElement].solved[this.state.index] = 1;
             let onLastVerse=(parseInt(this.state.index, 10) + 1 == parseInt(homeData[this.props.dataElement].num_verses, 10))?true:false;
-            if(onLastVerse && !this.state.openedAll)homeData[this.props.dataElement].type = 'solved';
+            let notSolvedYet = homeData[this.props.dataElement].solved.some(hasAZero);
+            if(onLastVerse && !notSolvedYet && !this.state.openedAll)homeData[this.props.dataElement].type = 'solved';
             try {
                 AsyncStorage.setItem(KEY_Verses, JSON.stringify(homeData));
             } catch (error) {
@@ -875,7 +899,47 @@ class Game extends Component {
             dsArray[this.state.index + 1] = '1';
             this.setState({daily_solvedArray: dsArray});
         }
-        let numSolved = this.state.numSolved + 1;
+        var numSolved = this.state.numSolved + 1;
+        var bonusLevel = this.state.nextBonus;
+        if (numSolved == bonusLevel){
+            var nextBonusLevel = null;
+            var bonusIndex = null;
+            switch (bonusLevel){
+                case 10:
+                    bonusIndex = 0;
+                    nextBonusLevel = '50';
+                    break;
+                case 50:
+                    bonusIndex = 1;
+                    nextBonusLevel = '100';
+                    break;
+                case 100:
+                    bonusIndex = 2;
+                    nextBonusLevel = '250';
+                    break;
+                case 250:
+                    bonusIndex = 3;
+                    nextBonusLevel = '500';
+                    break;
+                case 500:
+                    bonusIndex = 4;
+                    nextBonusLevel = '1000';
+                    break;
+                case 1000:
+                    bonusIndex = 5;
+                    nextBonusLevel = '100000000';
+                    break;
+            }
+            let objToPush = bonuses[bonusIndex];
+            objToPush.index = homeData.length;
+            homeData.push(objToPush);
+            try {
+                AsyncStorage.setItem(KEY_Verses, JSON.stringify(homeData));
+                AsyncStorage.setItem(KEY_NextBonus, nextBonusLevel);
+            } catch (error) {
+                window.alert('AsyncStorage error: ' + error.message);
+            }
+        }
         let strNumSolved = String(numSolved);
         try {
             AsyncStorage.setItem(KEY_daily_solved_array, JSON.stringify(dsArray));
