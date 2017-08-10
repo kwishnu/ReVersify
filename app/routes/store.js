@@ -67,6 +67,7 @@ module.exports = class Store extends Component {
         this.handleHardwareBackButton = this.handleHardwareBackButton.bind(this);
     }
     componentDidMount(){
+        Meteor.reconnect();
         BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
         AsyncStorage.getItem(KEY_expandInfo).then((strExpand) => {
             if(strExpand){
@@ -148,9 +149,11 @@ module.exports = class Store extends Component {
                     <View style={[store_styles.purchase_text_container, {backgroundColor: data.color}]}>
                         <Text style={[store_styles.launcher_text, {color: invertColor(data.color, true)}]}>{data.name}</Text>
                         <Text style={[store_styles.launcher_text_small, {color: invertColor(data.color, true)}]}>{data.num_verses + ' Verse Puzzles'}</Text>
+                        {productIDArray[2] == 'book' &&
                         <Text style={[store_styles.launcher_text_small, {color: invertColor(data.color, true)}]}>Complete Text</Text>
+                        }
                     </View>
-                    <View style={ store_styles.purchase_button_container } onStartShouldSetResponder={ ()=> {this.startPurchase(data.name, data.product_id)}}>
+                    <View style={ store_styles.purchase_button_container } onStartShouldSetResponder={ ()=> {this.startPurchase(data.product_id)}}>
                         <View style={store_styles.buy_button} >
                             <Text style={store_styles.buy_text}>Purchase</Text>
                         </View>
@@ -163,18 +166,25 @@ module.exports = class Store extends Component {
                     <View style={[store_styles.purchase_text_container, {backgroundColor: data.color}]}>
                         <Text style={[store_styles.launcher_text, {color: invertColor(data.color, true)}]}>{data.name[0]}</Text>
                         <Text style={[store_styles.launcher_text_small, {color: invertColor(data.color, true)}]}>{data.num_verses[0] + ' Verse Puzzles'}</Text>
+                        {productIDArray[0] == 'b' &&
                         <Text style={[store_styles.launcher_text_small, {color: invertColor(data.color, true)}]}>Complete Text</Text>
+                        }
                             <View style={store_styles.divider}/>
                         <Text style={[store_styles.launcher_text, {color: invertColor(data.color, true)}]}>{data.name[1]}</Text>
                         <Text style={[store_styles.launcher_text_small, {color: invertColor(data.color, true)}]}>{data.num_verses[1] + ' Verse Puzzles'}</Text>
+                        {productIDArray[2] == 'b' &&
                         <Text style={[store_styles.launcher_text_small, {color: invertColor(data.color, true)}]}>Complete Text</Text>
+                        }
                             <View style={store_styles.divider}/>
                         <Text style={[store_styles.launcher_text, {color: invertColor(data.color, true)}]}>{data.name[2]}</Text>
-                        <Text style={[store_styles.launcher_text_small, {color: invertColor(data.color, true)}]}>{data.num_verses[2] + ' reVersify Hints'}</Text>
+                        <Text style={[store_styles.launcher_text_small, {color: invertColor(data.color, true)}]}>{this.getRowThreeText(data.product_id, data.num_verses[2])}</Text>
+                        {productIDArray[4] == 'b' &&
+                        <Text style={[store_styles.launcher_text_small, {color: invertColor(data.color, true)}]}>Complete Text</Text>
+                        }
                             <View style={store_styles.spacer}/>
                         <Text style={[store_styles.launcher_text, {color: invertColor(data.color, true)}]}>{data.price}</Text>
                     </View>
-                    <View style={ store_styles.purchase_button_container } onStartShouldSetResponder={ ()=> {this.startPurchase(data.name, data.product_id)}}>
+                    <View style={ store_styles.purchase_button_container } onStartShouldSetResponder={ ()=> {this.startPurchase(data.product_id)}}>
                         <View style={store_styles.buy_button} >
                             <Text style={store_styles.buy_text}>Purchase</Text>
                         </View>
@@ -183,7 +193,13 @@ module.exports = class Store extends Component {
             )
         }
     }
-    startPurchase(item_name, itemID){
+    getRowThreeText(id, numVerses){
+        let splitID = id.split('.');
+        console.log(id);
+        let returnText = (splitID[4] == 'h')?'reVersify Hints':numVerses + ' Verse Puzzles';
+        return returnText;
+    }
+    startPurchase(itemID){
         NetInfo.isConnected.fetch().then(isConnected => {
             if (isConnected && Meteor.status().status == 'connected'){
                 InAppBilling.open()
@@ -194,7 +210,7 @@ module.exports = class Store extends Component {
 
                         let idArray = itemID.split('.');
                         let lastItem = idArray[idArray.length - 1];
-                        if (lastItem == '100' || lastItem == '500' || lastItem == '1000'){//hints
+                        if (lastItem.indexOf('0') > -1){// == '100' || lastItem == '500' || lastItem == '1000'){//hints
                             let numBuying = parseInt(lastItem, 10);
                             let numOwned = (this.state.currentHints == '-1')?0:parseInt(this.state.currentHints, 10);
                             let total = numBuying + numOwned;
@@ -210,7 +226,6 @@ module.exports = class Store extends Component {
                                 id: 'splash',
                                 passProps: {
                                     motive: 'purchase',
-                                    packName: item_name,
                                     productID: itemID
                                 }
                             });
