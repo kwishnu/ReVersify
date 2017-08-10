@@ -24,9 +24,7 @@ const KEY_Verses = 'versesKey';
 const KEY_SeenStart = 'seenStartKey';
 const KEY_Notifs = 'notifsKey';
 const KEY_NotifTime = 'notifTimeKey';
-const KEY_Solved = 'numSolvedKey';
 const KEY_ratedTheApp = 'ratedApp';
-const KEY_NextBonus = 'bonusKey';
 const {width, height} = require('Dimensions').get('window');
 import { normalize }  from '../config/pixelRatio';
 //'ws://52.52.205.96:80/websocket'; <= Publications...publication AllData, collections dataA...dataZ; MeteorApp
@@ -75,6 +73,11 @@ class SplashScreen extends Component {
                         }
                         continue;
                     }
+                    if (owned[check].split('.').length > 3){
+                        premiumBool = true;
+                        this.setState({isPremium: true});
+                        continue;
+                    }
                 }
                 for (let checkForHints=0; checkForHints<owned.length; checkForHints++){
                   if (owned[checkForHints].indexOf('.hint.') < 0){
@@ -106,62 +109,15 @@ class SplashScreen extends Component {
                         }
                     }
                 }
+                if (this.state.isPremium){
+                    homeData[14].show = 'false';//purchased something
+                    homeData[15].show = 'true';
+                    premiumBool = true;
+                }
                 this.setState({ isPremium: premiumBool,
                                 getPurchased: getPurchasedBool,
                                 pData: homeData
                 });
-                return AsyncStorage.getItem(KEY_NextBonus);
-            }).then((nb) => {//get next bonus level, compare to current number solved, download bonus pack accordingly...
-                if (nb !== null){
-                    this.setState({nextBonus: nb});
-                }else{
-                    this.setState({nextBonus: '10'});
-                    try {
-                        AsyncStorage.setItem(KEY_NextBonus, '10');
-                    } catch (error) {
-                        window.alert('AsyncStorage error: ' + error.message);
-                    }
-                }
-
-                return AsyncStorage.getItem(KEY_Solved);
-            }).then((ns) => {//number solved
-                var solvNum = 0;
-                var strNextBonus = this.state.nextBonus;
-                var bonusScore = parseInt(strNextBonus);//send number so getCollection() knows this is a bonus pack
-                if (ns !== null){
-                    solvNum =  parseInt(ns, 10);
-                }else{
-                    try {
-                        AsyncStorage.setItem(KEY_Solved, '0');
-                    } catch (error) {
-                        window.alert('AsyncStorage error: ' + error.message);
-                    }
-                }
-                if (solvNum >= bonusScore && Meteor.status().status == 'connected'){
-                    const bID = 'bonus.' + strNextBonus + '.collection';
-                    for (let getNext=0; getNext<bonuses.length; getNext++){
-                        if (bonuses[getNext][0] == strNextBonus){
-                            const nextToSet = bonuses[getNext + 1][0];//ignoring index-out-of-bounds possibility as top bonus is set at 100,000,000,000...
-                            try {
-                                AsyncStorage.setItem(KEY_NextBonus, nextToSet);
-                            } catch (error) {
-                                window.alert('AsyncStorage error: ' + error.message);
-                            }
-                        }
-                    }
-                    return this.getCollection(bonusScore, bID, this.state.pData);//*************************************bonuses****************************************************************
-                }else{
-                    return false;
-                }
-            }).then((pArray) => {
-                if (pArray){
-                  var appArray = this.state.pData;
-                  var iNum = this.state.pData.length;
-                  iNum++;
-                  pArray[0].index = String(iNum);
-                  appArray.push(pArray[0]);
-                  this.setState({pData: appArray});
-                }
                 return AsyncStorage.getItem(KEY_Notifs);
             }).then((notifHour) => {//notification hour, zero if no notifications (from Settings)
                 if (notifHour !== null) {
@@ -199,7 +155,8 @@ class SplashScreen extends Component {
                             premiumBool = true;
                         }
                         this.setState({ connectionBool: false,
-                                        isPremium: premiumBool
+                                        isPremium: premiumBool,
+                                        pData: homeData
                         })
                         return false;
                     });
@@ -218,7 +175,6 @@ class SplashScreen extends Component {
             }).then((isConnected) => {//retrieve purchased packs here, if not already on device
                 var promises = [];
                 if(isConnected && this.state.getPurchased && Meteor.status().status == 'connected'){
-                    var packNames = [];
                     var packsOnDevice = [];
                     for (var k=0; k<this.state.pData.length; k++){
                         if (this.state.pData[k].type == 'mypack'){
@@ -237,27 +193,27 @@ class SplashScreen extends Component {
                                 packTitle = this.makeTitle(idArray[3]);
                                 promises.push(this.getCollection(packTitle, ownedPacks[goThroughOwned], this.state.pData));
                             }else if (idArray && idArray.length > 4){//combo pack
-                                var packTitleArray = idArray.split('.');
                                 var assembledID = '';
                                 var keepGoing = true;
-                                for (var goThroughTitles=0; goThroughTitles<packTitleArray.length; goThroughTitles++){//b = Book, c = Collection, h = Hints
-                                    packTitle = this.makeTitle(packTitleArray(goThroughTitles + 1));
-                                    switch (packTitleArray(goThroughTitles)){
+                                for (var goThroughTitles=0; goThroughTitles<idArray.length; goThroughTitles++){//b = Book, c = Collection, h = Hints
+                                    if (idArray[goThroughTitles].length > 1)continue;
+                                    packTitle = this.makeTitle(idArray[goThroughTitles + 1]);
+                                    switch (idArray[goThroughTitles]){
                                         case 'b':
-                                            assembledID = 'rv.verse.book.' + packTitleArray(goThroughTitles + 1);
+                                            assembledID = 'rv.verse.book.' + idArray[goThroughTitles + 1];
                                             break;
                                         case 'c':
-                                            assembledID = 'rv.verse.collection.' + packTitleArray(goThroughTitles + 1);
+                                            assembledID = 'rv.verse.collection.' + idArray[goThroughTitles + 1];
                                             break;
                                         case 'h':
                                             keepGoing = false;
                                             break;
                                         default:
-                                            if (goThroughTitles == packTitleArray.length - 1)keepGoing = false;
+                                            if (goThroughTitles == idArray.length - 1)keepGoing = false;
                                     }
-                                    if (!keepGoing) break;
+                                    if (!keepGoing)break;
+                                    promises.push(this.getCollection(packTitle, assembledID, this.state.pData));
                                 }
-                                promises.push(this.getCollection(packTitle, assembledID, this.state.pData));
                             }else{
                                 console.log('Unknown Product: ', ownedPacks[goThroughOwned]);
                             }
@@ -268,29 +224,31 @@ class SplashScreen extends Component {
                   return false;
                 }
             }).catch((error) => {
-              console.log('line 140: ' + JSON.stringify(error))
+              console.log('line 217: ' + JSON.stringify(error))
               return false;
             }).then((collectionArray) => {
                 if (collectionArray){
                     var appDataArray = this.state.pData;
                     var indexNum = this.state.pData.length;
-                    for (var packIndex = 0; packIndex < collectionArray.length; packIndex++){
-                        collectionArray[packIndex].index = String(indexNum);
-                        appDataArray.push(collectionArray[packIndex]);
-                        indexNum++;
+                    for (var collectionIndex = 0; collectionIndex < collectionArray.length; collectionIndex++){
+                        for (var packIndex = 0; packIndex < collectionArray[collectionIndex].length; packIndex++){
+                            collectionArray[collectionIndex][packIndex].index = String(indexNum);
+                            appDataArray.push(collectionArray[collectionIndex][packIndex]);
+                            indexNum++;
+                        }
                     }
                     this.setState({pData: appDataArray});
                 }
               return true;
             }).catch((error) => {
-              console.log('line 154: ' + JSON.stringify(error))
+              console.log('line 232: ' + JSON.stringify(error))
               return false;
             }).then(() => {
               let whereToGo = (this.state.seenStart == 'true')?'home':'swiper';
               setTimeout(() => {this.gotoScene(whereToGo, this.state.pData)}, 500);//Hate to do this, but avoids warning of setting state on mounted component
             }).catch((error) => {
               let whereToGo = (this.state.seenStart == 'true')?'home':'swiper';
-              console.log('line 159: ' + JSON.stringify(error))
+              console.log('line 239: ' + JSON.stringify(error))
               setTimeout(() => {this.gotoScene(whereToGo, this.state.pData)}, 500);
             });
         }else{//purchased verse pack...
@@ -305,27 +263,63 @@ class SplashScreen extends Component {
                 homeData = JSON.parse(verses);
                 homeData[14].show = 'false';
                 homeData[15].show = 'true';
+                this.setState({isPremium: true, pData: homeData});
                 return homeData;
             }).then((theData) => {
-                return this.getCollection(this.props.packName, this.props.productID, theData);
+                var pTitle = '';
+                var promiseArray = [];
+                var idSplit = this.props.productID.split('.');
+                if (idSplit.length == 4){//single pack
+                    pTitle = this.makeTitle(idSplit[3]);
+                    promiseArray.push(this.getCollection(pTitle, this.props.productID, theData));
+                }else{//combo pack
+                    var packID = '';
+                    var flag = true;
+                    for (var gg=0; gg<idSplit.length; gg++){//b = Book, c = Collection, h = Hints
+                        if (idSplit[gg].length > 1)continue;
+                        pTitle = this.makeTitle(idSplit[gg + 1]);
+                        switch (idSplit[gg]){
+                            case 'b':
+                        console.log('hi: ' + idSplit[gg]);
+                                packID = 'rv.verse.book.' + idSplit[gg + 1];
+                                break;
+                            case 'c':
+                                packID = 'rv.verse.collection.' + idSplit[gg + 1];
+                                break;
+                            case 'h':
+                                flag = false;
+                                break;
+                            default:
+                                if (gg == idSplit.length - 1)flag = false;
+                        }
+                        if (!flag)break;
+                        promiseArray.push(this.getCollection(pTitle, packID, theData));
+                    }
+                }
+                return Promise.all(promiseArray);
+            }).catch((error) => {
+                console.log('line 268: ' + JSON.stringify(error))
+                return false;
             }).then((collectionArray) => {
                 if (collectionArray){
-                  var appDataArray = this.state.pData;
-                  var indexNum = this.state.pData.length;
-                  for (let arrayOfPacks of collectionArray){
-                    for (let pack of arrayOfPacks){
-                      indexNum++;
-                      pack.index = String(indexNum);
-                      appDataArray.push(pack);
+
+                console.log(JSON.stringify(collectionArray));
+                    var appDataArray = this.state.pData;
+                    var indexNum = this.state.pData.length;
+                    for (var collectionIndex = 0; collectionIndex < collectionArray.length; collectionIndex++){
+                        for (var packIndex = 0; packIndex < collectionArray[collectionIndex].length; packIndex++){
+                            collectionArray[collectionIndex][packIndex].index = String(indexNum);
+                            appDataArray.push(collectionArray[collectionIndex][packIndex]);
+                            indexNum++;
+                        }
                     }
-                  }
-                  this.setState({pData: appDataArray});
-                  return true;
+                    this.setState({pData: appDataArray});
+                    return true;
                 }else{
-                  return false;
+                    return false;
                 }
             }).catch((error) => {
-                console.log('line 334: ' + JSON.stringify(error))
+                console.log('line 277: ' + JSON.stringify(error))
                 return false;
             }).then(() => {
               this.gotoScene('home', this.state.pData);
@@ -378,185 +372,64 @@ class SplashScreen extends Component {
         return new Promise(
             function (resolve, reject) {
                 var returnArray = [];
-                if (Array.isArray(name)){//combo pack
-                    var title = [];
-                    var index = [];
-                    var num_verses = [];
-                    var num_chapters = [];
-                    var on_chapter = [];
-                    var solved = [];
-                    var verses = [];
-                    var chapters = [];
-                    for (let pushArrays1=0; pushArrays1<name.length; pushArrays1++){
-                        solved.push([]);
-                        verses.push([]);
-                        chapters.push([]);
-                        on_chapter.push('0');
-                    }
-                    var product_id = '';
-                    var bg_color = [];
-                    var combinedName = '';
-                    for (let makeName=0; makeName<name.length; makeName++){
-                        combinedName += name[makeName] + ' ';
-                    }
-                    var stringName = combinedName.trim();
-                    for (var k = 0; k < name.length; k++){
-                        for (var b = 0; b < theData.length; b++){//theData is the homeData array/object
-                            var obj = theData[b];
-                            for (var el in obj) {
-                                if (el == 'data'){
-                                    for(var j=0; j<obj[el].length; j++){
-                                        if(theData[b].data[j].name == name[k]){
-                                            title[k] = theData[b].data[j].name;
-                                            index[k] = (theData.length + k).toString();
-                                            num_verses[k] = theData[b].data[j].num_verses;
-                                            num_chapters[k] = theData[b].data[j].num_chapters;
-                                            bg_color[k] = theData[b].data[j].color;
-                                            continue;
-                                        }
-                                    }
+                var title = '';
+                var index = '';
+                var num_verses = '';
+                var solved = [];
+                var bg_color = '';
+                var verses = [];
+                var chapters = [];
+                for (var k = 0; k < theData.length; k++){
+                var obj = theData[k];
+                    for (var el in obj) {
+                        if (el == 'data'){
+                            for(var j=0; j<obj[el].length; j++){
+                                if(theData[k].data[j].name == name){
+                                    title = theData[k].data[j].name;
+                                    num_verses = theData[k].data[j].num_verses;
+                                    bg_color = theData[k].data[j].color;
+                                    continue;
                                 }
                             }
                         }
                     }
-                    for (var sol=0; sol<name.length; sol++){
-                        var arr = new Array(parseInt(num_verses[sol])).fill(0);
-                        solved[sol] = arr;
-                    }
-
-                    const subs = Meteor.subscribe('AllData', {
-                        onReady: function () {
-                                const d_verses = Meteor.collection('dataB').find({pack: stringName});
-                                var whichOfThem = 0;
-                                var verseCount = 0;
-                                for (var key in d_verses) {
-                                    var obj = d_verses[key];
-                                    for (var prop in obj) {
-                                        if(prop=='vs'){
-                                            console.log(obj[prop]);
-                                            verses[whichOfThem].push(obj[prop]);
-                                            verseCount++;
-                                        }
-                                        if (verseCount == num_verses[whichOfThem]){
-                                            whichOfThem++;
-                                            verseCount = 0;
-                                        }
-                                    }
-                                }
-                                var whichOfThem2 = 0;
-                                var chapterCount = 0;
-                                for (var key2 in d_verses) {
-                                    var obj2 = d_verses[key2];
-                                    for (var prop2 in obj2) {
-                                        if(prop2=='chapter'){
-                                            chapters[whichOfThem2].push(obj2[prop2]);
-                                            chapterCount++;
-                                        }
-                                        if (chapterCount == num_chapters[whichOfThem2]){
-                                            whichOfThem2++;
-                                            chapterCount = 0;
-                                        }
-                                    }
-                                }
-                                for (var push = 0; push < name.length; push++){
-                                    returnArray.push({
-                                        title: title[push],
-                                        index: index[push],
-                                        type: 'mypack',
-                                        show: 'true',
-                                        num_verses: num_verses[push],
-                                        num_chapters: num_chapters[push],
-                                        num_solved: '0',
-                                        solved: solved[push],
-                                        product_id: ID,
-                                        bg_color: bg_color[push],
-                                        verses: verses[push],
-                                        chapters: chapters[push],
-                                        on_chapter: on_chapter[push]
-                                    });
-                                }
-                                resolve(returnArray);
-                            },
-                        onStop: function () {
-                            window.alert('Sorry, can\'t connect to our server right now');
-                            reject(false);
-                        }
-                    });
-                }else{
-                    var strName = '';
-                    var title = '';
-                    var index = '';
-                    var num_verses = '';
-                    var solved = [];
-                    var bg_color = '';
-                    var verses = [];
-                    var chapters = [];
-                    if(typeof name == 'string'){//regular pack
-                        strName = name;
-                        for (var k = 0; k < theData.length; k++){
-                        var obj = theData[k];
-                            for (var el in obj) {
-                                if (el == 'data'){
-                                    for(var j=0; j<obj[el].length; j++){
-                                        if(theData[k].data[j].name == name){
-                                            title = theData[k].data[j].name;
-                                            num_verses = theData[k].data[j].num_verses;
-                                            bg_color = theData[k].data[j].color;
-                                            continue;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }else{//bonus pack for score level
-                        strName = name.toString();//e.g. '10'
-                        for(var bb=0; bb<bonuses.length; bb++){
-                            if (bonuses[bb][0] == strName){
-                                title = bonuses[bb][1];
-                                num_verses = bonuses[bb][2];
-                                bg_color = bonuses[bb][3];
-                                strName = bonuses[bb][1];//e.g. 'Welcome +10'
-                                continue;
-                            }
-                        }
-                    }
-                    var arr = new Array(parseInt(num_verses)).fill(0);
-                    const subs = Meteor.subscribe('AllData', {
-                        onReady: function () {
-                            const d_verses = Meteor.collection('dataV').find({pack: strName});
-                            for (var key in d_verses) {
-                                var obj = d_verses[key];
-                                for (var prop in obj) {
-                                    if(prop=='vs'){
-                                        verses.push(obj[prop]);
-                                    }
-                                    if(prop=='chapter'){
-                                        chapters.push(obj[prop]);
-                                    }
-                                }
-                            }
-                            returnArray.push({
-                                title: title,
-                                index: theData.length.toString(),
-                                type: 'mypack',
-                                show: 'true',
-                                num_verses: num_verses,
-                                num_solved: '0',
-                                solved: arr,
-                                product_id: ID,
-                                bg_color: bg_color,
-                                verses: verses,
-                                chapters: chapters,
-                                on_chapter: '0'
-                            });
-                            resolve(returnArray);
-                        },
-                        onStop: function () {
-                            window.alert('Sorry, can\'t connect to our server right now');
-                            reject(false);
-                        }
-                    });
                 }
+                var arr = new Array(parseInt(num_verses)).fill(0);
+                const subs = Meteor.subscribe('AllData', {
+                    onReady: function () {
+                        const d_verses = Meteor.collection('dataV').find({pack: name});
+                        for (var key in d_verses) {
+                            var obj = d_verses[key];
+                            for (var prop in obj) {
+                                if(prop=='vs'){
+                                    verses.push(obj[prop]);
+                                }
+                                if(prop=='chapter'){
+                                    chapters.push(obj[prop]);
+                                }
+                            }
+                        }
+                        returnArray.push({
+                            title: title,
+                            index: theData.length.toString(),
+                            type: 'mypack',
+                            show: 'true',
+                            num_verses: num_verses,
+                            num_solved: '0',
+                            solved: arr,
+                            product_id: ID,
+                            bg_color: bg_color,
+                            verses: verses,
+                            chapters: chapters,
+                            on_chapter: '0'
+                        });
+                        resolve(returnArray);
+                    },
+                    onStop: function () {
+                        window.alert('Sorry, can\'t connect to our server right now');
+                        reject(false);
+                    }
+                });
         });
     }
     gotoScene(whichScene, appData){
@@ -619,19 +492,19 @@ class SplashScreen extends Component {
         });
     }
     makeTitle(sentName){
-        var pTitle = '';
+        var pT = '';
         var packNameArray = sentName.split('_');
         switch (packNameArray.length){
             case 1:
-                pTitle = packNameArray[0].charAt(0).toUpperCase() + packNameArray[0].slice(1);
+                pT = packNameArray[0].charAt(0).toUpperCase() + packNameArray[0].slice(1);
                 break;
             case 2://e.g. 1_corinthians
-                pTitle = packNameArray[0] + ' ' + packNameArray[1].charAt(0).toUpperCase() + packNameArray[1].slice(1);
+                pT = packNameArray[0] + ' ' + packNameArray[1].charAt(0).toUpperCase() + packNameArray[1].slice(1);
                 break;
             case 3://_and_ in product ID, ' & ' in title
-                pTitle = packNameArray[0].charAt(0).toUpperCase() + packNameArray[0].slice(1) + ' & ' + packNameArray[2].charAt(0).toUpperCase() + packNameArray[2].slice(1);
+                pT = packNameArray[0].charAt(0).toUpperCase() + packNameArray[0].slice(1) + ' & ' + packNameArray[2].charAt(0).toUpperCase() + packNameArray[2].slice(1);
         }
-        return pTitle;
+        return pT;
     }
 
     render() {
