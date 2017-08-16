@@ -5,8 +5,6 @@ import {
   View,
   Alert,
   Image,
-  Dimensions,
-  AsyncStorage,
   Animated,
   Easing,
   BackHandler
@@ -75,6 +73,21 @@ class Intro5 extends Component {
         }else{
             this.props.navigator.pop({});
         }
+    }
+    footerBorder(color) {
+        let bgC = '#cfe7c2';
+        let darkerColor = (bgC == '#cfe7c2')?shadeColor('#2B0B30', 5):shadeColor(color, -40);
+        return {borderColor: darkerColor};
+    }
+    headerBorder(color) {
+        let bgC = '#cfe7c2';
+        let darkerColor = (bgC == '#cfe7c2')?shadeColor('#2B0B30', 5):shadeColor(color, -40);
+        return {borderColor: darkerColor};
+    }
+    headerFooterColor(color) {
+        let bgC = '#cfe7c2';
+        let darkerColor = (bgC == '#cfe7c2')? '#2B0B30':shadeColor(color, -40);
+        return {backgroundColor: darkerColor};
     }
     animate_image_delay(){
         this.moveValue.setValue(0);
@@ -175,9 +188,11 @@ class Intro5 extends Component {
                     <Text style={styles.large_text}>That's it - enjoy reVersify!</Text>
                 </View>
                 }
+                { this.state.showText &&
                 <View style={styles.done} onStartShouldSetResponder={()=>this.done()}>
                     <Text style={styles.done_text}>Done</Text>
                 </View>
+                }
             </View>
         );
     }

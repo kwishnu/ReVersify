@@ -1,30 +1,12 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, BackHandler, AsyncStorage, Animated, ActivityIndicator, Alert, Platform, Linking, AppState } from 'react-native';
-import moment from 'moment';
+import { StyleSheet, Text, View, Image, BackHandler, Alert, Animated } from 'react-native';
 import Button from '../components/Button';
 import Tile from '../components/Tile';
 import GrayTile from '../components/GrayTile';
-import DropdownMenu from '../components/DropdownMenu';
 import configs from '../config/configs';
 import { normalize, normalizeFont, getArrowSize, getArrowMargin }  from '../config/pixelRatio';
-const deepCopy = require('../config/deepCopy.js');
-const styles = require('../styles/styles');
 const {width, height} = require('Dimensions').get('window');
-let dsArray = [];
 let homeData = {};
-let Sound = require('react-native-sound');
-const plink1 = new Sound('plink.mp3', Sound.MAIN_BUNDLE, (error) => {
-  if (error) {
-    window.alert('Sound file not found');
-  }
-});
-reverse = (s) => {
-    return s.split("").reverse().join("");
-}
-randomBetween = (min,max) => {
-    return Math.floor(Math.random()*(max-min+1)+min);
-
-}
 shadeColor = (color, percent) => {
     percent = percent/100;
     let f=parseInt(color.slice(1),16),t=percent<0?0:255,p=percent<0?percent*-1:percent,R=f>>16,G=f>>8&0x00FF,B=f&0x0000FF;
@@ -46,7 +28,7 @@ invertColor = (hex, bw) => {
         b = parseInt(hex.slice(4, 6), 16);
     if (bw) {
         return (r * 0.299 + g * 0.587 + b * 0.114) > 186
-            ? '#000000'
+            ? '#333333'
             : '#FFFFFF';
     }
 }
@@ -56,79 +38,28 @@ class Intro2 extends Component {
     constructor(props) {
         super(props);
         this.flip = new Animated.Value(0);
-        this.grow = new Animated.Value(0);
-        this.opac = new Animated.Value(0);
         this.state = {
             id: 'intro2',
-            title: this.props.title,
-            index: this.props.index,
-            homeData: this.props.homeData,
-            daily_solvedArray: this.props.daily_solvedArray,
-            dataElement: this.props.dataElement,
-            shouldShowDropdown: false,
-            isLoading: true,
             pan: new Animated.ValueXY(0),
             scale: new Animated.Value(1),
             bgColor: '#cfe7c2',
             panelBgColor: '#cfe7c2',
             panelBorderColor: invertColor('#cfe7c2', true),
             showingVerse: false,
-            rows2: true,
-            rows3: true,
-            rows4: true,
-            rows5: true,
-            rows6: true,
-            rows7: true,
-            rows8: true,
-            numberOfRows: 1,
-            frag0: '', frag1: '', frag2: '', frag3: '', frag4: '', frag5: '', frag6: '', frag7: '', frag8: '', frag9: '', frag10: '', frag11: '', frag12: '',
-            frag13: '', frag14: '', frag15: '', frag16: '', frag17: '', frag18: '',frag19: '', frag20: '', frag21: '', frag22: '', frag23: '',
             panelText: '',
             line0Text: 'n the beginning God',
             line1Text: 'created the heavens and',
             line2Text: 'the earth.',
-            line3Text: '',
-            line4Text: '',
-            line5Text: '',
-            line6Text: '',
-            line7Text: '',
-            nextFrag: '',
-            onThisFragment: 0,
-            fragmentOrder: [],
-            wordsArray: [[], [], [], [], [], [], [], []],
-            wordArrayPosition: [0, 0, 0],
-            verseKey: '',
-            chapterVerse: '',
-            initialLetter: '',
-            addSpace: false,
             showNextArrow: false,
-            showButtons: false,
-            showHintButton: true,
-            showFB: true,
-            showTwitter: true,
-            showFavorites: true,
-            showBible: false,
-            numFavorites: 0,
             letterImage: require('../images/letters/i.png'),
             arrowImage: require('../images/arrowforward.png'),
             scaleXY: new Animated.Value(0),
-            soundString: 'Mute Sounds',
-            useSounds: true,
-            doneWithVerse: false,
-            playedFirst: false,
-            isPremium: false,
-            numHints: 0,
-            numSolved: 0,
-            myHintsInitialNum: -1,
-            hintNumOpacity: 1,
-            hasInfiniteHints: false,
-            entireVerse: '',
             showText1: false,
             showText2: false,
             showTiles: false,
-            showFooter: true,
             text2text: 'Change this in \'Settings\' if you\'d like to always see the Chapter and Verse.',
-            played: false
+            played: false,
+            showFooter: true
         }
         this.handleHardwareBackButton = this.handleHardwareBackButton.bind(this);
     }
@@ -204,8 +135,8 @@ class Intro2 extends Component {
         if (text == 'edtheh'){
             this.setState({line1Text: 'created the h', played: true});
             setTimeout(() => {this.playDropSound()}, 50);
-            setTimeout(() => {this.setState({ showText1: false, showText2: false, showTiles: false, showFooter: false })}, 1000);
-            setTimeout(() => {this.setState({ showNextArrow: true, showFooter: true, showText2: true, text2text: 'One more' })}, 1001);
+            setTimeout(() => {this.setState({ showText1: false, showText2: false, showTiles: false, showFooter: false })}, 800);
+            setTimeout(() => {this.setState({ showNextArrow: true, showFooter: true, showText2: true, text2text: 'One more' })}, 802);
         }
     }
     footerBorder(color) {
