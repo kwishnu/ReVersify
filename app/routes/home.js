@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { StyleSheet, Text, View, Image, TouchableHighlight, TouchableOpacity, ListView, BackHandler, AsyncStorage, ActivityIndicator, Alert, Vibration, AppState } from 'react-native';
 import moment from 'moment';
+import PushNotification from 'react-native-push-notification';
 import SectionHeader from '../components/SectionHeader';
 import Button from '../components/Button';
 import Dialog from '../components/Dialog';
@@ -111,6 +112,7 @@ const KEY_reverse = 'reverseFragments';
 const KEY_ThankRated = 'thankRatedApp';
 const KEY_ThankPremium = 'thankPremium';
 const KEY_Solved = 'numSolvedKey';
+const KEY_Notifs = 'notifsKey';
 let homeData = [];
 let dsArray = [];
 let solvedTodayOrNot = false;
@@ -269,7 +271,7 @@ class Home extends Component{
                     }else{
                         Alert.alert('Thank You!', `You now have a new feature--the first tile will already be played in each Verse. You can change this in 'Settings' if you wish`);
                     }
-            this.props.navigator.pop({});
+                    this.props.navigator.pop({});
                 }
             }
             if (this.props.isPremium){
@@ -288,6 +290,11 @@ class Home extends Component{
         if (this.props.connectionBool == false){
             Alert.alert('No Server Connection', 'Sorry, unable to load Daily Verses');
         }
+        AsyncStorage.getItem(KEY_Notifs).then((notifs) => {//remove notification from notification center if launched by that...
+            if (notifs !== null && notifs !== '0') {
+                this.setNotifTime(notifs);
+            }
+        });
     }
     componentWillUnmount(){
         BackHandler.removeEventListener('hardwareBackPress', this.handleHardwareBackButton);
@@ -708,6 +715,30 @@ class Home extends Component{
                             dataSource: ds.cloneWithRowsAndSections(dataBlob, sectionIds, rowIds)
             });
     }
+    setNotifTime(key: value){
+        PushNotification.cancelLocalNotifications({id: '777'});
+        this.startNotifications(key.selectedValue);
+        this.setState({ notif_time: key.selectedValue });
+        try {
+            AsyncStorage.setItem(KEY_Notifs, key.selectedValue);
+        } catch (error) {
+            window.alert('AsyncStorage error: ' + error.message);
+        }
+    }
+    startNotifications(time) {
+        var tomorrowAM = new Date(Date.now() + (moment(tonightMidnight).add(parseInt(time, 10), 'hours').valueOf()) - nowISO);
+        PushNotification.localNotificationSchedule({
+            message: "A new Daily Verse is in!",
+            vibrate: true,
+            soundName: 'plink.mp3',
+            //repeatType: 'day',//can be 'time', if so use following:
+            repeatTime: 86400000,//daily
+            date: tomorrowAM,
+            id: '777',
+        });
+    }
+
+
     render() {
         const menu = <Menu onItemSelected={this.onMenuItemSelected} data = {this.props.homeData} />;
         if(this.state.isLoading == true){
