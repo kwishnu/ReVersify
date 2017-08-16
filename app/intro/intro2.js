@@ -42,7 +42,6 @@ class Intro2 extends Component {
             bgColor: '#cfe7c2',
             panelBgColor: '#cfe7c2',
             panelBorderColor: invertColor('#cfe7c2', true),
-            showingVerse: false,
             line0Text: 'n the beginning God',
             line1Text: '',
             showNextArrow: false,
