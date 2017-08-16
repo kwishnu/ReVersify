@@ -437,6 +437,7 @@ module.exports = class Settings extends Component {
                                 </View>
                                 <View style={settings_styles.switch_container}>
                                     <Picker
+                                        mode={`dropdown`}
                                         enabled={this.state.notifs_state}
                                         style={[settings_styles.picker, {color: this.state.pickerColor}]}
                                         selectedValue={this.state.notif_time}
