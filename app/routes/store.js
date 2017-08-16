@@ -31,7 +31,7 @@ invertColor=(hex, bw)=> {
         b = parseInt(hex.slice(4, 6), 16);
     if (bw) {
         return (r * 0.299 + g * 0.587 + b * 0.114) > 186
-            ? '#000000'
+            ? '#333333'
             : '#FFFFFF';
     }
     // invert color components

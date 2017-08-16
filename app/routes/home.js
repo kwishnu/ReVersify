@@ -34,7 +34,7 @@ invertColor = (hex,bw)  => {
         b = parseInt(hex.slice(4, 6), 16);
     if (bw) {
         return (r * 0.299 + g * 0.587 + b * 0.114) > 186
-            ? '#000000'
+            ? '#222222'
             : '#FFFFFF';
     }
     // invert color components
@@ -726,6 +726,8 @@ class Home extends Component{
         }
     }
     startNotifications(time) {
+        const nowISO = moment().valueOf();
+        const tonightMidnight = moment().endOf('day').valueOf();
         var tomorrowAM = new Date(Date.now() + (moment(tonightMidnight).add(parseInt(time, 10), 'hours').valueOf()) - nowISO);
         PushNotification.localNotificationSchedule({
             message: "A new Daily Verse is in!",
