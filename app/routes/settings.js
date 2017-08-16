@@ -11,7 +11,6 @@ const {width, height} = require('Dimensions').get('window');
 const KEY_Sound = 'soundKey';
 const KEY_Color = 'colorKey';
 const KEY_Notifs = 'notifsKey';
-const KEY_NotifTime = 'notifTimeKey';
 const KEY_PlayFirst = 'playFirstKey';
 const KEY_show_score = 'showScoreKey';
 const KEY_showFB = 'showFBKey';
