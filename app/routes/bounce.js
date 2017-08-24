@@ -25,7 +25,8 @@ class Bounce extends Component {
                     title: this.props.title,
                     myTitle: this.props.senderTitle,
                     index: this.props.index,
-                    fromWhere: this.props.fromWhere
+                    fromWhere: this.props.fromWhere,
+                    gripeText: this.props.gripeText
                 }
            });
         }else{

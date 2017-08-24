@@ -282,7 +282,8 @@ class Daily extends Component{
                 dataElement: this.props.dataElement,
                 isPremium: this.state.isPremium,
                 bgColor: this.props.bgColor,
-                myTitle: this.props.title
+                myTitle: this.props.title,
+                gripeText: this.props.gripeText
             },
        });
     }
@@ -325,9 +326,11 @@ class Daily extends Component{
                                  </View>}
                              />
                         </View>
+                        {this.props.gripeText.length > 1 &&
                         <View style={daily_styles.center_text_view}>
                             <Text numberOfLines={5} style={daily_styles.gripe_text}>{this.props.gripeText}</Text>
                         </View>
+                        }
                     </View>
                 </SideMenu>
             );
@@ -369,7 +372,7 @@ const daily_styles = StyleSheet.create({
         justifyContent: 'center',
         position: 'absolute',
         padding: height/12,
-        top: height/2,
+        top: height/2
     },
     gripe_text: {
         color: '#333333',

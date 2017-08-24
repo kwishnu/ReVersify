@@ -674,6 +674,7 @@ class Game extends Component {
             return;
         }
         let nextTitle = '';
+        let gripe_text = (this.props.fromWhere == 'daily')?this.props.gripeText:'';
         if(this.props.fromWhere == 'daily'){
             let today = moment(this.props.title, 'MMMM D, YYYY');
             nextTitle = today.subtract(1, 'days').format('MMMM D, YYYY');
@@ -694,11 +695,13 @@ class Game extends Component {
                 senderTitle: this.props.myTitle,
                 fromWhere: this.props.fromWhere,
                 title: nextTitle,
-                index: newIndex
+                index: newIndex,
+                gripeText: gripe_text
             }
        });
     }
     reset_scene(){
+        let gripe_text = (this.props.fromWhere == 'daily')?this.props.gripeText:'';
         this.props.navigator.replace({
             id: 'bounce',
             passProps: {
@@ -711,7 +714,8 @@ class Game extends Component {
                 senderTitle: this.props.myTitle,
                 fromWhere: this.props.fromWhere,
                 title: this.props.title,
-                index: this.props.index
+                index: this.props.index,
+                gripeText: gripe_text
             }
        });
     }
@@ -735,6 +739,7 @@ class Game extends Component {
             });
             return;
         }
+        let gripe_text = (this.props.fromWhere == 'daily')?this.props.gripeText:'';
         let myPackArray = [];
         let str = '';
         for (let key in homeData){
@@ -779,6 +784,7 @@ class Game extends Component {
                 textColor: this.props.textColor,
                 bgColor: this.props.bgColor,
                 title: this.props.myTitle,
+                gripeText: gripe_text
             }
        });
     }
