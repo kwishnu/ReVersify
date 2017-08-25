@@ -198,25 +198,7 @@ class Intro2 extends Component {
                     </View>
                 </View>
                 <View style={intro_styles.game}>
-                 { this.state.showTiles &&
-                    <View>
-                       <View style={intro_styles.tile_row} >
-                            <Tile opac={0} ref={(a) => { this.a = a; }}  text={ 'nthebegi' } nextFrag={ 'nthebegi' } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                            <GrayTile ref={(b) => { this.b = b; }} text={ 'sandt' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                            <GrayTile ref={(c) => { this.c = c; }} text={ 'edtheh' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                        </View>
-                        <View style={intro_styles.tile_row} >
-                            <Tile ref={(d) => { this.d = d; }} text={ 'taerc' } nextFrag={ 'creat' } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                            <GrayTile ref={(e) => { this.e = e; }} text={ 'eaven' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                            <Tile opac={0} ref={(f) => { this.f = f; }} text={ 'ninggod' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                        </View>
-                        <View style={intro_styles.tile_row} >
-                            <GrayTile ref={(g) => { this.g = g; }} text={ 'heearth' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                        </View>
-                    </View>
-                }
                 </View>
-                { this.state.showFooter &&
                 <View style={[intro_styles.footer, this.footerBorder(this.state.bgColor), this.headerFooterColor(this.state.bgColor)]}>
                     <View style={{padding: height*.015}} onStartShouldSetResponder={()=>this.goSomewhere()}>
                         <Text style={intro_styles.footer_text}>Skip</Text>
@@ -225,7 +207,6 @@ class Intro2 extends Component {
                         <Text style={intro_styles.footer_text}></Text>
                     </View>
                 </View>
-                }
                 { this.state.showNextArrow &&
                 <View style={intro_styles.next_arrow}>
                     <Image source={this.state.arrowImage}/>
@@ -240,6 +221,23 @@ class Intro2 extends Component {
                 <View style={intro_styles.text2}>
                     <Text style={intro_styles.instructions_text}>{this.state.text2text}</Text>
                 </View>
+                }
+                 { this.state.showTiles &&
+                    <View style={intro_styles.tiles_container}>
+                       <View style={intro_styles.tile_row} >
+                            <Tile opac={0} ref={(a) => { this.a = a; }}  text={ 'nthebegi' } nextFrag={ 'nthebegi' } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                            <GrayTile ref={(b) => { this.b = b; }} text={ 'sandt' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                            <GrayTile ref={(c) => { this.c = c; }} text={ 'edtheh' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                        </View>
+                        <View style={intro_styles.tile_row} >
+                            <Tile ref={(d) => { this.d = d; }} text={ 'taerc' } nextFrag={ 'creat' } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                            <GrayTile ref={(e) => { this.e = e; }} text={ 'eaven' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                            <Tile opac={0} ref={(f) => { this.f = f; }} text={ 'ninggod' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                        </View>
+                        <View style={intro_styles.tile_row} >
+                            <GrayTile ref={(g) => { this.g = g; }} text={ 'heearth' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                        </View>
+                    </View>
                 }
             </View>
         );
@@ -287,6 +285,13 @@ const intro_styles = StyleSheet.create({
         left: (width-(height*.478))/2,
         height: height*.29,
         width: height*.478,
+    },
+    tiles_container: {
+        position: 'absolute',
+        height: 250,
+        width: width,
+        top: height*.6,
+        left: 0
     },
     text1: {
         position: 'absolute',

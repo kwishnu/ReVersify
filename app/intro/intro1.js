@@ -181,31 +181,12 @@ class Intro1 extends Component {
                     </View>
                 </View>
                 <View style={intro_styles.game}>
-                 { this.state.showTiles &&
-                    <View>
-                       <View style={intro_styles.tile_row} >
-                            <Tile isIntro1={true} ref={(a) => { this.a = a; }} zIndex={1} text={ 'nthebegi' } nextFrag={ 'nthebegi' } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                            <GrayTile ref={(b) => { this.b = b; }} text={ 'sandt' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                            <GrayTile ref={(c) => { this.c = c; }} text={ 'edtheh' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                        </View>
-                        <View style={intro_styles.tile_row} >
-                            <GrayTile ref={(d) => { this.d = d; }} text={ 'taerc' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                            <GrayTile ref={(e) => { this.e = e; }} text={ 'eaven' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                            <Tile isIntro1={true} ref={(f) => { this.f = f; }} text={ 'ninggod' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                        </View>
-                        <View style={intro_styles.tile_row} >
-                            <GrayTile ref={(g) => { this.g = g; }} text={ 'heearth' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                        </View>
-                    </View>
-                }
                 </View>
-                { this.state.showFooter &&
                 <View style={[intro_styles.footer, this.footerBorder(this.state.bgColor), this.headerFooterColor(this.state.bgColor)]}>
                     <View style={{padding: height*.015}} onStartShouldSetResponder={()=>this.goSomewhere()}>
                         <Text style={intro_styles.footer_text}>Skip</Text>
                     </View>
                 </View>
-                }
                 { this.state.showNextArrow &&
                 <View style={intro_styles.next_arrow}>
                     <Image source={this.state.arrowImage}/>
@@ -220,6 +201,23 @@ class Intro1 extends Component {
                 <View style={intro_styles.text2}>
                     <Text style={intro_styles.instructions_text}>{this.state.text2text}</Text>
                 </View>
+                }
+                 { this.state.showTiles &&
+                    <View style={intro_styles.tiles_container}>
+                       <View style={intro_styles.tile_row} >
+                            <Tile isIntro1={true} ref={(a) => { this.a = a; }} zIndex={1} text={ 'nthebegi' } nextFrag={ 'nthebegi' } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                            <GrayTile ref={(b) => { this.b = b; }} text={ 'sandt' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                            <GrayTile ref={(c) => { this.c = c; }} text={ 'edtheh' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                        </View>
+                        <View style={intro_styles.tile_row} >
+                            <GrayTile ref={(d) => { this.d = d; }} text={ 'taerc' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                            <GrayTile ref={(e) => { this.e = e; }} text={ 'eaven' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                            <Tile isIntro1={true} ref={(f) => { this.f = f; }} text={ 'ninggod' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                        </View>
+                        <View style={intro_styles.tile_row} >
+                            <GrayTile ref={(g) => { this.g = g; }} text={ 'heearth' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                        </View>
+                    </View>
                 }
             </View>
         );
@@ -238,7 +236,7 @@ const intro_styles = StyleSheet.create({
         alignItems: 'center',
     },
     header: {
-        flex: 2,
+        flex: 4,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -254,7 +252,7 @@ const intro_styles = StyleSheet.create({
     },
     tablet: {
         marginTop: 6,
-        flex: 10,
+        flex: 20,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
@@ -267,6 +265,13 @@ const intro_styles = StyleSheet.create({
         left: (width-(height*.478))/2,
         height: height*.29,
         width: height*.478,
+    },
+    tiles_container: {
+        position: 'absolute',
+        height: 250,
+        width: width,
+        top: height*.6,
+        left: 0
     },
     text1: {
         position: 'absolute',
@@ -314,7 +319,7 @@ const intro_styles = StyleSheet.create({
         fontFamily: 'Book Antiqua',
     },
     verse_panel_container: {
-        flex: 2,
+        flex: 4,
         alignItems: 'center',
         justifyContent: 'center',
         width: width,
@@ -337,14 +342,14 @@ const intro_styles = StyleSheet.create({
 
     },
     game: {
-        flex: 16,
+        flex: 32,
         marginTop: 6,
         alignItems: 'center',
         justifyContent: 'center',
         width: width,
     },
     footer: {
-        flex: 3,
+        flex: 6,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-start',
