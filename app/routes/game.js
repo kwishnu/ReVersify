@@ -27,6 +27,7 @@ const KEY_ShowedGameOverlay = 'showedOverlay';
 const KEY_MyHints = 'myHintsKey';
 const KEY_Premium = 'premiumOrNot';
 const KEY_PlayFirst = 'playFirstKey';
+const KEY_Easy = 'easyKey';
 const KEY_HideVerse = 'hideVerseKey';
 let dsArray = [];
 let homeData = {};
@@ -187,11 +188,13 @@ class Game extends Component {
             hasInfiniteHints: false,
             entireVerse: '',
             openedAll: false,
-            shouldShowOverlay: false
+            shouldShowOverlay: false,
+            easy: false
         }
         this.handleHardwareBackButton = this.handleHardwareBackButton.bind(this);
     }
     componentDidMount() {
+        var makeEasy = false;
         if (this.props.dataElement == 17)this.setState({showFavorites: false});
         if (this.props.fromWhere == 'book')this.setState({showBible: true});
         let reverseTiles = this.props.reverse;
@@ -206,7 +209,7 @@ class Game extends Component {
         dsArray = this.props.daily_solvedArray;
         let numHints = parseInt(verseArray[0], 10);
         let chapterVerse = verseArray[1];
-        let verseStr = verseArray[2];
+        let verseStr = verseArray[2].replace(/  +/g, ' ');
         let saveVerse = verseStr;
         let initial = verseStr.substr(0, 1);
         verseStr = verseStr.substring(1);
@@ -292,7 +295,20 @@ class Game extends Component {
             default:
                 this.setState({ letterImage: require('../images/letters/i.png') });
         }
-        this.populateArrays(verseStr, numHints, reverseTiles).then((values) => {
+        AsyncStorage.getItem(KEY_Easy).then((notEasy) => {
+            if (notEasy !== null) {
+                var easyBool = (notEasy == 'true')?false:true;
+                makeEasy = easyBool;
+                this.setState({ easy: easyBool});
+            }else{
+                try {
+                    AsyncStorage.setItem(KEY_Easy, 'true');
+                } catch (error) {
+                    window.alert('AsyncStorage error: ' + error.message);
+                }
+            }
+            return this.populateArrays(verseStr, numHints, reverseTiles, makeEasy);
+        }).then((values) => {
             if(values){
                 this.setState({ numHints: values.hints, fragmentOrder: values.fragmentOrder, nextFrag: values.nextFrag, frag0: values.frag0, frag1: values.frag1, frag2: values.frag2, frag3: values.frag3, frag4: values.frag4, frag5: values.frag5, frag6: values.frag6, frag7: values.frag7, frag8: values.frag8, frag9: values.frag9, frag10: values.frag10,
                                 frag11: values.frag11, frag12: values.frag12,  frag13: values.frag13, frag14: values.frag14, frag15: values.frag15, frag16: values.frag16, frag17: values.frag17, frag18: values.frag18, frag19: values.frag19, frag20: values.frag20, frag21: values.frag21, frag22: values.frag22, frag23: values.frag23,
@@ -300,7 +316,7 @@ class Game extends Component {
                 })
                 this.assignWordsToRows(verseStr);
             }
-            return this.getRowBools(values.length);
+            return this.getRowBools(values.length, makeEasy);
         }).then((bools) => {
             if(bools){
                 this.setState({
@@ -468,61 +484,115 @@ class Game extends Component {
         }
         this.setState({wordsArray: layout});
     }
-    getRowBools(length){
+    getRowBools(length, easy){
         return new Promise(
             function (resolve, reject) {
                 let showRowBools = [false, false, false, false, false, false, false];
                 let rows = 1;
-                switch(length){
-                    case 6:
-                        showRowBools[0] = true;
-                        rows = 2;
-                        break;
-                    case 9:
-                        showRowBools[0] = true;
-                        showRowBools[1] = true;
-                        rows = 3;
-                        break;
-                    case 12:
-                        showRowBools[0] = true;
-                        showRowBools[1] = true;
-                        showRowBools[2] = true;
-                        rows = 4;
-                        break;
-                    case 15:
-                        showRowBools[0] = true;
-                        showRowBools[1] = true;
-                        showRowBools[2] = true;
-                        showRowBools[3] = true;
-                        rows = 5;
-                        break;
-                    case 18:
-                        showRowBools[0] = true;
-                        showRowBools[1] = true;
-                        showRowBools[2] = true;
-                        showRowBools[3] = true;
-                        showRowBools[4] = true;
-                        rows = 6;
-                        break;
-                    case 21:
-                        showRowBools[0] = true;
-                        showRowBools[1] = true;
-                        showRowBools[2] = true;
-                        showRowBools[3] = true;
-                        showRowBools[4] = true;
-                        showRowBools[5] = true;
-                        rows = 7;
-                        break;
-                    case 24:
-                        showRowBools[0] = true;
-                        showRowBools[1] = true;
-                        showRowBools[2] = true;
-                        showRowBools[3] = true;
-                        showRowBools[4] = true;
-                        showRowBools[5] = true;
-                        showRowBools[6] = true;
-                        rows = 8;
-                        break;
+                if (easy){
+                    switch(length){
+                        case 4:
+                            showRowBools[0] = true;
+                            rows = 2;
+                            break;
+                        case 6:
+                            showRowBools[0] = true;
+                            showRowBools[1] = true;
+                            rows = 3;
+                            break;
+                        case 8:
+                            showRowBools[0] = true;
+                            showRowBools[1] = true;
+                            showRowBools[2] = true;
+                            rows = 4;
+                            break;
+                        case 10:
+                            showRowBools[0] = true;
+                            showRowBools[1] = true;
+                            showRowBools[2] = true;
+                            showRowBools[3] = true;
+                            rows = 5;
+                            break;
+                        case 12:
+                            showRowBools[0] = true;
+                            showRowBools[1] = true;
+                            showRowBools[2] = true;
+                            showRowBools[3] = true;
+                            showRowBools[4] = true;
+                            rows = 6;
+                            break;
+                        case 14:
+                            showRowBools[0] = true;
+                            showRowBools[1] = true;
+                            showRowBools[2] = true;
+                            showRowBools[3] = true;
+                            showRowBools[4] = true;
+                            showRowBools[5] = true;
+                            rows = 7;
+                            break;
+                        case 16:
+                            showRowBools[0] = true;
+                            showRowBools[1] = true;
+                            showRowBools[2] = true;
+                            showRowBools[3] = true;
+                            showRowBools[4] = true;
+                            showRowBools[5] = true;
+                            showRowBools[6] = true;
+                            rows = 8;
+                            break;
+                    }
+                }else{
+                    switch(length){
+                        case 6:
+                            showRowBools[0] = true;
+                            rows = 2;
+                            break;
+                        case 9:
+                            showRowBools[0] = true;
+                            showRowBools[1] = true;
+                            rows = 3;
+                            break;
+                        case 12:
+                            showRowBools[0] = true;
+                            showRowBools[1] = true;
+                            showRowBools[2] = true;
+                            rows = 4;
+                            break;
+                        case 15:
+                            showRowBools[0] = true;
+                            showRowBools[1] = true;
+                            showRowBools[2] = true;
+                            showRowBools[3] = true;
+                            rows = 5;
+                            break;
+                        case 18:
+                            showRowBools[0] = true;
+                            showRowBools[1] = true;
+                            showRowBools[2] = true;
+                            showRowBools[3] = true;
+                            showRowBools[4] = true;
+                            rows = 6;
+                            break;
+                        case 21:
+                            showRowBools[0] = true;
+                            showRowBools[1] = true;
+                            showRowBools[2] = true;
+                            showRowBools[3] = true;
+                            showRowBools[4] = true;
+                            showRowBools[5] = true;
+                            rows = 7;
+                            break;
+                        case 24:
+                            showRowBools[0] = true;
+                            showRowBools[1] = true;
+                            showRowBools[2] = true;
+                            showRowBools[3] = true;
+                            showRowBools[4] = true;
+                            showRowBools[5] = true;
+                            showRowBools[6] = true;
+                            rows = 8;
+                            break;
+                    }
                 }
                 if(showRowBools){
                     resolve([showRowBools, rows]);
@@ -531,7 +601,7 @@ class Game extends Component {
                 }
         });
     }
-    populateArrays(theVerse, num, reverseTiles){
+    populateArrays(theVerse, num, reverseTiles, easyOrNot){
         return new Promise(
             function (resolve, reject) {
                 let verseKeyString = cleanup(theVerse);
@@ -539,10 +609,15 @@ class Game extends Component {
                 let remainingStr = verseKeyString;
                 let haveFinished = false;
                 let rndLength = 0;
+                let lowerBound = (easyOrNot)?8:4;
+                let upperBound = (easyOrNot)?15:8;
+                let numColumns = (easyOrNot)?2:3;
+                let maxTiles = (easyOrNot)?16:24;
+                let takeOverPoint = (easyOrNot)?24:15;
                 while (!haveFinished){
                     let fragAssemble = '';
-                    if (remainingStr.length > 15){
-                        rndLength = randomBetween(4, 8);
+                    if (remainingStr.length > takeOverPoint){
+                        rndLength = randomBetween(lowerBound, upperBound);
                         for (let i=0; i<rndLength; i++){
                             fragAssemble += remainingStr.substr(i, 1);
                         }
@@ -575,6 +650,33 @@ class Game extends Component {
                             case 15:
                                 twoNumbers = [7, 8];
                                 break;
+                            case 16:
+                                twoNumbers = [8, 8];
+                                break;
+                            case 17:
+                                twoNumbers = [8, 9];
+                                break;
+                            case 18:
+                                twoNumbers = [9, 9];
+                                break;
+                            case 19:
+                                twoNumbers = [8, 11];
+                                break;
+                            case 20:
+                                twoNumbers = [9, 11];
+                                break;
+                            case 21:
+                                twoNumbers = [8, 13];
+                                break;
+                            case 22:
+                                twoNumbers = [10, 12];
+                                break;
+                            case 23:
+                                twoNumbers = [9, 14];
+                                break;
+                            case 24:
+                                twoNumbers = [12, 12];
+                                break;
                         }
                         for (let ii=0; ii<2; ii++){
                             for (let iii=0; iii<twoNumbers[ii]; iii++){
@@ -584,7 +686,7 @@ class Game extends Component {
                             fragments.push(fragAssemble);
                             fragAssemble = '';
                         }
-                        if (fragments.length % 3 == 0 && fragments.length < 25){
+                        if (fragments.length % numColumns == 0 && fragments.length <= maxTiles){
                             const count = fragments =>
                                 fragments.reduce((a, b) =>
                                     Object.assign(a, {[b]: (a[b] || 0) + 1}), {});//checking for duplicate fragments
@@ -1168,39 +1270,70 @@ class Game extends Component {
             return;
         }
         if(this.state.useSounds == true){swish.play();}
-        this.a.showNextTile(frag);
-        this.b.showNextTile(frag);
-        this.c.showNextTile(frag);
+        if(this.state.easy){
+            this.a.showNextTile(frag);
+            this.b.showNextTile(frag);
+        }else{
+            this.a.showNextTile(frag);
+            this.b.showNextTile(frag);
+            this.c.showNextTile(frag);
+        }
         let rows = this.state.numberOfRows;
-        switch(true){
-            case rows > 7:
-                this.v.showNextTile(frag);
-                this.w.showNextTile(frag);
-                this.x.showNextTile(frag);
-            case rows > 6:
-                this.s.showNextTile(frag);
-                this.t.showNextTile(frag);
-                this.u.showNextTile(frag);
-            case rows > 5:
-                this.p.showNextTile(frag);
-                this.q.showNextTile(frag);
-                this.r.showNextTile(frag);
-            case rows > 4:
-                this.m.showNextTile(frag);
-                this.n.showNextTile(frag);
-                this.o.showNextTile(frag);
-            case rows > 3:
-                this.j.showNextTile(frag);
-                this.k.showNextTile(frag);
-                this.l.showNextTile(frag);
-            case rows > 2:
-                this.g.showNextTile(frag);
-                this.h.showNextTile(frag);
-                this.i.showNextTile(frag);
-            case rows > 1:
-                this.d.showNextTile(frag);
-                this.e.showNextTile(frag);
-                this.f.showNextTile(frag);
+        if(this.state.easy){
+            switch(true){
+                case rows > 7:
+                    this.o.showNextTile(frag);
+                    this.p.showNextTile(frag);
+                case rows > 6:
+                    this.m.showNextTile(frag);
+                    this.n.showNextTile(frag);
+                case rows > 5:
+                    this.k.showNextTile(frag);
+                    this.l.showNextTile(frag);
+                case rows > 4:
+                    this.i.showNextTile(frag);
+                    this.j.showNextTile(frag);
+                case rows > 3:
+                    this.g.showNextTile(frag);
+                    this.h.showNextTile(frag);
+                case rows > 2:
+                    this.e.showNextTile(frag);
+                    this.f.showNextTile(frag);
+                case rows > 1:
+                    this.c.showNextTile(frag);
+                    this.d.showNextTile(frag);
+            }
+        }else{
+            switch(true){
+                case rows > 7:
+                    this.v.showNextTile(frag);
+                    this.w.showNextTile(frag);
+                    this.x.showNextTile(frag);
+                case rows > 6:
+                    this.s.showNextTile(frag);
+                    this.t.showNextTile(frag);
+                    this.u.showNextTile(frag);
+                case rows > 5:
+                    this.p.showNextTile(frag);
+                    this.q.showNextTile(frag);
+                    this.r.showNextTile(frag);
+                case rows > 4:
+                    this.m.showNextTile(frag);
+                    this.n.showNextTile(frag);
+                    this.o.showNextTile(frag);
+                case rows > 3:
+                    this.j.showNextTile(frag);
+                    this.k.showNextTile(frag);
+                    this.l.showNextTile(frag);
+                case rows > 2:
+                    this.g.showNextTile(frag);
+                    this.h.showNextTile(frag);
+                    this.i.showNextTile(frag);
+                case rows > 1:
+                    this.d.showNextTile(frag);
+                    this.e.showNextTile(frag);
+                    this.f.showNextTile(frag);
+            }
         }
     }
     goToHintStore(){
@@ -1459,62 +1592,114 @@ class Game extends Component {
                                         <Text style={game_styles.panel_text} >{this.state.panelText}</Text>
                             </Animated.View>
                         </View>
+                        {!this.state.easy &&
                         <View style={game_styles.game}>
                                 <View style={game_styles.tile_row} >
-                                    <Tile ref={(a) => { this.a = a; }} opac={ this.state.frag0Opacity } text={ this.state.frag0 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                    <Tile ref={(b) => { this.b = b; }} opac={ this.state.frag1Opacity } text={ this.state.frag1 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                    <Tile ref={(c) => { this.c = c; }} opac={ this.state.frag2Opacity } text={ this.state.frag2 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    <Tile ref={(a) => { this.a = a; }} easy={ this.state.easy } opac={ this.state.frag0Opacity } text={ this.state.frag0 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    <Tile ref={(b) => { this.b = b; }} easy={ this.state.easy } opac={ this.state.frag1Opacity } text={ this.state.frag1 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    <Tile ref={(c) => { this.c = c; }} easy={ this.state.easy } opac={ this.state.frag2Opacity } text={ this.state.frag2 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
                                 </View>
                             { this.state.rows2 &&
                                 <View style={game_styles.tile_row} >
-                                    <Tile ref={(d) => { this.d = d; }} opac={ this.state.frag3Opacity } text={ this.state.frag3 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                    <Tile ref={(e) => { this.e = e; }} opac={ this.state.frag4Opacity } text={ this.state.frag4 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                    <Tile ref={(f) => { this.f = f; }} opac={ this.state.frag5Opacity } text={ this.state.frag5 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    <Tile ref={(d) => { this.d = d; }} easy={ this.state.easy } opac={ this.state.frag3Opacity } text={ this.state.frag3 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    <Tile ref={(e) => { this.e = e; }} easy={ this.state.easy } opac={ this.state.frag4Opacity } text={ this.state.frag4 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    <Tile ref={(f) => { this.f = f; }} easy={ this.state.easy } opac={ this.state.frag5Opacity } text={ this.state.frag5 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
                                 </View>
                             }
                             { this.state.rows3 &&
                                 <View style={game_styles.tile_row} >
-                                    <Tile ref={(g) => { this.g = g; }} opac={ this.state.frag6Opacity } text={ this.state.frag6 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                    <Tile ref={(h) => { this.h = h; }} opac={ this.state.frag7Opacity } text={ this.state.frag7 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                    <Tile ref={(i) => { this.i = i; }} opac={ this.state.frag8Opacity } text={ this.state.frag8 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    <Tile ref={(g) => { this.g = g; }} easy={ this.state.easy } opac={ this.state.frag6Opacity } text={ this.state.frag6 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    <Tile ref={(h) => { this.h = h; }} easy={ this.state.easy } opac={ this.state.frag7Opacity } text={ this.state.frag7 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    <Tile ref={(i) => { this.i = i; }} easy={ this.state.easy } opac={ this.state.frag8Opacity } text={ this.state.frag8 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
                                 </View>
                             }
                             { this.state.rows4 &&
                                     <View style={game_styles.tile_row} >
-                                        <Tile ref={(j) => { this.j = j; }} opac={ this.state.frag9Opacity } text={ this.state.frag9 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                        <Tile ref={(k) => { this.k = k; }} opac={ this.state.frag10Opacity } text={ this.state.frag10 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                        <Tile ref={(l) => { this.l = l; }} opac={ this.state.frag11Opacity } text={ this.state.frag11 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(j) => { this.j = j; }} easy={ this.state.easy } opac={ this.state.frag9Opacity } text={ this.state.frag9 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(k) => { this.k = k; }} easy={ this.state.easy } opac={ this.state.frag10Opacity } text={ this.state.frag10 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(l) => { this.l = l; }} easy={ this.state.easy } opac={ this.state.frag11Opacity } text={ this.state.frag11 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
                                     </View>
                             }
                             { this.state.rows5 &&
                                     <View style={game_styles.tile_row} >
-                                        <Tile ref={(m) => { this.m = m; }} opac={ this.state.frag12Opacity } text={ this.state.frag12 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                        <Tile ref={(n) => { this.n = n; }} opac={ this.state.frag13Opacity } text={ this.state.frag13 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                        <Tile ref={(o) => { this.o = o; }} opac={ this.state.frag14Opacity } text={ this.state.frag14 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(m) => { this.m = m; }} easy={ this.state.easy } opac={ this.state.frag12Opacity } text={ this.state.frag12 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(n) => { this.n = n; }} easy={ this.state.easy } opac={ this.state.frag13Opacity } text={ this.state.frag13 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(o) => { this.o = o; }} easy={ this.state.easy } opac={ this.state.frag14Opacity } text={ this.state.frag14 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
                                     </View>
                             }
                             { this.state.rows6 &&
                                     <View style={game_styles.tile_row} >
-                                        <Tile ref={(p) => { this.p = p; }} opac={ this.state.frag15Opacity } text={ this.state.frag15 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                        <Tile ref={(q) => { this.q = q; }} opac={ this.state.frag16Opacity } text={ this.state.frag16 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                        <Tile ref={(r) => { this.r = r; }} opac={ this.state.frag17Opacity } text={ this.state.frag17 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(p) => { this.p = p; }} easy={ this.state.easy } opac={ this.state.frag15Opacity } text={ this.state.frag15 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(q) => { this.q = q; }} easy={ this.state.easy } opac={ this.state.frag16Opacity } text={ this.state.frag16 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(r) => { this.r = r; }} easy={ this.state.easy } opac={ this.state.frag17Opacity } text={ this.state.frag17 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
                                     </View>
                             }
                             { this.state.rows7 &&
                                     <View style={game_styles.tile_row} >
-                                        <Tile ref={(s) => { this.s = s; }} opac={ this.state.frag18Opacity } text={ this.state.frag18 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                        <Tile ref={(t) => { this.t = t; }} opac={ this.state.frag19Opacity } text={ this.state.frag19 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                        <Tile ref={(u) => { this.u = u; }} opac={ this.state.frag20Opacity } text={ this.state.frag20 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(s) => { this.s = s; }} easy={ this.state.easy } opac={ this.state.frag18Opacity } text={ this.state.frag18 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(t) => { this.t = t; }} easy={ this.state.easy } opac={ this.state.frag19Opacity } text={ this.state.frag19 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(u) => { this.u = u; }} easy={ this.state.easy } opac={ this.state.frag20Opacity } text={ this.state.frag20 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
                                     </View>
                             }
                             { this.state.rows8 &&
                                     <View style={game_styles.tile_row} >
-                                        <Tile ref={(v) => { this.v = v; }} opac={ this.state.frag21Opacity } text={ this.state.frag21 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                        <Tile ref={(w) => { this.w = w; }} opac={ this.state.frag22Opacity } text={ this.state.frag22 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                                        <Tile ref={(x) => { this.x = x; }} opac={ this.state.frag23Opacity } text={ this.state.frag23 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(v) => { this.v = v; }} easy={ this.state.easy } opac={ this.state.frag21Opacity } text={ this.state.frag21 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(w) => { this.w = w; }} easy={ this.state.easy } opac={ this.state.frag22Opacity } text={ this.state.frag22 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(x) => { this.x = x; }} easy={ this.state.easy } opac={ this.state.frag23Opacity } text={ this.state.frag23 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
                                     </View>
                             }
                         </View>
+                        }
+                        {this.state.easy &&
+                        <View style={game_styles.game}>
+                                <View style={game_styles.tile_row} >
+                                    <Tile ref={(a) => { this.a = a; }} easy={ this.state.easy } opac={ this.state.frag0Opacity } text={ this.state.frag0 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    <Tile ref={(b) => { this.b = b; }} easy={ this.state.easy } opac={ this.state.frag1Opacity } text={ this.state.frag1 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                </View>
+                            { this.state.rows2 &&
+                                <View style={game_styles.tile_row} >
+                                    <Tile ref={(c) => { this.c = c; }} easy={ this.state.easy } opac={ this.state.frag2Opacity } text={ this.state.frag2 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    <Tile ref={(d) => { this.d = d; }} easy={ this.state.easy } opac={ this.state.frag3Opacity } text={ this.state.frag3 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                </View>
+                            }
+                            { this.state.rows3 &&
+                                <View style={game_styles.tile_row} >
+                                    <Tile ref={(e) => { this.e = e; }} easy={ this.state.easy } opac={ this.state.frag4Opacity } text={ this.state.frag4 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    <Tile ref={(f) => { this.f = f; }} easy={ this.state.easy } opac={ this.state.frag5Opacity } text={ this.state.frag5 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                </View>
+                            }
+                            { this.state.rows4 &&
+                                    <View style={game_styles.tile_row} >
+                                        <Tile ref={(g) => { this.g = g; }} easy={ this.state.easy } opac={ this.state.frag6Opacity } text={ this.state.frag6 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(h) => { this.h = h; }} easy={ this.state.easy } opac={ this.state.frag7Opacity } text={ this.state.frag7 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    </View>
+                            }
+                            { this.state.rows5 &&
+                                    <View style={game_styles.tile_row} >
+                                        <Tile ref={(i) => { this.i = i; }} easy={ this.state.easy } opac={ this.state.frag8Opacity } text={ this.state.frag8 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(j) => { this.j = j; }} easy={ this.state.easy } opac={ this.state.frag9Opacity } text={ this.state.frag9 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    </View>
+                            }
+                            { this.state.rows6 &&
+                                    <View style={game_styles.tile_row} >
+                                        <Tile ref={(k) => { this.k = k; }} easy={ this.state.easy } opac={ this.state.frag10Opacity } text={ this.state.frag10 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(l) => { this.l = l; }} easy={ this.state.easy } opac={ this.state.frag11Opacity } text={ this.state.frag11 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    </View>
+                            }
+                            { this.state.rows7 &&
+                                    <View style={game_styles.tile_row} >
+                                        <Tile ref={(m) => { this.m = m; }} easy={ this.state.easy } opac={ this.state.frag12Opacity } text={ this.state.frag12 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(n) => { this.n = n; }} easy={ this.state.easy } opac={ this.state.frag13Opacity } text={ this.state.frag13 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    </View>
+                            }
+                            { this.state.rows8 &&
+                                    <View style={game_styles.tile_row} >
+                                        <Tile ref={(o) => { this.o = o; }} easy={ this.state.easy } opac={ this.state.frag14Opacity } text={ this.state.frag14 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                        <Tile ref={(p) => { this.p = p; }} easy={ this.state.easy } opac={ this.state.frag15Opacity } text={ this.state.frag15 } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                                    </View>
+                            }
+                        </View>
+                        }
                         <View style={[game_styles.footer, this.footerBorder(this.state.bgColor), this.headerFooterColor(this.state.bgColor)]}>
                         { this.state.showHintButton &&
                             <View style={{flexDirection: 'row', justifyContent: 'space-between', width: width}}>
@@ -1557,7 +1742,7 @@ class Game extends Component {
                     <DropdownMenu onPress={(num)=>{ this.onDropdownSelect(num); }} item1={this.state.soundString} item2={'Reset Verse'} item3={'How to Play'}/>
                     }
                     {this.state.shouldShowOverlay &&
-                            <Overlay onPress={()=>{ this.dismissOverlay(); }} margin={0.16} text={`Mute game sounds and reset the Verse with this menu`} />
+                    <Overlay onPress={()=>{ this.dismissOverlay(); }} margin={0.16} text={`Mute game sounds and reset the Verse with this menu`} />
                     }
                 </View>
             );

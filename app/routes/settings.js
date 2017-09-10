@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Image, Picker, BackHandler, AsyncStorage, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, Image, Picker, BackHandler, AsyncStorage, ActivityIndicator, ScrollView } from 'react-native';
 import {Switch} from '../components/Switch';
 import Button from '../components/Button';
 import PushNotification from 'react-native-push-notification';
@@ -12,6 +12,7 @@ const KEY_Sound = 'soundKey';
 const KEY_Color = 'colorKey';
 const KEY_Notifs = 'notifsKey';
 const KEY_PlayFirst = 'playFirstKey';
+const KEY_Easy = 'easyKey';
 const KEY_show_score = 'showScoreKey';
 const KEY_showFB = 'showFBKey';
 const KEY_showTwitter = 'showTwitterKey';
@@ -32,6 +33,8 @@ module.exports = class Settings extends Component {
             sounds_text: 'Game sounds on',
             reverse_state: true,
             reverse_text: 'Reverse some Verse tiles',
+            difficulty_state: true,
+            difficulty_text: 'Use more tiles (regular difficulty)',
             show_fb_state: true,
             show_fb_text: 'Show Facebook button on completion',
             show_twitter_state: true,
@@ -150,6 +153,14 @@ module.exports = class Settings extends Component {
                 reverse_state: stateToUse,
                 reverse_text: strToUse
             });
+            return AsyncStorage.getItem(KEY_Easy);
+        }).then((easyBool) => {
+            var stateToUse = (easyBool == 'true')?true:false;
+            var strToUse = (easyBool == 'true')?'Use more tiles (regular difficulty)':'Use fewer tiles (easier)';
+            this.setState({
+                difficulty_state: stateToUse,
+                difficulty_text: strToUse
+            });
             return AsyncStorage.getItem(KEY_showFB);
         }).then((showFB) => {
             var stateToUse = (showFB == 'true')?true:false;
@@ -251,6 +262,16 @@ module.exports = class Settings extends Component {
             window.alert('AsyncStorage error: ' + error.message);
         }
     }
+    toggleDifficulty(state){
+        var strToUse = (state)?'Use more tiles (regular difficulty)':'Use fewer tiles (easier)';
+        var easyBool = (state)?'true':'false';
+        this.setState({difficulty_text: strToUse});
+        try {
+            AsyncStorage.setItem(KEY_Easy, easyBool);
+        } catch (error) {
+            window.alert('AsyncStorage error: ' + error.message);
+        }
+    }
     toggleShowFB(state){
         var strToUse = (state)?'Show Facebook button on completion':'Not showing Facebook button';
         var fbBool = (state)?'true':'false';
@@ -347,7 +368,7 @@ module.exports = class Settings extends Component {
                         </Button>
                     </View>
                     <View style={ settings_styles.settings_container }>
-                        <View>
+                        <ScrollView style={{paddingTop: height*.05}}>
                             <View style={settings_styles.parameter_container}>
                                 <View style={[settings_styles.text_container, {alignItems: 'flex-end'}]}>
                                     <Text style={settings_styles.text}>{this.state.sounds_text}</Text>
@@ -374,6 +395,14 @@ module.exports = class Settings extends Component {
                                 </View>
                                 <View style={settings_styles.switch_container}>
                                     <Switch value={this.state.reverse_state} onValueChange={(state)=>{this.toggleReverse(state)}}/>
+                                </View>
+                            </View>
+                            <View style={[settings_styles.parameter_container, {marginTop: height*0.02}]}>
+                                <View style={[settings_styles.text_container, {alignItems: 'flex-end'}]}>
+                                    <Text style={settings_styles.text}>{this.state.difficulty_text}</Text>
+                                </View>
+                                <View style={settings_styles.switch_container}>
+                                    <Switch value={this.state.difficulty_state} onValueChange={(state)=>{this.toggleDifficulty(state)}}/>
                                 </View>
                             </View>
                             <View style={[settings_styles.parameter_container, {marginTop: height*0.02}]}>
@@ -451,7 +480,7 @@ module.exports = class Settings extends Component {
                                     </Picker>
                                 </View>
                             </View>
-                        </View>
+                        </ScrollView>
                     </View>
                 </View>
             );
@@ -514,8 +543,9 @@ const settings_styles = StyleSheet.create({
         fontSize: normalizeFont(configs.LETTER_SIZE*.072)
     },
     picker: {
-        width: normalize(height/5.5)
-    },
+        width: normalize(height/5.5),
+        right: height*.04
+        },
     divider: {
         height: StyleSheet.hairlineWidth,
         width: width * 0.9,

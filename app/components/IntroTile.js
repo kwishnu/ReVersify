@@ -17,7 +17,7 @@ reverse = (s) => {
 }
 
 
-class Tile extends Component {
+class IntroTile extends Component {
   constructor(props) {
     super(props);
     this.flip = new Animated.Value(0);
@@ -131,11 +131,10 @@ class Tile extends Component {
         let { pan, scale } = this.state;
         let [translateX, translateY] = [pan.x, pan.y];
         let imageStyle = {transform: [{translateX}, {translateY}, {rotateY}, {scale}]};
-        let tileWidth = (this.props.easy)?height/4:height/6;
         return (
             <View onStartShouldSetResponder={() => {console.log('uhh');}}>
                 <Animated.View
-                  style={[imageStyle, tile_styles.draggable, {zIndex: this.state.zIndex, opacity: this.state.opacity, width: tileWidth}]}
+                  style={[imageStyle, tile_styles.draggable, {zIndex: this.state.zIndex, opacity: this.state.opacity}]}
                   {...this._panResponder.panHandlers}>
                     <Text style={tile_styles.text}>{this.state.text}</Text>
                 </Animated.View>
@@ -150,6 +149,7 @@ const tile_styles = StyleSheet.create({
     marginRight: 3,
     marginBottom: 2,
     height: height/20,
+    width: height/6,
     borderRadius: height*.005,
     justifyContent: 'center',
     alignItems: 'center',
@@ -163,4 +163,4 @@ const tile_styles = StyleSheet.create({
   }
 });
 
-export default Tile;
+export default IntroTile;
