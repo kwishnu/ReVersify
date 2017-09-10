@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, Image, BackHandler, Alert } from 'react-native';
 import Button from '../components/Button';
-import Tile from '../components/Tile';
+import IntroTile from '../components/IntroTile';
 import GrayTile from '../components/GrayTile';
 import configs from '../config/configs';
 import { normalize, normalizeFont, getArrowSize, getArrowMargin }  from '../config/pixelRatio';
@@ -205,14 +205,14 @@ class Intro1 extends Component {
                  { this.state.showTiles &&
                     <View style={intro_styles.tiles_container}>
                        <View style={intro_styles.tile_row} >
-                            <Tile isIntro1={true} ref={(a) => { this.a = a; }} zIndex={1} text={ 'nthebegi' } nextFrag={ 'nthebegi' } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                            <IntroTile isIntro1={true} ref={(a) => { this.a = a; }} zIndex={1} text={ 'nthebegi' } nextFrag={ 'nthebegi' } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
                             <GrayTile ref={(b) => { this.b = b; }} text={ 'sandt' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
                             <GrayTile ref={(c) => { this.c = c; }} text={ 'edtheh' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
                         </View>
                         <View style={intro_styles.tile_row} >
                             <GrayTile ref={(d) => { this.d = d; }} text={ 'taerc' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
                             <GrayTile ref={(e) => { this.e = e; }} text={ 'eaven' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
-                            <Tile isIntro1={true} ref={(f) => { this.f = f; }} text={ 'ninggod' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
+                            <IntroTile isIntro1={true} ref={(f) => { this.f = f; }} text={ 'ninggod' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>
                         </View>
                         <View style={intro_styles.tile_row} >
                             <GrayTile ref={(g) => { this.g = g; }} text={ 'heearth' } nextFrag={ this.state.nextFrag } onDrop={ (text)=>{ this.onDrop(text); }} sounds={ this.state.useSounds }/>

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, Image, BackHandler, Alert, Animated } from 'react-native';
 import Button from '../components/Button';
-import Tile from '../components/Tile';
+import IntroTile from '../components/IntroTile';
 import GrayTile from '../components/GrayTile';
 import configs from '../config/configs';
 import { normalize, normalizeFont, getArrowSize, getArrowMargin }  from '../config/pixelRatio';
