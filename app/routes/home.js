@@ -715,12 +715,12 @@ class Home extends Component{
                             dataSource: ds.cloneWithRowsAndSections(dataBlob, sectionIds, rowIds)
             });
     }
-    setNotifTime(key: value){
+    setNotifTime(hour){
         PushNotification.cancelLocalNotifications({id: '777'});
-        this.startNotifications(key.selectedValue);
-        this.setState({ notif_time: key.selectedValue });
+        this.startNotifications(hour);
+        this.setState({ notif_time: hour });
         try {
-            AsyncStorage.setItem(KEY_Notifs, key.selectedValue);
+            AsyncStorage.setItem(KEY_Notifs, hour);
         } catch (error) {
             window.alert('AsyncStorage error: ' + error.message);
         }
