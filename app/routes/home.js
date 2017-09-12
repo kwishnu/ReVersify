@@ -392,6 +392,10 @@ class Home extends Component{
                                 homeData: this.state.homeData,
                             }
                         });
+                        break;
+                    }
+                    if (Meteor.status().status != 'connected'){
+                        Alert.alert('No Server Connection', 'Sorry, unable to reach our server right now; please try again later');
                         return;
                     }
                     let showInfoBox = (item.title == 'Value Combinations' || item.title == 'Popular')?false:true;
@@ -489,6 +493,10 @@ class Home extends Component{
     }
     onSelect(index, title, bg, productID) {
         if (title.indexOf('*') > -1){
+            if (Meteor.status().status != 'connected'){
+                Alert.alert('No Server Connection', 'Sorry, unable to reach our server right now; please try again later');
+                return;
+            }
             let theName = title.substring(1);
             let myPackArray = [];
             let keepInList = [];

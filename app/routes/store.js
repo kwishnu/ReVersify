@@ -67,7 +67,6 @@ module.exports = class Store extends Component {
         this.handleHardwareBackButton = this.handleHardwareBackButton.bind(this);
     }
     componentDidMount(){
-        Meteor.reconnect();
         BackHandler.addEventListener('hardwareBackPress', this.handleHardwareBackButton);
         AsyncStorage.getItem(KEY_expandInfo).then((strExpand) => {
             if(strExpand){

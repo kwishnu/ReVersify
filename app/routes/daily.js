@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, Image, TouchableHighlight, ListView, BackHandler, Animated, AsyncStorage, AppState, ActivityIndicator } from 'react-native';
+import Meteor from 'react-native-meteor';
 import moment from 'moment';
 import Button from '../components/Button';
 import configs from '../config/configs';
@@ -168,6 +169,10 @@ class Daily extends Component{
                             homeData: this.state.homeData,
                         }
                     });
+                    break;
+                }
+                if (Meteor.status().status != 'connected'){
+                    Alert.alert('No Server Connection', 'Sorry, unable to reach our server right now; please try again later');
                     return;
                 }
                 for (var j=0; j<this.state.homeData.length; j++){

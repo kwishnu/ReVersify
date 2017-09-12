@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, Image, Alert, BackHandler, Platform, AsyncStorage, NetInfo } from 'react-native';
-import Meteor from 'react-native-meteor';
 import Button from '../components/Button';
 import configs from '../config/configs';
 import { normalize, normalizeFont }  from '../config/pixelRatio';
@@ -20,7 +19,6 @@ module.exports = class HintStore extends Component {
         this.goSomewhere = this.goSomewhere.bind(this);
     }
     componentDidMount(){
-        Meteor.reconnect();
         AsyncStorage.getItem(KEY_MyHints).then((hintStr) => {
             this.setState({currentHints: hintStr});
         });
@@ -44,7 +42,7 @@ module.exports = class HintStore extends Component {
             return;
         }
         NetInfo.isConnected.fetch().then(isConnected => {
-            if (isConnected && Meteor.status().status == 'connected'){
+            if (isConnected){
 //rv.hint.package.100, 500, 1000
 // == unlimited
                 InAppBilling.close()//docs recommend making sure IAB is closed first
@@ -100,7 +98,7 @@ module.exports = class HintStore extends Component {
                     return InAppBilling.close()
                 });
             }else{
-                Alert.alert('Not Connected', `Sorry, we can't reach our servers right now. Please try again later!`);
+                Alert.alert('Not Connected', `Sorry, we can't reach Google right now. Please try again later!`);
             }
         });
     }

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, Image, TouchableHighlight, ListView, BackHandler, Alert, AsyncStorage, ActivityIndicator, AppState, Vibration } from 'react-native';
+import Meteor from 'react-native-meteor';
 import moment from 'moment';
 import Button from '../components/Button';
 import Dialog from '../components/Dialog';
@@ -245,6 +246,10 @@ class Favorites extends Component{
                             homeData: this.state.homeData,
                         }
                     });
+                    return;
+                }
+                if (Meteor.status().status != 'connected'){
+                    Alert.alert('No Server Connection', 'Sorry, unable to reach our server right now; please try again later');
                     return;
                 }
                 for (var j=0; j<this.state.homeData.length; j++){
