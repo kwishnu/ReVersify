@@ -87,6 +87,7 @@ class Intro2 extends Component {
         return true;
     }
     start(){
+        this.props.toggleVisible(false);
         setTimeout(()=>{
             Alert.alert('Showing Chapter and Verse', 'The panel under the Bible page hides the Chapter and Verse until the puzzle is completed--but you can show it earlier if you\'d like...',
             [{text: 'OK', onPress: () => this.giveDirections()}], { onDismiss: () => {this.giveDirections()} }
@@ -130,6 +131,7 @@ class Intro2 extends Component {
         setTimeout(()=>{this.setState({showText1: true})}, 1200);
         setTimeout(()=>{this.setState({showText2: true})}, 3200);
         setTimeout(()=>{this.setState({showNextArrow: true})}, 5300);
+        setTimeout(() => {this.props.toggleVisible(true)}, 5300);
     }
     onDrop(text) {
         if (text == 'edtheh'){

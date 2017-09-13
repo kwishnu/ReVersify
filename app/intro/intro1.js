@@ -70,6 +70,7 @@ class Intro1 extends Component {
         return true;
     }
     start(){
+        this.props.toggleVisible(false);
         setTimeout(()=>{
             Alert.alert('Solving Verse puzzles', 'Solve Verse puzzles by dropping the correct tiles onto the Bible page. \r\n\r\nThe first letter is already given...\r\ngive it a try!',
             [{text: 'OK', onPress: () => this.giveDirections()}], { onDismiss: () => {this.giveDirections()} }
@@ -130,7 +131,8 @@ class Intro1 extends Component {
         if (this.state.line0Text == 'n the begi' && text == 'ninggod'){
             this.setState({nextFrag: 'creat', line0Text: 'n the beginning God'});
             setTimeout(() => {this.setState({ showText1: false, showText2: false, showTiles: false, showFooter: false })}, 800);
-            setTimeout(() => {this.setState({ showNextArrow: true, showFooter: true, showText1: true,text1text: 'Next learn about reversing tiles...'})}, 802);
+            setTimeout(() => {this.setState({ showNextArrow: true, showFooter: true, showText1: true,text1text: 'Next learn about\r\nreversing tiles...'})}, 802);
+            setTimeout(() => {this.props.toggleVisible(true)}, 802);
         }
     }
     footerBorder(color) {

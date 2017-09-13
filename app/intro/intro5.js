@@ -43,11 +43,13 @@ class Intro5 extends Component {
         return true;
     }
     start(){
+        this.props.toggleVisible(false);
         this.animate_image_delay();
         setTimeout(()=> {this.setState({showSocialText: true})}, 1000);
         setTimeout(()=> {this.showFavoritesImage()}, 3200);
         setTimeout(()=> {this.showBibleImage()}, 5300);
         setTimeout(()=> {this.setState({showText: true})}, 8500);
+        setTimeout(() => {this.props.toggleVisible(true)}, 8500);
     }
     reset(){
         setTimeout(()=>{

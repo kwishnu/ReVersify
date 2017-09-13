@@ -66,8 +66,6 @@ class Intro extends Component {
     }
     animate_image_delay(){
         this.moveValue.setValue(0);
-//        Animated.sequence([
-//            Animated.delay(1000),
             Animated.spring(
             this.moveValue,
                 {
@@ -77,13 +75,12 @@ class Intro extends Component {
                     useNativeDriver: true
                 }
             ).start()
-//        ]).start()
+            this.props.toggleVisible(true);
     }
     showArrowImage(){
         this.grow.setValue(0);
         this.opac.setValue(0);
         this.setState({showNextArrow: true});
-
         Animated.parallel([
             Animated.timing(this.opac, {
                 toValue: 1,

@@ -80,6 +80,7 @@ class Intro2 extends Component {
         return true;
     }
     start(){
+        this.props.toggleVisible(false);
         setTimeout(()=>{
             Alert.alert('Reversing tiles', 'Some tiles have their letters arranged in reverse...by tapping a tile you can flip it the right way.',
             [{text: 'OK', onPress: () => this.giveDirections()}], { onDismiss: () => {this.giveDirections()} }
@@ -131,6 +132,7 @@ class Intro2 extends Component {
             this.setState({line1Text: 'creat'});
             setTimeout(() => {this.setState({ showText1: false, showText2: false, showTiles: false, showFooter: false })}, 800);
             setTimeout(() => {this.setState({ showNextArrow: true, showFooter: true, showText1: true, text1text: 'Great!', showText2: true, text2text: 'Next up...' })}, 802);
+            setTimeout(() => {this.props.toggleVisible(true)}, 802);
         }
     }
     footerBorder(color) {

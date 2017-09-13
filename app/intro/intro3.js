@@ -74,6 +74,7 @@ class Intro2 extends Component {
         return true;
     }
     start(){
+        this.props.toggleVisible(false);
         setTimeout(()=>{
             Alert.alert('Hints', 'If you get stumped, try using the hint button...',
             [{text: 'OK', onPress: () => this.giveDirections()}], { onDismiss: () => {this.giveDirections()} }
@@ -119,11 +120,11 @@ class Intro2 extends Component {
     }
     giveDirections(){
         setTimeout(()=>{this.setState({showText1: true})}, 250);
-//        setTimeout(()=>{this.setState({showText2: true})}, 1500);
     }
     onDrop(text) {
         if (text == 'edtheh'){
             this.setState({line1Text: 'created the h', played: true});
+            setTimeout(() => {this.props.toggleVisible(true)}, 250);
             setTimeout(() => {this.setState({ text1text: 'Two hints per verse unless you\'ve purchased a hint package', showText2: false, showTiles: false, showFooter: false })}, 800);
             setTimeout(() => {this.setState({ showNextArrow: true, showFooter: true, showText2: true, text2text: 'Next...' })}, 802);
         }

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Image, StyleSheet, ActivityIndicator, AsyncStorage } from 'react-native';
+import { Text, View, Image, StyleSheet, ActivityIndicator, AsyncStorage } from 'react-native';
 import { normalize }  from '../config/pixelRatio';
 const {width, height} = require('Dimensions').get('window');
 import Swiper from 'react-native-swiper';
@@ -31,6 +31,7 @@ class SwipeNavigator extends Component {
         super(props);
         this.state = {
             id: 'swiper',
+            buttonsVisible: false,
             isLoading: true
         };
     }
@@ -92,7 +93,12 @@ class SwipeNavigator extends Component {
                 break;
         }
     }
-      render() {
+    toggleVisible(bool){
+      this.setState({buttonsVisible: bool});
+
+    }
+
+    render() {
         if(this.state.isLoading == true){
             return(
                 <View style={ styles.container }>
@@ -103,6 +109,9 @@ class SwipeNavigator extends Component {
         }else{
             return (
                 <Swiper
+                    showsButtons={this.state.buttonsVisible}
+                    nextButton={<Text style={styles.buttonText}>›</Text>}
+                    prevButton={<Text style={styles.buttonText}>‹</Text>}
                     style={{flex: 1}}
                     loop={false}
                     showsPagination={true}
@@ -120,6 +129,7 @@ class SwipeNavigator extends Component {
                             connectionBool={this.props.connectionBool}
                             isPremium= {this.props.isPremium}
                             seenIntro= {this.props.seenIntro}
+                            toggleVisible={ (bool)=>{ this.toggleVisible(bool); }}
                     />
                     <Intro1  ref={(intro1) => { this.intro1 = intro1 }}
                             navigator= {this.props.navigator}
@@ -129,6 +139,7 @@ class SwipeNavigator extends Component {
                             connectionBool={this.props.connectionBool}
                             isPremium= {this.props.isPremium}
                             seenIntro= {this.props.seenIntro}
+                            toggleVisible={ (bool)=>{ this.toggleVisible(bool); }}
                     />
                     <Intro2  ref={(intro2) => { this.intro2 = intro2 }}
                             navigator= {this.props.navigator}
@@ -138,6 +149,7 @@ class SwipeNavigator extends Component {
                             connectionBool={this.props.connectionBool}
                             isPremium= {this.props.isPremium}
                             seenIntro= {this.props.seenIntro}
+                            toggleVisible={ (bool)=>{ this.toggleVisible(bool); }}
                     />
                     <Intro3  ref={(intro3) => { this.intro3 = intro3 }}
                             navigator= {this.props.navigator}
@@ -147,6 +159,7 @@ class SwipeNavigator extends Component {
                             connectionBool={this.props.connectionBool}
                             isPremium= {this.props.isPremium}
                             seenIntro= {this.props.seenIntro}
+                            toggleVisible={ (bool)=>{ this.toggleVisible(bool); }}
                     />
                     <Intro4  ref={(intro4) => { this.intro4 = intro4 }}
                             navigator= {this.props.navigator}
@@ -156,6 +169,7 @@ class SwipeNavigator extends Component {
                             connectionBool={this.props.connectionBool}
                             isPremium= {this.props.isPremium}
                             seenIntro= {this.props.seenIntro}
+                            toggleVisible={ (bool)=>{ this.toggleVisible(bool); }}
                     />
                     <Intro5  ref={(intro5) => { this.intro5 = intro5 }}
                             navigator= {this.props.navigator}
@@ -165,6 +179,7 @@ class SwipeNavigator extends Component {
                             connectionBool={this.props.connectionBool}
                             isPremium= {this.props.isPremium}
                             seenIntro= {this.props.seenIntro}
+                            toggleVisible={ (bool)=>{ this.toggleVisible(bool); }}
                     />
                 </Swiper>
             );
@@ -190,6 +205,10 @@ const styles = StyleSheet.create({
         width: normalize(height*.35),
         height: normalize(height*.17),
         marginBottom: 20
+    },
+    buttonText: {
+        fontSize: normalize(height*.14),
+        color: 'blue'
     }
 });
 
