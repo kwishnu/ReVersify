@@ -242,11 +242,6 @@ class Intro2 extends Component {
                                     <Text style={intro_styles.panel_text} >{this.state.panelText}</Text>
                         </Animated.View>
                     </View>
-                    { this.state.showNextArrow &&
-                    <View style={intro_styles.next_arrow}>
-                        <Image source={this.state.arrowImage}/>
-                    </View>
-                    }
                     { this.state.showText1 &&
                     <View style={intro_styles.text1}>
                         <Text style={intro_styles.instructions_text}>Tapping the panel will show or hide the Verse (try it!)</Text>

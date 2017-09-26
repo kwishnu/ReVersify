@@ -209,11 +209,6 @@ class Intro2 extends Component {
                         <Text style={intro_styles.footer_text}></Text>
                     </View>
                 </View>
-                { this.state.showNextArrow &&
-                <View style={intro_styles.next_arrow}>
-                    <Image source={this.state.arrowImage}/>
-                </View>
-                }
                 { this.state.showText1 &&
                 <View style={intro_styles.text1}>
                     <Text style={intro_styles.instructions_text}>{this.state.text1text}</Text>

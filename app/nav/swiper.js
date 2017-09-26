@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Text, View, Image, StyleSheet, ActivityIndicator, AsyncStorage } from 'react-native';
 import { normalize }  from '../config/pixelRatio';
 const {width, height} = require('Dimensions').get('window');
-import Swiper from 'react-native-swiper';
+import Swiper from '../components/Swiper';
 import Intro from '../intro/intro';
 import Intro1 from '../intro/intro1';
 import Intro2 from '../intro/intro2';
@@ -67,6 +67,7 @@ class SwipeNavigator extends Component {
         switch (index){
             case 0:
                 this.intro1.reset();
+                this.intro0.reset();
                 break;
             case 1:
                 this.intro1.start();
@@ -109,10 +110,10 @@ class SwipeNavigator extends Component {
         }else{
             return (
                 <Swiper
-                    showsButtons={this.state.buttonsVisible}
-                    nextButton={<Text style={styles.buttonText}>›</Text>}
-                    prevButton={<Text style={styles.buttonText}>‹</Text>}
                     style={{flex: 1}}
+                    showsButtons={this.state.buttonsVisible}
+                    nextButton={<View><Image style={styles.arrow_image} source={require('../images/arrowforward.png')}/></View>}
+                    prevButton={<View></View>}
                     loop={false}
                     showsPagination={true}
                     index={0}
@@ -204,6 +205,11 @@ const styles = StyleSheet.create({
     image: {
         width: normalize(height*.35),
         height: normalize(height*.17),
+        marginBottom: 20
+    },
+    arrow_image: {
+        width: height*.16,
+        height: height*.16,
         marginBottom: 20
     },
     buttonText: {

@@ -124,7 +124,7 @@ class Intro2 extends Component {
     onDrop(text) {
         if (text == 'edtheh'){
             this.setState({line1Text: 'created the h', played: true});
-            setTimeout(() => {this.props.toggleVisible(true)}, 250);
+            setTimeout(() => {this.props.toggleVisible(true)}, 802);
             setTimeout(() => {this.setState({ text1text: 'Two hints per verse unless you\'ve purchased a hint package', showText2: false, showTiles: false, showFooter: false })}, 800);
             setTimeout(() => {this.setState({ showNextArrow: true, showFooter: true, showText2: true, text2text: 'Next...' })}, 802);
         }
@@ -308,7 +308,7 @@ const intro_styles = StyleSheet.create({
         width: width,
         height: height*.15,
         top: height*.47,
-        paddingHorizontal: height*.06
+        paddingHorizontal: height*.09
     },
     text2: {
         position: 'absolute',

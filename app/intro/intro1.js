@@ -189,11 +189,13 @@ class Intro1 extends Component {
                         <Text style={intro_styles.footer_text}>Skip</Text>
                     </View>
                 </View>
+                {/*
                 { this.state.showNextArrow &&
                 <View style={intro_styles.next_arrow}>
                     <Image source={this.state.arrowImage}/>
                 </View>
                 }
+                */}
                 { this.state.showText1 &&
                 <View style={intro_styles.text1}>
                     <Text style={intro_styles.instructions_text}>{this.state.text1text}</Text>
@@ -282,7 +284,7 @@ const intro_styles = StyleSheet.create({
         width: width,
         height: height*.15,
         top: height*.47,
-        paddingHorizontal: height*.06
+        paddingHorizontal: height*.09
     },
     text2: {
         position: 'absolute',
