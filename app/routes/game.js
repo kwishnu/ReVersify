@@ -466,14 +466,15 @@ class Game extends Component {
     assignWordsToRows(verse){
         let layout = [[], [], [], [], [], [], [], []];
         let leadingSpace = (verse.substring(0, 1) == ' ')?true:false;
-        if (leadingSpace)verse = verse.substring(1);
+        let leadingApostrophe = (verse.substring(0, 1) == '\'' || verse.substring(0, 1) == '’')?'’':'';
+        if (leadingSpace || leadingApostrophe)verse = verse.substring(1);
         let verseArray = verse.split(' ');
         let whichRow = 0;
         let letterTotal = 0;
         let lineLength = 0;
         for (let word=0; word<verseArray.length; word++){
             letterTotal += (verseArray[word].length + 1);
-            lineLength = (whichRow < 3)?23:32;
+            lineLength = (whichRow < 3)?24:32;
             if (letterTotal > lineLength){
                 layout[whichRow + 1].push(verseArray[word]);
                 letterTotal = verseArray[word].length + 1;
@@ -482,7 +483,7 @@ class Game extends Component {
                 layout[whichRow].push(verseArray[word]);
             }
         }
-        this.setState({wordsArray: layout});
+        this.setState({wordsArray: layout, line0Text: leadingApostrophe});
     }
     getRowBools(length, easy){
         return new Promise(
