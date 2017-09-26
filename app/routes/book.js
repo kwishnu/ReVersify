@@ -302,7 +302,7 @@ class Book extends Component{
             return {borderColor: darkerColor};
     }
     bg(num){
-        let strToReturn = (this.props.homeData[this.props.dataElement].solved[num] == 0)?'#ffffff':'#cae6ef';
+        let strToReturn = (this.props.homeData[this.props.dataElement].solved[num] == 0)?'#ffffff':'#a6b4b9';//'#cae6ef';
             return {
                 backgroundColor: strToReturn
             };
